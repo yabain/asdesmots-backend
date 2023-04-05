@@ -1,0 +1,5 @@
+
+/**
+ * @apiDefine apiDefaultResponse
+ * @apiUse apiError
+ */
