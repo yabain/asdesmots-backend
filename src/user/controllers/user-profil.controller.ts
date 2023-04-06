@@ -3,7 +3,7 @@ import { EmailConfirmedGuard, UserJwtAuthGuard } from "../guards";
 import { Request } from "express"
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { UsersService } from "../services";
-import { UpdateUserDTO } from "../dtos";
+import { UpdateAccountStatusDTO, UpdateUserDTO } from "../dtos";
 import { UserPerms } from "../enums";
 import { SecureRouteWithPerms } from "src/shared/security";
 
@@ -93,6 +93,38 @@ export class UserProfilController
         }
     }
 
+    /**
+     * @api {put} /user/profil/status update user status by id
+     * @apidescription Update user status by id
+     * @apiName Update status
+     * @apiGroup User
+     * @apiUse UpdateAccountStatusDTO
+     * 
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} message Message Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Put("status")
+    async updateUserStatus(@Body() updateAccountStatusDTO:UpdateAccountStatusDTO) 
+    {
+        let data = await this.userService.findOneByField({"_id":updateAccountStatusDTO.userId});
+        if(!data) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["User not found"]
+        })
+
+        data=await this.userService.update({"_id":updateAccountStatusDTO.userId},{isDisabled:updateAccountStatusDTO.status})
+        
+        return {
+            statusCode:HttpStatus.OK,
+            message:"User status updated successfully ",
+        }
+    }
 
     /**
      * @api {put} /user/profil/:id update user profil by id
@@ -146,5 +178,6 @@ export class UserProfilController
         }
     }
 
+    
     
 }

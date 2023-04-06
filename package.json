@@ -10,8 +10,8 @@
     "version": "1.3.0",
     "description": "API de l'application AsDesMots. Cette documentation contient toutes les endpoints exposé par l'API ainsi que le corps de requete",
     "title": "AsDesMots API Documentation",
-    "url": "https://api-dev.asdesmots.io",
-    "sampleUrl": "https://api-dev.asdesmots.io"
+    "url": "https://api-dev.asdesmots.com",
+    "sampleUrl": "https://api-dev.asdesmots.om"
   },
   "scripts": {
     "prebuild": "rimraf dist",

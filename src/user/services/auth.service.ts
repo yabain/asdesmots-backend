@@ -23,6 +23,12 @@ export class AuthService
 
   login(user)
   {
+    if(user.isDeleted) throw new UnauthorizedException({
+      statusCode:HttpStatus.UNAUTHORIZED,
+      error:'Authentification error',
+      message:['Email/password incorrect']
+    });
+
     if(user.isDisabled) throw new ForbiddenException({
       statusCode:HttpStatus.FORBIDDEN,
       error:'Authentication blocked',
