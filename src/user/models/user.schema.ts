@@ -47,6 +47,9 @@ export class User extends Document
     @Prop({required:true,default:false})
     emailConfirmed:boolean;
 
+    @Prop({required:true,default:false})
+    telConfirmed:boolean;
+
     @Prop({default:""})
     profilePicture:string;
 

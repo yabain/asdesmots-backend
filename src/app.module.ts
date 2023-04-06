@@ -5,8 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { PermsGuard } from './authorization/guards';
-import { GamingModule } from './gaming/gaming.module';
-import { SubscriptionModule } from './subscription/subscription.module';
+import { GameLevelModule } from './gamelevel/gamelevel.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -14,8 +13,7 @@ import { UserModule } from './user/user.module';
     UserModule,
     ActivityModule,
     AuthorizationModule,
-    GamingModule,
-    SubscriptionModule
+    GameLevelModule
   ],
   controllers: [AppController],
   providers: [

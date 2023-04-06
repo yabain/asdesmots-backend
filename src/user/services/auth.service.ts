@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { LoginTelUserDTO } from "../dtos";
 import { LoginUserDTO } from "../dtos/login-user.dto";
 import { AUTH_TYPE } from "../enums";
 import { UserSchema } from "../models";
@@ -21,12 +22,12 @@ export class AuthService
     return null;
   }
 
-  login(user)
+  login(user,field:string="Email")
   {
     if(user.isDeleted) throw new UnauthorizedException({
       statusCode:HttpStatus.UNAUTHORIZED,
       error:'Authentification error',
-      message:['Email/password incorrect']
+      message:[`${field}/password incorrect`]
     });
 
     if(user.isDisabled) throw new ForbiddenException({
@@ -72,6 +73,28 @@ export class AuthService
     return {
       user:userFound,
       ...this.login(userFound)
+    };
+
+  }
+
+  async telLogin(userLogin:LoginTelUserDTO)
+  {
+
+    const user = await this.usersService.findOneByField({phoneNumber:userLogin.phoneNumber,authType:AUTH_TYPE.EMAIL_PASSWORD});
+    if(!user) throw new UnauthorizedException({
+      statusCode:HttpStatus.UNAUTHORIZED,
+      error:'Authentification error',
+      message:['Tel/password incorrect']
+    });
+    if(!PasswordUtil.compare(user.password,userLogin.password)) throw new UnauthorizedException({
+      statusCode:HttpStatus.UNAUTHORIZED,
+      error:'Authentification error',
+      message:['Tel/password incorrect']
+    });
+
+    return {
+      user,
+      ...this.login(user,"Tel")
     };
 
   }

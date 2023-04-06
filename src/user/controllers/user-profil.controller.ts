@@ -1,5 +1,5 @@
 import { Controller, Get,Delete, UseGuards, Req, Param, HttpStatus, NotFoundException, Put,Body } from "@nestjs/common";
-import { EmailConfirmedGuard, UserJwtAuthGuard } from "../guards";
+import {  UserJwtAuthGuard } from "../guards";
 import { Request } from "express"
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { UsersService } from "../services";
