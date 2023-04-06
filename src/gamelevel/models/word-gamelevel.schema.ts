@@ -1,6 +1,10 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, HydratedDocument } from "mongoose";
 import { User } from "src/user/models";
+import { WordGameLevelLangType } from "../enums";
+
+export type WordGameLevelDocument = HydratedDocument<WordGameLevel>
+
 
 @Schema({
     toObject:{
@@ -19,17 +23,20 @@ import { User } from "src/user/models";
         },
     }
 })
-export class QuestionGameLevel extends Document
+export class WordGameLevel extends Document
 {
 
-    @Prop({default:""})
+    @Prop({default:"",unique:true})
     name:string;
 
     @Prop({default:""})
     description:string;
 
+    @Prop({enum:WordGameLevelLangType,default:WordGameLevelLangType.FR})
+    type:WordGameLevelLangType;
+
     @Prop({default:Date.now(),required:true})
     createdAt:Date
 }
 
-export const QuestionGameLevelSchema = SchemaFactory.createForClass(QuestionGameLevel)
+export const WordGameLevelSchema = SchemaFactory.createForClass(WordGameLevel)
