@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { PermsGuard } from './authorization/guards';
+import { GameModule } from './game/game.module';
 import { GameLevelModule } from './gamelevel/gamelevel.module';
 import { UserModule } from './user/user.module';
 
@@ -18,6 +19,7 @@ import { UserModule } from './user/user.module';
   controllers: [AppController],
   providers: [
     AppService,
+    GameModule
     // {
     //   provide:APP_GUARD,
     //   useClass:PermsGuard
