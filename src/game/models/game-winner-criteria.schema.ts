@@ -28,7 +28,7 @@ export class GameWinnerCriteria extends Document
     @Prop({default:""})
     description:string;
 
-    @Prop({default:{}})
+    @Prop({default:null, type:Object})
     criteria:Record<string,any>;
 
     @Prop({default:Date.now(),required:true})
