@@ -15,9 +15,9 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "nest build && cp -r ./env ./dist/env",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "env-cmd -f env/.env.dev nest start",
     "start:dev": "env-cmd -f env/.env.dev nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
