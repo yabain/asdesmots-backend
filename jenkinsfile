@@ -12,6 +12,7 @@ pipeline {
                 sh 'node --version '
                 npm i
                 echo "Installation Complete"
+                
             }
         }
 
