@@ -22,16 +22,18 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Build') {
             steps {
                 sh "chmod +x -R ${env.WORKSPACE}"
-                sh './jenkins/scripts/test.sh'
+                sh './jenkins/scripts/build.sh'
+                echo "Build Complete"
             }
         }
 
-        stage('Deliver') {
+        stage('Deploy') {
             steps {
-                sh './jenkins/scripts/deliver.sh'
+                
+                sh './jenkins/scripts/deploy.sh'
                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
                 sh './jenkins/scripts/kill.sh'
             }
