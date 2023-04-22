@@ -1,7 +1,10 @@
 pipeline {
 
     agent {
-        docker {  image 'node:16.13.1-alpine' }
+        docker {  
+            image 'node:16.13.1-alpine'
+            args '-p 3000:3000'
+        }
     }
 
     stages {
@@ -10,30 +13,30 @@ pipeline {
             steps {
                 echo "Install Dependencies"
                 sh 'node --version '
-                npm i
+                sh 'npm i'
                 echo "Installation Complete"
-                
             }
         }
 
-        // stage('Build') {
-        //     steps {
-        //         echo "Start Build"
-        //         npm run build
-        //         echo "Build complete"
-        //     }
-        // }
+        stage('Build') {
+            steps {
+                echo "Start Build"
+                sh 'npm run build'
+                echo "Build complete"
+            }
+        }
 
-        // stage('Deploy') {
-        //     when {
-        //         expression {
-        //             currentBuild.result == null || currentBuild.result == 'SUCCESS'
-        //         }
-        //     }
-        //     steps {
-        //         echo "Start Deployment"
-        //         npm run start
-        //     }
-        // }
+        stage('Deploy') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
+            
+            steps {
+                echo "Start Deployment"
+                sh 'npm run start'
+            }
+        }
     }
 }
