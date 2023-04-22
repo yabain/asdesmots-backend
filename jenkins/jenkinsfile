@@ -32,25 +32,5 @@ pipeline {
             }
         }
 
-        // stage('Build') {
-        //     steps {
-        //         echo "Start Build"
-        //         sh 'npm run build'
-        //         echo "Build complete"
-        //     }
-        // }
-
-        // stage('Deploy') {
-        //     when {
-        //         expression {
-        //             currentBuild.result == null || currentBuild.result == 'SUCCESS'
-        //         }
-        //     }
-
-        //     steps {
-        //         echo "Start Deployment"
-        //         sh 'npm run start'
-        //     }
-        // }
     }
 }
