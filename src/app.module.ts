@@ -14,12 +14,12 @@ import { UserModule } from './user/user.module';
     UserModule,
     ActivityModule,
     AuthorizationModule,
-    GameLevelModule
+    GameLevelModule,
+    GameModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    GameModule
     // {
     //   provide:APP_GUARD,
     //   useClass:PermsGuard

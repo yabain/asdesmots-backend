@@ -4,11 +4,15 @@ import { AuthorizationModule } from "src/authorization/authorization.module";
 import { GameLevelModule } from "src/gamelevel/gamelevel.module";
 import { SharedModule } from "src/shared/shared.module";
 import { UserModule } from "src/user/user.module";
+import { GameArcardeController, GameCompetitionController } from "./controllers";
 import { CompetitionGame, CompetitionGameSchema, GameArcarde, GameArcardeSchema, GamePart, GamePartSchema, GameRound, GameRoundSchema, GameWinner, GameWinnerCriteria, GameWinnerCriteriaSchema, GameWinnerSchema, PlayerGameRegistration, PlayerGameRegistrationSchema } from "./models";
-import { CompetitionGameService, GameArcardeService } from "./services";
+import { CompetitionGameService, GameArcardeService, GameWinnerCriteriaService } from "./services";
 
 @Module({
-    controllers:[],
+    controllers:[
+        GameArcardeController,
+        GameCompetitionController
+    ],
     imports:[
         MongooseModule.forFeature([
             {name:CompetitionGame.name,schema:CompetitionGameSchema},
@@ -26,7 +30,8 @@ import { CompetitionGameService, GameArcardeService } from "./services";
     ],
     providers:[
         CompetitionGameService,
-        GameArcardeService
+        GameArcardeService,
+        GameWinnerCriteriaService
     ],
     exports:[CompetitionGameService,GameArcardeService]
 })

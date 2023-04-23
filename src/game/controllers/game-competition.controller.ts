@@ -5,7 +5,7 @@ import { GameCompetitionPerms } from "../enum";
 import { CompetitionGameService } from "../services";
 
 @Controller("game-competition")
-export class CompetitionGameController
+export class GameCompetitionController
 {
     constructor(
         private competitionGameService:CompetitionGameService
