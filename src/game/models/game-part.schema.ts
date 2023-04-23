@@ -22,15 +22,29 @@ export type GamePartDocument = HydratedDocument<GamePart>
         },
     }
 })
-export class GamePart extends Document
+export class GamePart extends Document //Manche de jeux
 {
+    @Prop({default:"", unique:true})
+    name:string;
 
-    @Prop({type:mongoose.Types.ObjectId,ref:GameRound.name,default:null})
-    gameRound:GameRound;
+    @Prop({default:""})
+    description:string;
+    
+    @Prop({type:[mongoose.Types.ObjectId],ref:GameRound.name,default:[]})
+    gameRound:GameRound[];
 
     @Prop({type:mongoose.Types.ObjectId,ref:GameLevel.name,default:null})
     gameLevel:GameLevel;
 
+    @Prop({type:Number,default:1})
+    numberOfWord:Number
+
+    @Prop({type:Date,default:Date.now()})
+    startDate:Date;
+
+    @Prop({type:Date,default:Date.now()})
+    endDate:Date;
+    
     @Prop({default:Date.now(),required:true})
     createdAt:Date
 }

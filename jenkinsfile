@@ -4,6 +4,7 @@ pipeline {
         docker {  
             image 'node:16.13.1-alpine'
             args '-p 3000:3000'
+            reuseNode true
         }
     }
 
@@ -25,7 +26,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh "chmod +x -R ${env.WORKSPACE}"
-                sh './jenkins/scripts/build.sh'
+                // sh './jenkins/scripts/build.sh'
+                sh 'npm run build'
                 echo "Build Complete"
             }
         }

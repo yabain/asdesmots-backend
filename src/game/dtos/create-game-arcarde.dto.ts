@@ -1,9 +1,9 @@
 import { Transform } from "class-transformer";
-import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, Max, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength } from "class-validator";
 
 
 /**
- * @apiDefine CreateGameLevelDTO Create new game arcarde
+ * @apiDefine CreateGameArcardeDTO Create new game arcarde
  * @apiBody {String {4..65}} name Game arcarde name
  * @apiBody {String {4..65}} description Game arcarde description
  * @apiBody {Boolean} isOnlineGame is set to true if the game is online and false otherwise
@@ -39,6 +39,7 @@ export class CreateGameArcardeDTO
 
     @IsNumber()
     @Max(100)
+    @Min(1)
     maxPlayersNumber:Number;
 
     @Transform(({value})=> value && new Date(value))
