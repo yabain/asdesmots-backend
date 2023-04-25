@@ -21,6 +21,7 @@ pipeline {
                 echo "Install Dependencies"
                 sh 'node --version '
                 sh 'npm i'
+                sh 'docker --version'
                 echo "Installation Complete"
             }
         }
