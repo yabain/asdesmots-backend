@@ -68,8 +68,8 @@ export class CompetitionGame extends Document
     @Prop({type:[mongoose.Types.ObjectId],ref:GameWinnerCriteria.name,default:[]})
     gameWinnerCriterias:GameWinnerCriteria[];
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:User.name,default:[]})
-    gameJudges:User[];
+    @Prop({type:mongoose.Types.ObjectId,ref:User.name,default:null})
+    gameJudge:User;
 
     @Prop({type:[mongoose.Types.ObjectId],ref:GamePart.name,default:[]})
     gameParts:GamePart[];

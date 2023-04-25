@@ -10,7 +10,7 @@ export class EmailService
         @InjectAwsService(SES) private awsEmailService:SES
     ){}
 
-    sendEmail(emailObj:Email)
+    sendEmailWithAwsSES(emailObj:Email)
     {
         let email=emailObj.toJSON();
         let params = {
@@ -40,9 +40,14 @@ export class EmailService
 
     }
 
+    async sendEmailWithGmail(emailObj:Email)
+    {
+
+    }
+
     async sendTemplateEmail(sender,receiver,template,templateVar)
     {
-        return this.sendEmail(
+        return this.sendEmailWithGmail(
             new Email()
             .from(sender)
             .to(receiver)

@@ -3,7 +3,7 @@ import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
 import { CompetitionGame, CompetitionGameDocument } from "../models";
 import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateCompetitionGameDTO } from "../dtos";
+import { CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
 
@@ -56,10 +56,68 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
 
         return this.create({
             ...createCompetitionGameDTO,
-            gameJudges:judge,
+            gameJudge:judge,
             parentCompetition,
             gameWinnerCriterias: gamesCriteria
         })
+
+    }
+
+    async updateCompetition(updateCompetitionGameDTO:UpdateGameCompetitionGameDTO,competitionGameID:String)
+    {
+        let competition = await this.findOneByField({"_id":competitionGameID}), parentCompetition=null, judge=null,gamesCriteria =null;
+        if(!competition) throw new NotFoundException({
+            statusCode:HttpStatus.NOT_FOUND,
+            error:'NotFound/GameCompetition-competition',
+            message:[`Game competition not found`]
+        })
+
+        if(updateCompetitionGameDTO.parentCompetition)
+        {
+            parentCompetition = await this.findOneByField({"_id":updateCompetitionGameDTO.parentCompetition});
+            if(!parentCompetition) throw new NotFoundException({
+                statusCode:HttpStatus.NOT_FOUND,
+                error:'NotFound/GameCompetition-ParentCompetition',
+                message:[`Parent competition not found`]
+            })
+
+            if(competition.parentCompetition && competition.parentCompetition.id!=parentCompetition.id) competition.parentCompetition = parentCompetition;
+        }
+
+
+        if(updateCompetitionGameDTO.gameJudgeID)
+        {
+            judge= await this.usersService.findOneByField({"_id":updateCompetitionGameDTO.gameJudgeID})
+            if(!judge) throw new NotFoundException({
+                statusCode:HttpStatus.NOT_FOUND,
+                error:'NotFound/GameCompetition-Judge',
+                message:[`Judge of the competition not found`]
+            })
+
+            if(competition.gameJudge && competition.gameJudge.id!=judge.id) competition.gameJudge = judge
+        }
+
+        if(updateCompetitionGameDTO.gameWinnerCriterias)
+        {
+            gamesCriteria = await updateCompetitionGameDTO.gameWinnerCriterias.map((criteriaID)=> this.gameWinnerCriteriaService.findOneByField({"_id":criteriaID}))
+            gamesCriteria.forEach((criteria)=>{
+                if(!criteria) throw new NotFoundException({
+                    statusCode:HttpStatus.NOT_FOUND,
+                    error:'NotFound/GameCompetition-WinnerCompetition',
+                    message:[`A winning criterion of the competition is not found`]
+                })
+            })
+
+            competition.gameWinnerCriterias = gamesCriteria;
+        }
+        
+        return competition.update({
+            ...updateCompetitionGameDTO,
+            gameJudge:judge,
+            parentCompetition,
+            gameWinnerCriterias: gamesCriteria
+        })
+
 
     }
     
