@@ -9,6 +9,6 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    return `Smartest Lotto API Version ${this.configService.get<string>("NODE_ENV")} ${this.version}`;
+    return `AsDesMots API Version ${this.configService.get<string>("NODE_ENV")} ${this.version}`;
   }
 }
