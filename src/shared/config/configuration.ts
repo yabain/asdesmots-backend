@@ -32,7 +32,8 @@ export default () => ({
 
 
     //Email Sender
-    NO_REPLY_EMAIL_SENDER: "no-reply@smartestlotto.io",
+    NO_REPLY_EMAIL_SENDER: "c.nguendap@yaba-in.com",
+    EMAIL_SENDER_NAME:"AsDesMots No-Reply",
     TEAM_EMAIL_SENDER: "team@smartestlotto.io",
 
     //Email template name
@@ -49,6 +50,12 @@ export default () => ({
     //Google API Key
     GOOGLE_API_CLIENTID:process.env.GOOGLE_API_CLIENTID,
     GOOGLE_API_SECRET_KEY:process.env.GOOGLE_API_SECRET_KEY,
-    GOOGLE_API_CALLBACK_URL:process.env.GOOGLE_API_CALLBACK_URL
+    GOOGLE_API_CALLBACK_URL:process.env.GOOGLE_API_CALLBACK_URL,
+    GOOGLE_API_URL_PLAYGROUND:'https://developers.google.com/oauthplayground',
+
+    //Google Account
+    GOOGLE_ACCOUNT_EMAIL: process.env.GOOGLE_ACCOUNT_EMAIL,
+    GOOGLE_ACCOUNT_PASSWORD: process.env.GOOGLE_ACCOUNT_PASSWORD,
+    GOOGLE_ACCOUNT_SMTP: "smtp.gmail.com"
   });
   

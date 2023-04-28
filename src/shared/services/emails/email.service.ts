@@ -1,48 +1,25 @@
 import { Injectable } from "@nestjs/common";
-import { SES } from "aws-sdk";
-import { InjectAwsService } from "nest-aws-sdk";
+import { AwsEmailService } from "./aws-email.service";
+
 import { Email } from "./email";
+import { GmailEmailService } from "./gmail-email.service";
 
 @Injectable()
 export class EmailService
 {
     constructor(
-        @InjectAwsService(SES) private awsEmailService:SES
+        private awsEmailService:AwsEmailService,
+        private gmailEmailService:GmailEmailService
     ){}
 
     sendEmailWithAwsSES(emailObj:Email)
     {
-        let email=emailObj.toJSON();
-        let params = {
-            Source:email.from.toString(),
-            Destination:{
-                ToAddresses:email.to,
-            },
-            Message:{
-                Subject: { Data: email.subject},
-                Body: { Text: { Data: email.content} }
-            },
-            Template:"",
-            TemplateData:""
-        };
-
-        if(!email.template) {
-            delete params.Template;
-            delete params.TemplateData;
-            return this.awsEmailService.sendEmail(params).promise()
-        }
-        
-        params.Template = email.template;
-        params.TemplateData=JSON.stringify(email.templateVar);
-        delete params.Message;
-
-        return this.awsEmailService.sendTemplatedEmail(params).promise()
-
+        return this.awsEmailService.sendEmail(emailObj)
     }
 
     async sendEmailWithGmail(emailObj:Email)
     {
-
+        return this.gmailEmailService.sendMail(emailObj)
     }
 
     async sendTemplateEmail(sender,receiver,template,templateVar)
