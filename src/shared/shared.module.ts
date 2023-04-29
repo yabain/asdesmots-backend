@@ -53,6 +53,7 @@ import { EmailModule, EmailService } from "./services/emails";
         ConfigModule,
         MongooseModule,
         AwsSdkModule,
+        EmailModule
         // EmailService
     ]
 })

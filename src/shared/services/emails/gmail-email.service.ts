@@ -19,9 +19,9 @@ export class GmailEmailService
         const oauth2Client = new OAuth2(
             this.configService.get("GOOGLE_API_CLIENTID"),
             this.configService.get("GOOGLE_API_SECRET_KEY"),
-            this.configService.get("GOOGLE_API_URL_PLAYGROUND")
-        )    
-
+            this.configService.get("GOOGLE_API_URL_PLAYGROUND") 
+        )  
+        oauth2Client.setCredentials({refresh_token:this.configService.get("GOOGLE_API_REFRESH_CODE")});
         const accessToken:string = await new Promise((resolve,reject)=>{
             oauth2Client.getAccessToken((err,token)=>{
                 if(err) return  reject("Failed to get access token")
