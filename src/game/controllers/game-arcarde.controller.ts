@@ -54,8 +54,8 @@ export class GameArcardeController
 
 
     /**
-     * @api {get} /user/profil/:id Get user by id
-     * @apidescription Get user details by id
+     * @api {get} /game-arcarde/:id Get game arcarde by id
+     * @apidescription Get game arcarde details by id
      * @apiParam {String} id Game Arcarde unique ID
      * @apiName get game arcarde by ID 
      * @apiGroup Game Arcarde

@@ -47,20 +47,18 @@ export class AuthController
      */
     @Post("register")
     async register(@Body() createUserDTO:CreateUserDTO)
-    {
-        return await this.userEmailService.sendNewUserEmail(this.usersService.createInstance(createUserDTO)); 
+    { 
         let userCreated=await this.usersService.create(createUserDTO)
         
         if(userCreated.email)
         {
             await this.userEmailService.sendNewUserEmail(userCreated);    
-            // await this.userEmailService.sendConfirmationEmail(userCreated);
+            await this.userEmailService.sendConfirmationEmail(userCreated);
         }
         else if(userCreated.phoneNumber)
         {
             //Envoi du code par SMS
         }
-        // if(!userCreated && !userCreated)
 
         await this.activityLogService.logActivity({
             owner:userCreated,

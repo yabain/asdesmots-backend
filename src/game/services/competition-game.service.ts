@@ -6,6 +6,7 @@ import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
+import { GamePartService } from "./game-part.service";
 
 @Injectable()
 export class CompetitionGameService extends DataBaseService<CompetitionGameDocument>
@@ -14,7 +15,8 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         @InjectModel(CompetitionGame.name) competitionGameModel: Model<CompetitionGameDocument>,
         @InjectConnection() connection: mongoose.Connection,
         private usersService:UsersService,
-        private gameWinnerCriteriaService:GameWinnerCriteriaService
+        private gameWinnerCriteriaService:GameWinnerCriteriaService,
+        private gamePartService:GamePartService
         ){
             super(competitionGameModel,connection);
     }  
@@ -53,6 +55,16 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
                 })
             })
         }
+        if(createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0)
+            return this.executeWithTransaction(async (session)=>{
+                return this.create({
+                    ...createCompetitionGameDTO,
+                    gameJudge:judge,
+                    parentCompetition,
+                    gameWinnerCriterias: gamesCriteria,
+                    gameParts: await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,session))
+                },session)
+            })
 
         return this.create({
             ...createCompetitionGameDTO,

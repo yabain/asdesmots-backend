@@ -1,12 +1,9 @@
 pipeline {
-
+    // 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 github token
     agent {
         docker {  
             image 'node:16'
             args '-p 3000:3000 --name as_des_mots_server'
-            // reuseNode true
-            // label 'as_des_mots_serveur'
-            // Token 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
         }
     }
 

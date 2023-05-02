@@ -22,7 +22,7 @@ import { CreateGamePartDTO } from "./create-game-part.dto";
  * @apiBody {String} [parentCompetition] In case it is a sub competition, this value represents the parent competition
  * @apiBody {String[]} gameWinnerCriterias competition winning criteria ID table
  * @apiBody {String[]} gameJudgesID competition judge ID 
- * @apiBody {CreateGamePartDTO[]} gameJudges competition judges ID table
+ * @apiBody {CreateGamePartDTO[]} gameParts game part
  */
 
 export class CreateCompetitionGameDTO
