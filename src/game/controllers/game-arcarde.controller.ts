@@ -1,15 +1,19 @@
 import { Body, Controller, Get, HttpStatus, Post } from "@nestjs/common";
-import { Param } from "@nestjs/common/decorators";
+import { Delete, Param } from "@nestjs/common/decorators";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
-import { CreateGameArcardeDTO } from "../dtos";
+import { PlayerSubscriptionDTO, CreateGameArcardeDTO } from "../dtos";
 import { GameArcardePerms } from "../enum";
 import { GameArcardeService } from "../services";
+import { GameSubscriptionService } from "../services/game-subscription.service";
 
 @Controller("game-arcarde")
 export class GameArcardeController
 {
-    constructor(private gameArcardeService:GameArcardeService){}
+    constructor(
+        private gameArcardeService:GameArcardeService,
+        private gameSubscriptionService:GameSubscriptionService
+        ){}
 
     /**
      * 
@@ -86,6 +90,26 @@ export class GameArcardeController
             statusCode:HttpStatus.OK,
             message:"Game arcarde by ID",
             data:await this.gameArcardeService.findOneByField({"_id":id})
+        }
+    }
+
+    @Post("subscription")
+    async addSubscription(@Body() addSubscriptionDTO:PlayerSubscriptionDTO)
+    {
+        return {
+            statusCode:HttpStatus.CREATED,
+            message:"Successful registered user subscription",
+            data:await this.gameSubscriptionService.addGameArcardeSubscription(addSubscriptionDTO)
+        }
+    }
+
+    @Delete("subscription")
+    async removeSubscription(@Body() addSubscriptionDTO:PlayerSubscriptionDTO)
+    {
+        return {
+            statusCode:HttpStatus.OK,
+            message:"user unregistration with success",
+            data:await this.gameSubscriptionService.addGameArcardeSubscription(addSubscriptionDTO)
         }
     }
 }

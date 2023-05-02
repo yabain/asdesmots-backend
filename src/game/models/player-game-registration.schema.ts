@@ -27,7 +27,7 @@ export class PlayerGameRegistration extends Document
     @Prop({default:0})
     lifeGame:Number;
 
-    @Prop({default:true})
+    @Prop({default:false})
     hasLostGame:Boolean;
 
     @Prop({type:mongoose.Types.ObjectId,ref:User.name,default:null})
