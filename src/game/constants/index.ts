@@ -1,1 +1,1 @@
-export const MAX_PLAYER_COMPETITION
+export const MAX_PLAYER_COMPETITION =15

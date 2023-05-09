@@ -4,7 +4,7 @@ import mongoose, { Model } from "mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import { UsersService } from "src/user/services";
 import { PlayerSubscriptionDTO } from "../dtos";
-import { PlayerGameRegistrationDocument } from "../models";
+import { PlayerGameRegistration, PlayerGameRegistrationDocument } from "../models";
 import { GameArcardeService } from "./game-arcarde.service";
 import { PlayerGameRegistrationService } from "./player-game-registration.service";
 
@@ -12,7 +12,7 @@ import { PlayerGameRegistrationService } from "./player-game-registration.servic
 export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrationDocument>
 {
     constructor(
-        @InjectModel(GameSubscriptionService.name) gameArcardeModel: Model<PlayerGameRegistrationDocument>,
+        @InjectModel(PlayerGameRegistration.name) gameArcardeModel: Model<PlayerGameRegistrationDocument>,
         @InjectConnection() connection: mongoose.Connection,
         private gameArcardeService:GameArcardeService,
         private userService:UsersService,

@@ -6,7 +6,8 @@ import { SharedModule } from "src/shared/shared.module";
 import { UserModule } from "src/user/user.module";
 import { GameArcardeController, GameCompetitionController } from "./controllers";
 import { CompetitionGame, CompetitionGameSchema, GameArcarde, GameArcardeSchema, GamePart, GamePartSchema, GameRound, GameRoundSchema, GameWinner, GameWinnerCriteria, GameWinnerCriteriaSchema, GameWinnerSchema, PlayerGameRegistration, PlayerGameRegistrationSchema } from "./models";
-import { CompetitionGameService, GameArcardeService, GamePartService, GameWinnerCriteriaService } from "./services";
+import { CompetitionGameService, GameArcardeService, GamePartService, GameWinnerCriteriaService, PlayerGameRegistrationService } from "./services";
+import { GameSubscriptionService } from "./services/game-subscription.service";
 
 @Module({
     controllers:[
@@ -32,7 +33,9 @@ import { CompetitionGameService, GameArcardeService, GamePartService, GameWinner
         CompetitionGameService,
         GameArcardeService,
         GameWinnerCriteriaService,
-        GamePartService
+        GameSubscriptionService,
+        GamePartService,
+        PlayerGameRegistrationService
     ],
     exports:[CompetitionGameService,GameArcardeService,GamePartService]
 })
