@@ -52,7 +52,7 @@ export class AuthController
         
         if(userCreated.email)
         {
-            await this.userEmailService.sendNewUserEmail(userCreated);    
+            // await this.userEmailService.sendNewUserEmail(userCreated);    
             await this.userEmailService.sendConfirmationEmail(userCreated);
         }
         else if(userCreated.phoneNumber)

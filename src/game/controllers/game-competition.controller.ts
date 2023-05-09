@@ -14,8 +14,9 @@ export class GameCompetitionController
 
     /**
      * 
-     * @api {post} /game-competition create new game competition
+     * @api {post} /game-competition/:gameArcardeID create new game competition
      * @apiDescription create new game competition
+     * @apiParam {String} gameArcardeID Arcade game id
      * @apiName Create game competition
      * @apiGroup Game Competition
      * @apiUse apiSecurity
@@ -47,16 +48,16 @@ export class GameCompetitionController
      * @apiUse apiError
      * 
      */
-    @Post()
+    @Post(":gameArcardeID")
     @SecureRouteWithPerms(
         GameCompetitionPerms.CREATE
     )
-    async create(@Body() createCompetitionGameDTO:CreateCompetitionGameDTO)
+    async create(@Body() createCompetitionGameDTO:CreateCompetitionGameDTO, @Param("gameArcardeID",ObjectIDValidationPipe) gameArcardeID:string)
     {
         return {
             statusCode:HttpStatus.CREATED,
             message:"Game competition Created",
-            data:await this.competitionGameService.createNewCompetition(createCompetitionGameDTO)
+            data:await this.competitionGameService.createNewCompetition(createCompetitionGameDTO,gameArcardeID)
         }
     }
 

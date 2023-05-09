@@ -1,4 +1,4 @@
-import { IsMongoId } from "class-validator";
+import { IsMongoId, IsString, MaxLength, MinLength } from "class-validator";
 import { ObjectId } from "mongoose";
 
 export class PlayerSubscriptionDTO
@@ -8,4 +8,9 @@ export class PlayerSubscriptionDTO
 
     @IsMongoId()
     playerID:ObjectId;
+
+    @IsString()
+    @MinLength(4)
+    @MaxLength(65)
+    localisation:string
 }

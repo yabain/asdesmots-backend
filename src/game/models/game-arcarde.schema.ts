@@ -34,14 +34,14 @@ export class GameArcarde extends Document
     @Prop({default:true})
     isOnlineGame:Boolean;
 
-    @Prop({default:true})
+    @Prop({default:false})
     canRegisterPlayer:Boolean;
 
     @Prop({default:true})
     isFreeRegistrationPlayer:Boolean;
 
     @Prop({default:100})
-    maxPlayersNumber:Number;
+    maxPlayersNumber:number;
 
     @Prop({type:Date,default:Date.now()})
     startDate:Date;
@@ -58,8 +58,8 @@ export class GameArcarde extends Document
     @Prop({type:[mongoose.Types.ObjectId],ref:PlayerGameRegistration.name,default:[]})
     playerGameRegistrations:PlayerGameRegistration[];
 
-    @Prop({type:mongoose.Types.ObjectId,ref:CompetitionGame.name,default:null})
-    competitionGame:CompetitionGame;
+    @Prop({type:[mongoose.Types.ObjectId],ref:CompetitionGame.name,default:[]})
+    competitionGames:CompetitionGame[];
 
     @Prop({default:Date.now(),required:true})
     createdAt:Date

@@ -30,6 +30,12 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             message:[`Game arcarde not found`]
         })
 
+        if(!game.canRegisterPlayer) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'UnableSubscription/GameArcarde-subscription',
+            message:[`Unable to subscribe the player to the game`]
+        })
+
         if(!game.isFreeRegistrationPlayer) throw new ServiceUnavailableException({
             statusCode: HttpStatus.SERVICE_UNAVAILABLE,
             error:'ServiceNotFound/GameArcarde-subscription',
@@ -57,7 +63,9 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         })
 
         return this.executeWithTransaction(async (session)=>{
-            game.playerGameRegistrations.push(await this.playerGameRegistrationService.create({player},session));
+            let gameSubscription = await this.playerGameRegistrationService.create({player,localisation:gameSubscriptionDTO.localisation},session);
+            await this.gameArcardeService.addSubscription(gameSubscription,game,session)
+            game.playerGameRegistrations.push(gameSubscription);
             return game.save({session});
         })
 
@@ -68,7 +76,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         let game = await this.gameArcardeService.findOneByField({_id:gameSubscriptionDTO.gameID});
         if(!game) throw  new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/GameArcarde-subscription',
+            error:'NotFound/GameArcarde-unsubscription',
             message:[`Game arcarde not found`]
         })
 
@@ -76,17 +84,20 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         let player = await this.userService.findOneByField({_id:gameSubscriptionDTO.playerID});
         if(!player) throw  new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/PlayerGame-subscription',
+            error:'NotFound/PlayerGame-unsubscription',
             message:[`Player not found`]
         })
 
         let foundPlayer = game.playerGameRegistrations.findIndex((player)=>player.player.id==gameSubscriptionDTO.playerID)
         if(foundPlayer<0) throw new BadRequestException({
             statusCode: HttpStatus.BAD_REQUEST,
-            error:'NotFound/PlayerGameRegistration-subscription',
+            error:'NotFound/PlayerGameRegistration-unsubscription',
             message:[`Player subscription not found`]
         })
-        return this.executeWithTransaction((session)=>{
+
+
+        return this.executeWithTransaction(async (session)=>{
+            await this.gameArcardeService.removeSubscription(game.playerGameRegistrations[foundPlayer],game,session)
             this.playerGameRegistrationService.delete({_id:game.playerGameRegistrations[foundPlayer].id})
             game.playerGameRegistrations.splice(foundPlayer,1);
             return game.save({session});

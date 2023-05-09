@@ -39,7 +39,7 @@ export class CreateCompetitionGameDTO
     description:string;
 
     @IsNumber()
-    level:Number;
+    level:number;
 
     @IsBoolean()
     isSinglePart:Boolean;
@@ -54,10 +54,10 @@ export class CreateCompetitionGameDTO
     localisation:String
 
     @IsNumber()
-    maxPlayerLife:Number;
+    maxPlayerLife:number;
 
     @IsNumber()
-    maxTimeToPlay:Number;
+    maxTimeToPlay:number;
 
     @Transform(({value})=> value && new Date(value))
     @IsDate()
@@ -68,7 +68,7 @@ export class CreateCompetitionGameDTO
     endDate:Date;
 
     @IsNumber()
-    maxOfWinners:Number;
+    maxOfWinners:number;
 
     @IsMongoId({each:true})
     @ArrayMinSize(0)

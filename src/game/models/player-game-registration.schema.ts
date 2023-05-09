@@ -33,6 +33,9 @@ export class PlayerGameRegistration extends Document
     @Prop({type:mongoose.Types.ObjectId,ref:User.name,default:null})
     player:User;    
 
+    @Prop({unique:true})
+    localisation:string
+
     @Prop({default:Date.now(),required:true})
     createdAt:Date
 }

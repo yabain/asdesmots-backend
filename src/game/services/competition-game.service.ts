@@ -7,6 +7,7 @@ import { CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos"
 import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
 import { GamePartService } from "./game-part.service";
+import { GameArcardeService } from "./game-arcarde.service";
 
 @Injectable()
 export class CompetitionGameService extends DataBaseService<CompetitionGameDocument>
@@ -16,14 +17,22 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         @InjectConnection() connection: mongoose.Connection,
         private usersService:UsersService,
         private gameWinnerCriteriaService:GameWinnerCriteriaService,
-        private gamePartService:GamePartService
+        private gamePartService:GamePartService,
+        private gameArcardeService:GameArcardeService
         ){
             super(competitionGameModel,connection);
     }  
 
-    async createNewCompetition(createCompetitionGameDTO:CreateCompetitionGameDTO)
+    async createNewCompetition(createCompetitionGameDTO:CreateCompetitionGameDTO,gameArcardeID:string)
     {
         let judge = null,parentCompetition = null, gamesCriteria = [];
+        let gameArcarde = await this.gameArcardeService.findOneByField({_id:gameArcardeID});
+        if(!gameArcarde)  throw new NotFoundException({
+            statusCode:HttpStatus.NOT_FOUND,
+            error:'NotFound/GameCompetition-GameArcarde',
+            message:[`Game arcarde of the competition not found`]
+        })
+
         if(createCompetitionGameDTO.gameJudgeID)
         {
             judge= await this.usersService.findOneByField({"_id":createCompetitionGameDTO.gameJudgeID})
@@ -55,23 +64,23 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
                 })
             })
         }
-        if(createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0)
+        
             return this.executeWithTransaction(async (session)=>{
-                return this.create({
+
+                let competitionGame= await this.create({
                     ...createCompetitionGameDTO,
                     gameJudge:judge,
                     parentCompetition,
                     gameWinnerCriterias: gamesCriteria,
-                    gameParts: await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,session))
-                },session)
+                    gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
+                        (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,session))) :
+                        []
+                },session);
+                gameArcarde.competitionGames.push(competitionGame);
+                await gameArcarde.save({session});
+                return competitionGame
             })
 
-        return this.create({
-            ...createCompetitionGameDTO,
-            gameJudge:judge,
-            parentCompetition,
-            gameWinnerCriterias: gamesCriteria
-        })
 
     }
 
@@ -131,6 +140,11 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         })
 
 
+    }
+
+    async addSubscription()
+    {
+        
     }
     
 } 

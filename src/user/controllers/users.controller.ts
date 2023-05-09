@@ -8,7 +8,9 @@ export class UsersController
 {
     constructor(private usersService:UsersService){}
 
-    @SecureRouteWithPerms(UserPerms.READ_ALL)
+    @SecureRouteWithPerms(
+        // UserPerms.READ_ALL
+        )
     @Get()
     async getAll()
     {
