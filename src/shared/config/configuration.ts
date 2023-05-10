@@ -39,7 +39,7 @@ export default () => ({
     //Email template name
     EMAIL_TEMPLATE_NEW_REGISTRATION:"new-registration-template",
     EMAIL_TEMPLATE_ACCOUNT_CONFIRMATION:"confirm-email-template",
-    EMAIL_TEMPLATE_RESET_PASSWORD:"reset_password_email_template",
+    EMAIL_TEMPLATE_RESET_PASSWORD:"reset-password-template",
   
     //Frontend
     PUBLIC_FRONTEND_URL: process.env.PUBLIC_FRONTEND_URL,
