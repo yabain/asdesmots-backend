@@ -21,29 +21,29 @@ export abstract class DataBaseService<T extends Document>
 
     async findAll(): Promise<T[]>
     {
-        return this.entityModel.find<T>().sort({createdAt:1}).exec();
+        return this.entityModel.find<T>({isDeleted:false}).sort({createdAt:1}).exec();
     }
 
  
     async findByField(entityObj:Record<string,any>):Promise<T[]>
     {
-        return this.entityModel.find<T>({where:entityObj}).sort({createdAt:1}).exec();
+        return this.entityModel.find<T>({where:{...entityObj,isDeleted:false}}).sort({createdAt:1}).exec();
     }
 
     async findOneByField(entityObj:Record<string,any>,select:Record<string,any>={}):Promise<T>
     {
-        return this.entityModel.findOne<T>(entityObj).select(select).exec();
+        return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec();
     }
 
   
     async update(filter:Record<string,any>,toUpdate:Record<string,any>,session=null):Promise<T>
     {
-        return this.entityModel.findOneAndUpdate<T>(filter,toUpdate,{session,new:true});
+        return this.entityModel.findOneAndUpdate<T>({...filter,isDeleted:false},toUpdate,{session,new:true});
     }
 
     async delete(filter,session=null)
     {
-        await this.entityModel.findOneAndDelete(filter,{session});
+        await this.entityModel.findOneAndDelete({...filter,isDeleted:false},{session});
     }
 
     async executeWithTransaction(functionToExecute:(session:ClientSession)=>any)

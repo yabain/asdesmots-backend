@@ -237,7 +237,7 @@ export class AuthController
     }
 
     /**
-     * @api {put} /user/auth/logout Logout
+     * @api {delete} /user/auth/logout Logout
      * @apiDescription Disconnect a user and revoke their access token
      * @apiName Logout
      * @apiGroup User
