@@ -64,9 +64,10 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
 
         return this.executeWithTransaction(async (session)=>{
             let gameSubscription = await this.playerGameRegistrationService.create({player,localisation:gameSubscriptionDTO.localisation},session);
-            await this.gameArcardeService.addSubscription(gameSubscription,game,session)
+            let playerSubscription = await this.gameArcardeService.addSubscription(gameSubscription,game,session)
             game.playerGameRegistrations.push(gameSubscription);
-            return game.save({session});
+            await game.save({session});
+            return playerSubscription;
         })
 
     }
