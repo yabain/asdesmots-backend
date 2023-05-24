@@ -40,7 +40,7 @@ export class ActivityController
         @Req() request:Request    
     )
     {
-        let data=await this.activityService.getActivityByPagination(request.user["userId"],page,limit);
+        let data=await this.activityService.getActivityByPagination(id,page,limit);
         return {
             statusCode:HttpStatus.OK,
             message:`Page ${page} User Action History`,

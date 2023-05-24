@@ -43,7 +43,7 @@ export class UserProfilController
      */
     @Get(":id")
     @SecureRouteWithPerms(
-        UserPerms.READ_UNIQUE
+        // UserPerms.READ_UNIQUE
     )
     async getUserProfilById( @Param("id",ObjectIDValidationPipe) id:string)
     {
