@@ -70,7 +70,7 @@ export class GameCompetitionController
      * @apiGroup Game Competition
      * @apiUse apiSecurity
      * @apiUse apiDefaultResponse
-     * @apiUse UpdateCompetitionGameDTO
+     * @apiUse UpdateGameCompetitionGameDTO
      * @apiPermission GameCompetitionPerms.CREATE
      * 
      * @apiSuccess (200 Ok) {Number} statusCode status code

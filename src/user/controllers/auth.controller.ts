@@ -252,7 +252,7 @@ export class AuthController
      */
     @UseGuards(UserJwtAuthGuard)
     @Delete("logout")
-    async logout(@Req() request:Request,@Res() reponse:Response)
+    async logout(@Req() request:Request)
     {
         // TODO: A revoir sur la facon d'invalider le Token
         // this.customJwtTokenService.jwtBlackList.revoke(request.user);

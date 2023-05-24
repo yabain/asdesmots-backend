@@ -24,7 +24,6 @@ export abstract class DataBaseService<T extends Document>
         return this.entityModel.find<T>({isDeleted:false}).sort({createdAt:1}).exec();
     }
 
- 
     async findByField(entityObj:Record<string,any>):Promise<T[]>
     {
         return this.entityModel.find<T>({where:{...entityObj,isDeleted:false}}).sort({createdAt:1}).exec();
@@ -35,7 +34,6 @@ export abstract class DataBaseService<T extends Document>
         return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec();
     }
 
-  
     async update(filter:Record<string,any>,toUpdate:Record<string,any>,session=null):Promise<T>
     {
         return this.entityModel.findOneAndUpdate<T>({...filter,isDeleted:false},toUpdate,{session,new:true});

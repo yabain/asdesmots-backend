@@ -2,7 +2,7 @@ import { PartialType } from "@nestjs/mapped-types";
 import { CreateCompetitionGameDTO } from "./create-competition-game.dto";
 
 /**
- * @apiDefine CreateCompetitionGameDTO Update game competition
+ * @apiDefine UpdateGameCompetitionGameDTO Update game competition
  * @apiBody {String {4..65}} [name] Game competition name
  * @apiBody {String {4..65}} [description] Game competition description
  * @apiBody {Number} [level] level of games
