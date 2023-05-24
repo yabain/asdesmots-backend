@@ -108,6 +108,7 @@ export class UserProfilController
      * @apiError (Error 4xx) 404-NotFound User not found
      * @apiUse apiError
      */
+    @SecureRouteWithPerms()
     @Put("status")
     async updateUserStatus(@Body() updateAccountStatusDTO:UpdateAccountStatusDTO) 
     {
