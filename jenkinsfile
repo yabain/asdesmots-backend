@@ -1,39 +1,31 @@
-pipeline {
-    // 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 github token
+
+pipeline{
     agent any
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5',daysToKeepStr: '5'))
-        timestamps();
+    options{
+        buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '5'))
+        timestamps()
     }
-
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+    environment{
+        
+        registry = "yabain/asdesmots-backend"
+        registryCredential = credentials('dockerhub')        
     }
-
-    stages {    
-
-        stage('Build') {
-            steps {
-                sh 'docker build -t yabain/as-des-mots'
-            }
+    
+    stages{
+       stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
         }
-
-        stage('Login') {
-            steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-            }
-        }
-
-        stage('Push') {
-            steps {
-                sh 'docker push yabain/as-des-mots'
-            }
-        }
+      }
     }
-
-    post {
-        always {
-            sh 'docker logout'
+       stage('Deploy Image') {
+      steps{
+         script {
+            docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
         }
+      }
     }
 }
