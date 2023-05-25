@@ -7,7 +7,8 @@ import { IsNotEmpty, MinLength, IsString, Matches, IsMongoId, IsBoolean } from "
  */
 export class UpdateAccountStatusDTO
 {
-    @IsMongoId()
+    // IsMongoId()
+    @IsString()
     userId:string
 
     @IsBoolean()

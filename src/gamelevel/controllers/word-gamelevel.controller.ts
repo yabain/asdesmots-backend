@@ -34,7 +34,7 @@ export class WordGameLevelController
      */
      @Post("word")
      @SecureRouteWithPerms(
-         WordGameLevelPerms.CREATE
+        //  WordGameLevelPerms.CREATE
      )
      async createNewGameLevel(@Body() newGameLevel:CreateWordGameLevelDTO)
      {
