@@ -14,7 +14,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh "docker build -t yabain/as-des-mots"
+                sh 'docker build -t yabain/as-des-mots'
             }
         }
 
