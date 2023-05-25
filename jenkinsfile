@@ -2,7 +2,8 @@ pipeline {
     // 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 github token
     agent any
     options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+        buildDiscarder(logRotator(numToKeepStr: '5',daysToKeepStr: '5'))
+        timestamps();
     }
 
     environment {
