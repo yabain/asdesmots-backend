@@ -30,37 +30,37 @@
 //     }
 // }
 
-// pipeline {
-//   agent any
-//   options {
-//     buildDiscarder(logRotator(numToKeepStr: '5'))
-//   }
-//   environment {
-//     DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-//   }
-//   stages {
-//     stage('Build') {
-//       steps {
-//         sh 'docker build -t yabain/asdesmots-backend .'
-//       }
-//     }
-//     stage('Login') {
-//       steps {
-//         sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-//       }
-//     }
-//     stage('Push') {
-//       steps {
-//         sh 'docker push yabain/asdesmots-backend'
-//       }
-//     }
-//   }
-//   post {
-//     always {
-//       sh 'docker logout'
-//     }
-//   }
-// }
+pipeline {
+  agent any
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'docker build -t yabain/asdesmots-backend .'
+      }
+    }
+    stage('Login') {
+      steps {
+        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+      }
+    }
+    stage('Push') {
+      steps {
+        sh 'docker push yabain/asdesmots-backend'
+      }
+    }
+  }
+  post {
+    always {
+      sh 'docker logout'
+    }
+  }
+}
 
 // pipeline {
 //     environment {
@@ -99,41 +99,41 @@
 //     }
 // }
 
-pipeline {   
-  agent any     
+// pipeline {   
+//   agent any     
 
-  environment {     
-    DOCKERHUB_CREDENTIALS= credentials('dockerhub')     
-  }    
-  stages {         
-    stage("Git Checkout"){           
-      steps{                
-        git credentialsId: 'github', url: 'https://github.com/yabain/asdesmots-backend'                 
-        echo 'Git Checkout Completed'            
-      }        
-    }
-    stage('Build Docker Image') {         
-      steps{                
-	    sh 'sudo docker build -t yabain/asdesmots-backend:$BUILD_NUMBER .'           
-        echo 'Build Image Completed'                
-      }           
-    }
-    stage('Login to Docker Hub') {         
-      steps{                            
-        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
-        echo 'Login Completed'                
-      }           
-    }               
-    stage('Push Image to Docker Hub') {         
-      steps{                            
-	    sh 'sudo docker push yabain/asdesmots-backend:$BUILD_NUMBER'                
-        echo 'Push Image Completed'       
-      }           
-    }      
-  } //stages 
-  post{
-    always {  
-      sh 'docker logout'           
-    }      
-  }  
-} //pipeline
+//   environment {     
+//     DOCKERHUB_CREDENTIALS= credentials('dockerhub')     
+//   }    
+//   stages {         
+//     stage("Git Checkout"){           
+//       steps{                
+//         git credentialsId: 'github', url: 'https://github.com/yabain/asdesmots-backend'                 
+//         echo 'Git Checkout Completed'            
+//       }        
+//     }
+//     stage('Build Docker Image') {         
+//       steps{                
+// 	    sh 'sudo docker build -t yabain/asdesmots-backend:$BUILD_NUMBER .'           
+//         echo 'Build Image Completed'                
+//       }           
+//     }
+//     stage('Login to Docker Hub') {         
+//       steps{                            
+//         sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
+//         echo 'Login Completed'                
+//       }           
+//     }               
+//     stage('Push Image to Docker Hub') {         
+//       steps{                            
+// 	    sh 'sudo docker push yabain/asdesmots-backend:$BUILD_NUMBER'                
+//         echo 'Push Image Completed'       
+//       }           
+//     }      
+//   } //stages 
+//   post{
+//     always {  
+//       sh 'docker logout'           
+//     }      
+//   }  
+// } //pipeline
