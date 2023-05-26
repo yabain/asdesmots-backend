@@ -115,7 +115,7 @@ pipeline {
     }
     stage('Build Docker Image') {         
       steps{                
-	    sh 'sudo docker build -t yabain/asdesmots-backend:$BUILD_NUMBER .'           
+	    sh 'sudo docker build -t yabain/asdesmots-backend .'           
         echo 'Build Image Completed'                
       }           
     }
