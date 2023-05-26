@@ -15,7 +15,7 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build && cp -r ./env ./dist/env && cp -r ./src/shared/services/emails/templates/ ./dist/shared/services/emails/templates",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "env-cmd -f env/.env.dev nest start",
     "start:dev": "env-cmd -f env/.env.dev nest start --watch",
