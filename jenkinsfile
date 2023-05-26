@@ -1,97 +1,45 @@
-
-// pipeline{
-//     agent any
-//     options{
-//         buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '5'))
-//         timestamps()
-//     }
-//     environment{
-        
-//         registry = "yabain/asdesmots-backend"
-//         registryCredential = credentials('dockerhub')        
-//     }
-    
-//     stages{
-//        stage('Building image') {
-//       steps{
-//         script {
-//           dockerImage = docker.build registry + ":$BUILD_NUMBER"
-//         }
-//       }
-//     }
-//        stage('Deploy Image') {
-//       steps{
-//          script {
-//             docker.withRegistry( '', registryCredential ) {
-//             dockerImage.push()
-//           }
-//         }
-//       }
-//     }
-// }
-
 pipeline {
-  agent any
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
-  }
-  environment {
-    DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-  }
-  stages {
-    stage('Build') {
-      steps {
-        sh 'docker build -t yabain/asdesmots-backend .'
-      }
+    // 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 github token
+    agent {
+        docker {  
+            image 'node:16'
+            args '-p 3000:3000 --name as_des_mots_server'
+        }
     }
-    stage('Login') {
-      steps {
-        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-      }
+
+    environment {
+        CI = 'true'
+        NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
     }
-    stage('Push') {
-      steps {
-        sh 'docker push yabain/asdesmots-backend'
-      }
+
+    stages {
+    
+        stage ('Install Dependencies') {
+            steps {
+                echo "Install Dependencies"
+                sh 'node --version '
+                sh 'npm i'
+                echo "Installation Complete"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh "chmod +x -R ${env.WORKSPACE}"
+                sh './jenkins/scripts/build.sh'
+                // sh 'npm run build'
+                echo "Build Complete"
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                
+                sh './jenkins/scripts/deploy.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
+
     }
-  }
-  post {
-    always {
-      sh 'docker logout'
-    }
-  }
 }
-
-// pipeline {
-//     environment {
-//         registry = "yabain/asdesmots-backend"
-//         registryCredential = 'dockerhub'
-//         dockerImage = 'asdesmots-backend'
-//     }
-//     agent any
-//     stages {
-        
-//         stage('Building our image') {
-//             steps{
-//                 script {
-//                     dockerImage = docker.build registry + ":$BUILD_NUMBER"
-//                 }
-//             }
-//         }
-//         stage('Deploy our image') {
-//             steps{
-//                 script {
-//                     docker.withRegistry( '', registryCredential ) {
-//                         dockerImage.push()
-//                     }
-//                 }
-//             }
-//         }
-//         stage('Cleaning up') {
-//             steps{
-//                 sh "docker rmi --force $registry:$BUILD_NUMBER"
-//             }
-//         }
-//     }
-// }
-
