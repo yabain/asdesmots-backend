@@ -62,79 +62,79 @@
 //   }
 // }
 
-pipeline {
-    environment {
-        registry = "yabain/asdesmots-backend"
-        registryCredential = 'dockerhub'
-        dockerImage = 'asdesmots-backend'
-    }
-    agent any
-    stages {
-        stage('Cloning our Git') {
-            steps {
-                git 'https://github.com/yabain/asdesmots-backend.git'
-            }
-        }
-        
-        stage('Building our image') {
-            steps{
-                script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                }
-            }
-        }
-        stage('Deploy our image') {
-            steps{
-                script {
-                    docker.withRegistry( '', registryCredential ) {
-                        dockerImage.push()
-                    }
-                }
-            }
-        }
-        stage('Cleaning up') {
-            steps{
-                sh "docker rmi --force $registry:$BUILD_NUMBER"
-            }
-        }
-    }
-}
-
-// pipeline {   
-//   agent any     
-
-//   environment {     
-//     DOCKERHUB_CREDENTIALS= credentials('dockerhub')     
-//   }    
-//   stages {         
-//     stage("Git Checkout"){           
-//       steps{                
-//         git credentialsId: 'github', url: 'https://github.com/yabain/asdesmots-backend'                 
-//         echo 'Git Checkout Completed'            
-//       }        
+// pipeline {
+//     environment {
+//         registry = "yabain/asdesmots-backend"
+//         registryCredential = 'dockerhub'
+//         dockerImage = 'asdesmots-backend'
 //     }
-//     stage('Build Docker Image') {         
-//       steps{                
-// 	    sh 'sudo docker build -t yabain/asdesmots-backend:$BUILD_NUMBER .'           
-//         echo 'Build Image Completed'                
-//       }           
+//     agent any
+//     stages {
+//         stage('Cloning our Git') {
+//             steps {
+//                 git 'https://github.com/yabain/asdesmots-backend.git'
+//             }
+//         }
+
+//         stage('Building our image') {
+//             steps{
+//                 script {
+//                     dockerImage = docker.build registry + ":$BUILD_NUMBER"
+//                 }
+//             }
+//         }
+//         stage('Deploy our image') {
+//             steps{
+//                 script {
+//                     docker.withRegistry( '', registryCredential ) {
+//                         dockerImage.push()
+//                     }
+//                 }
+//             }
+//         }
+//         stage('Cleaning up') {
+//             steps{
+//                 sh "docker rmi --force $registry:$BUILD_NUMBER"
+//             }
+//         }
 //     }
-//     stage('Login to Docker Hub') {         
-//       steps{                            
-//         sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
-//         echo 'Login Completed'                
-//       }           
-//     }               
-//     stage('Push Image to Docker Hub') {         
-//       steps{                            
-// 	    sh 'sudo docker push yabain/asdesmots-backend:$BUILD_NUMBER'                
-//         echo 'Push Image Completed'       
-//       }           
-//     }      
-//   } //stages 
-//   post{
-//     always {  
-//       sh 'docker logout'           
-//     }      
-//   }  
-// } //pipeline
+// }
+
+pipeline {   
+  agent any     
+
+  environment {     
+    DOCKERHUB_CREDENTIALS= credentials('dockerhub')     
+  }    
+  stages {         
+    stage("Git Checkout"){           
+      steps{                
+        git credentialsId: 'github', url: 'https://github.com/yabain/asdesmots-backend'                 
+        echo 'Git Checkout Completed'            
+      }        
+    }
+    stage('Build Docker Image') {         
+      steps{                
+	    sh 'sudo docker build -t yabain/asdesmots-backend:$BUILD_NUMBER .'           
+        echo 'Build Image Completed'                
+      }           
+    }
+    stage('Login to Docker Hub') {         
+      steps{                            
+        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                 
+        echo 'Login Completed'                
+      }           
+    }               
+    stage('Push Image to Docker Hub') {         
+      steps{                            
+	    sh 'sudo docker push yabain/asdesmots-backend:$BUILD_NUMBER'                
+        echo 'Push Image Completed'       
+      }           
+    }      
+  } //stages 
+  post{
+    always {  
+      sh 'docker logout'           
+    }      
+  }  
+} //pipeline
