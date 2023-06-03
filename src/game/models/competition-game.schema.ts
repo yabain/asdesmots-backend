@@ -9,6 +9,9 @@ import { PlayerGameRegistration } from "./player-game-registration.schema";
 
 export type CompetitionGameDocument = HydratedDocument<CompetitionGame>
 
+//Mettre en place un middle pour que l'ors de la sauvegarde et l'ors de la creation l'attribut isSinglePart ce mette a jours automatiquement 
+//en fonction du nombre de partie contenu dans l'attribue gamePart
+
 @Schema({
     toObject:{
         transform(doc, ret, options) {

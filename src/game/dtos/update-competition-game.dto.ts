@@ -17,7 +17,7 @@ import { CreateCompetitionGameDTO } from "./create-competition-game.dto";
  * @apiBody {String} [lang] Language of the competition. it can be "en" for English and "fr" for French
  * @apiBody {String} [parentCompetition] In case it is a sub competition, this value represents the parent competition
  * @apiBody {String[]} [gameWinnerCriterias] competition winning criteria ID table
- * @apiBody {String[]} [gameJudgesID] competition judge ID 
+ * @apiBody {String} [gameJudgeID] competition judge ID 
  * @apiBody {CreateGamePartDTO[]} [gameJudges] competition judges ID table
  */
 
