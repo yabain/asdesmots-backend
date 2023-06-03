@@ -22,6 +22,7 @@ export class UserProfilController
      * @apiName Get profil
      * @apiGroup User
      * @apiUse apiSecurity
+     * @apiPermission  UserPerms.READ_UNIQUE
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
      * @apiSuccess (200 Ok) {Object} data response data

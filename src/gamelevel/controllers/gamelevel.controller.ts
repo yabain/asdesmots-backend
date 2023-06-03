@@ -15,6 +15,7 @@ export class GameLevelController
      * @apiName New game level
      * @apiGroup Game Level
      * @apiUse CreateGameLevelDTO
+     * @apiPermission GameLevelPerms.CREATE
      * 
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
      * @apiSuccess (201 Created) {String} Response Description
@@ -29,7 +30,7 @@ export class GameLevelController
      */
     @Post()
     @SecureRouteWithPerms(
-        GameLevelPerms.CREATE
+        // GameLevelPerms.CREATE
     )
     async createNewGameLevel(@Body() newGameLevel:CreateGameLevelDTO)
     {
@@ -46,6 +47,7 @@ export class GameLevelController
      * @apidescription Get the List of game levels
      * @apiName List of game levels
      * @apiGroup Game Level
+     * @apiPermission GameLevelPerms.READ_ALL
      * @apiUse apiSecurity
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
@@ -68,7 +70,7 @@ export class GameLevelController
      */
     @Get()
     @SecureRouteWithPerms(
-        GameLevelPerms.READ_ALL
+        // GameLevelPerms.READ_ALL
     )
     async getGameLevelList()
     {

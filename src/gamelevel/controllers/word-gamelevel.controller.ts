@@ -19,6 +19,7 @@ export class WordGameLevelController
      * @apiName New word of a games level
      * @apiGroup Game Level
      * @apiUse CreateWordGameLevelDTO
+     * @apiPermission WordGameLevelPerms.CREATE
      * 
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
      * @apiSuccess (201 Created) {String} Response Description

@@ -24,6 +24,7 @@ export class GameArcardeController
      * @apiUse apiSecurity
      * @apiUse apiDefaultResponse
      * @apiUse CreateGameArcardeDTO
+     * @apiPermission GameArcardePerms.CREATE
      * 
      * @apiSuccess (201 Created) {Number} statusCode status code
      * @apiSuccess (201 Created) {String} Response Description
@@ -45,7 +46,7 @@ export class GameArcardeController
      */
     @Post()
     @SecureRouteWithPerms(
-        GameArcardePerms.CREATE
+        // GameArcardePerms.CREATE
     )
     async create(@Body() createGameArcardeDTO:CreateGameArcardeDTO)
     {
