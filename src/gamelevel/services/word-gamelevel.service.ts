@@ -19,7 +19,7 @@ export class WordGameLevelService extends DataBaseService<WordGameLevelDocument>
 
     async newWordGameLevel(newWordGameLevel:CreateWordGameLevelDTO)
     {
-        let gameLevel = this.gameLevelService.findOneByField({"_id":newWordGameLevel});
+        let gameLevel = this.gameLevelService.findOneByField({"_id":newWordGameLevel.gameLevelId});
         if(!gameLevel) throw new NotFoundException({
             statusCode: HttpStatus.NOT_FOUND,
             error:"NotFound",
