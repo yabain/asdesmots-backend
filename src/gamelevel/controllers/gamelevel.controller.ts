@@ -1,13 +1,16 @@
-import { Controller, Post,Get, Body, HttpStatus } from "@nestjs/common";
+import { Controller, Post,Get, Body, HttpStatus, Delete, Param, NotFoundException } from "@nestjs/common";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { GameLevelPerms } from "../enums";
-import { GameLevelService } from "../services";
+import { GameLevelService, WordGameLevelService } from "../services";
 import { CreateGameLevelDTO } from "./../dtos"
+import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 @Controller("gamelevel")
 export class GameLevelController
 {
-    constructor( private gameLevelService:GameLevelService){}
+    constructor( 
+        private wordGameLevelService:WordGameLevelService,
+        private gameLevelService:GameLevelService){}
 
     /**
      * @api {post} /gamelevel New game level
@@ -78,6 +81,43 @@ export class GameLevelController
             statusCode:HttpStatus.OK,
             message:'List of game levels',
             data: await this.gameLevelService.findAll()
+        }
+    }
+
+    /**
+     * @api {delete} /gamelevel/:gamelevelID Delete game level by id
+     * @apidescription Delete game level by id
+     * @apiName Delete game level by id
+     * @apiParam {String} gamelevelID game level id
+     * @apiGroup Game Level
+     * @apiPermission GameLevelPerms.DELETE
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Delete(":gamelevelID")
+    @SecureRouteWithPerms()
+    async deleteGameLevelList(@Param("gamelevelID",ObjectIDValidationPipe) gamelevelID:string)
+    {
+        let gameLevel = await this.gameLevelService.findOneByField({"_id":gamelevelID});
+        if(!gameLevel) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["Game level not found"]
+        })
+
+        await this.gameLevelService.executeWithTransaction(async (session)=>{
+            await Promise.all(gameLevel.words.map((word)=>this.wordGameLevelService.delete({"_id":word.id},session)));
+            return this.gameLevelService.delete({_id:gamelevelID},session)
+        })
+        
+        return {
+            statusCode: HttpStatus.OK,
+            message:'Game of words deleted successfully'
         }
     }
 }

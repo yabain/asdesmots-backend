@@ -14,4 +14,8 @@ export class GameLevelService extends DataBaseService<GameLevelDocument>
             super(gameLevelModel,connection);
     }  
     
+    // async deleteGameLevel(gameLevelID:string):Promise<any>
+    // {
+        
+    // }
 } 

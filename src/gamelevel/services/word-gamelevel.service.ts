@@ -19,14 +19,19 @@ export class WordGameLevelService extends DataBaseService<WordGameLevelDocument>
 
     async newWordGameLevel(newWordGameLevel:CreateWordGameLevelDTO)
     {
-        let gameLevel = this.gameLevelService.findOneByField({"_id":newWordGameLevel.gameLevelId});
+        let gameLevel = await this.gameLevelService.findOneByField({"_id":newWordGameLevel.gameLevelId});
         if(!gameLevel) throw new NotFoundException({
             statusCode: HttpStatus.NOT_FOUND,
             error:"NotFound",
             message:["Game level not found"]
         })
+        let wordGameLevel= this.createInstance(newWordGameLevel)
+        gameLevel.words.push(wordGameLevel) 
         
-        return this.create(newWordGameLevel);
+        return this.executeWithTransaction(async (session)=>{
+            await gameLevel.save({session});
+            return wordGameLevel.save({session})
+        })
     }
     
 } 

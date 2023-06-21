@@ -12,7 +12,7 @@
     "title": "AsDesMots API Documentation",
     "url": "https://api-dev.asdesmots.com",
     "sampleUrl": "https://api-dev.asdesmots.om"
-  },
+  }, 
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build && cp -r ./env ./dist/env && cp -r ./src/shared/services/emails/templates/ ./dist/shared/services/emails/templates",
