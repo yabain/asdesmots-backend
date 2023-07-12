@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import mongoose, { Document, HydratedDocument } from "mongoose";
 import { CompetitionGame } from "./competition-game.schema";
 import { PlayerGameRegistration } from "./player-game-registration.schema";
+import { User } from "src/user/models";
 
 export type GameArcardeDocument = HydratedDocument<GameArcarde>
 
@@ -24,7 +25,7 @@ export type GameArcardeDocument = HydratedDocument<GameArcarde>
 })
 export class GameArcarde extends Document
 {
-
+    
     @Prop({default:"", unique:true})
     name:string;
 
@@ -33,6 +34,9 @@ export class GameArcarde extends Document
 
     @Prop({default:true})
     isOnlineGame:Boolean;
+
+    @Prop({type:mongoose.Types.ObjectId,ref:User.name,default:null})
+    owner:User;
 
     @Prop({default:false})
     canRegisterPlayer:Boolean;

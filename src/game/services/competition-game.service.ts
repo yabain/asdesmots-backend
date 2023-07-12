@@ -23,10 +23,11 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
             super(competitionGameModel,connection);
     }  
 
-    async createNewCompetition(createCompetitionGameDTO:CreateCompetitionGameDTO,gameArcardeID:string)
+    async createNewCompetition(createCompetitionGameDTO,gameArcardeID:string,session=null,game=null)//CreateCompetitionGameDTO
     {
         let judge = null,parentCompetition = null, gamesCriteria = [];
-        let gameArcarde = await this.gameArcardeService.findOneByField({_id:gameArcardeID});
+        let gameArcarde=game;
+        if(!gameArcarde) gameArcarde = await this.gameArcardeService.findOneByField({_id:gameArcardeID});
         if(!gameArcarde)  throw new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
             error:'NotFound/GameCompetition-GameArcarde',
@@ -64,22 +65,26 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
                 })
             })
         }
-        
-            return this.executeWithTransaction(async (session)=>{
+        // if(session) 
 
-                let competitionGame= await this.create({
-                    ...createCompetitionGameDTO,
-                    gameJudge:judge,
-                    parentCompetition,
-                    gameWinnerCriterias: gamesCriteria,
-                    gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
-                        (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,session))) :
-                        []
-                },session);
-                gameArcarde.competitionGames.push(competitionGame);
-                await gameArcarde.save({session});
-                return competitionGame
-            })
+        const exectSaveCompetition = async (transaction)=>{
+
+            let competitionGame= await this.create({
+                ...createCompetitionGameDTO,
+                gameJudge:judge,
+                parentCompetition,
+                gameWinnerCriterias: gamesCriteria,
+                gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
+                    (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,transaction))) :
+                    []
+            },transaction);
+            gameArcarde.competitionGames.push(competitionGame);
+            await gameArcarde.save({session:transaction});
+            return competitionGame
+        }
+
+        if(session) return exectSaveCompetition(session)
+        return this.executeWithTransaction((transaction)=>exectSaveCompetition(transaction) )
 
 
     }

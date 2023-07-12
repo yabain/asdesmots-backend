@@ -1,18 +1,22 @@
 import { Body, Controller, Get, HttpStatus, Post } from "@nestjs/common";
-import { Delete, Param } from "@nestjs/common/decorators";
+import { Delete, Param, Req } from "@nestjs/common/decorators";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { PlayerSubscriptionDTO, CreateGameArcardeDTO } from "../dtos";
 import { GameArcardePerms } from "../enum";
-import { GameArcardeService } from "../services";
+import { CompetitionGameService, GameArcardeService } from "../services";
 import { GameSubscriptionService } from "../services/game-subscription.service";
+import { Request } from "express";
+import { UsersService } from "src/user/services";
 
 @Controller("game-arcarde")
 export class GameArcardeController
 {
     constructor(
         private gameArcardeService:GameArcardeService,
-        private gameSubscriptionService:GameSubscriptionService
+        private gameSubscriptionService:GameSubscriptionService,
+        private gameCompetitionService:CompetitionGameService,
+        private usersService:UsersService
         ){}
 
     /**
@@ -48,15 +52,70 @@ export class GameArcardeController
     @SecureRouteWithPerms(
         // GameArcardePerms.CREATE
     )
-    async create(@Body() createGameArcardeDTO:CreateGameArcardeDTO)
-    {
+    async create(@Body() createGameArcardeDTO:CreateGameArcardeDTO,@Req()request:Request)
+    {       
+        let userConnected=await this.usersService.findOneByField({"email":request.user["email"]});
+        
         return {
             statusCode:HttpStatus.CREATED,
             message:"Game arcarde Created",
-            data:await this.gameArcardeService.create(createGameArcardeDTO)
+            data: await this.gameArcardeService.executeWithTransaction(async (session)=>{
+                    let gameArcarde=await this.gameArcardeService.create({...createGameArcardeDTO,owner:userConnected},session);
+        
+                    await this.gameCompetitionService.createNewCompetition({
+                        name:gameArcarde.name,
+                        description:gameArcarde.description,
+                        level:0,
+                        isSinglePart:false,
+                        canRegisterPlayer:createGameArcardeDTO.canRegisterPlayer,
+                        localisation:"",
+                        maxPlayerLife:0,
+                        startDate:createGameArcardeDTO.startDate,
+                        endDate:createGameArcardeDTO.endDate,
+                        maxOfWinners:3
+                    },gameArcarde.id,session,gameArcarde);
+                    return gameArcarde
+                })
         }
     }
 
+     /**
+     * @api {get} /game-arcarde/ Obtaining the list of arcades of the logged in user
+     * @apidescription Obtaining the list of arcades of the logged in user
+     * @apiName get list of games arcarde 
+     * @apiGroup Game Arcarde
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response Array
+     * @apiSuccess (200 Ok) {String} data.name Game arcarde name
+     * @apiSuccess (200 Ok) {String} data.description Game arcarde description
+     * @apiSuccess (200 Ok) {Boolean} data.isOnlineGame is set to true if the game is online and false otherwise
+     * @apiSuccess (200 Ok) {Boolean} data.canRegisterPlayer Is set to true if players can register or not
+     * @apiSuccess (200 Ok) {Boolean} data.isFreeRegistrationPlayer Is set to true if the participation in the games is free or not
+     * @apiSuccess (200 Ok) {Number} data.maxPlayersNumber  Maximum number of player
+     * @apiSuccess (200 Ok) {Date} data.startDate game start date
+     * @apiSuccess (200 Ok) {Date} data.endDate game end date
+     * @apiSuccess (200 Ok) {Date} data.startRegistrationDate game registration start date
+     * @apiSuccess (200 Ok) {Date} data.endRegistrationDate game registration end date
+     * @apiSuccess (200 Ok) {String} data.owner Arcade Creator ID
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+     @SecureRouteWithPerms()
+     @Get()
+     async getByAllArcardeByUser(@Req() request:Request)
+     {
+        let userConnected=await this.usersService.findOneByField({"email":request.user["email"]});
+         return {
+             statusCode:HttpStatus.OK,
+             message:"List of arcade games of the connected user",
+             data:await this.gameArcardeService.findByField({"owner":userConnected._id})
+         }
+     }
+     
 
     /**
      * @api {get} /game-arcarde/:id Get game arcarde by id

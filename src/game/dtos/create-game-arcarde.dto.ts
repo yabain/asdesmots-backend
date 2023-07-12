@@ -24,8 +24,6 @@ export class CreateGameArcardeDTO
 
     @IsOptional()
     @IsString()
-    @MinLength(4)
-    @MaxLength(65)
     description:string;
 
     @IsOptional()

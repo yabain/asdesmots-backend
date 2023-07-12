@@ -179,7 +179,7 @@ export class AuthController
             }
         }
     }
-
+    
     /**
      * @api {get} /user/auth/google-login/:token loggin user
      * @apiDescription loggin user with google account

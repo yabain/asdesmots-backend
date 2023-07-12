@@ -62,6 +62,12 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             message:[`Player already subscribed to the game`]
         })
 
+        if(game.startRegistrationDate>(new Date()) || game.endRegistrationDate<(new Date())) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'DateRegistration/GameArcarde-subscription',
+            message:[`Unable to register player for this game because player registration date is not allowed for this game`]
+        })
+
         return this.executeWithTransaction(async (session)=>{
             let gameSubscription = await this.playerGameRegistrationService.create({player,localisation:gameSubscriptionDTO.localisation},session);
             let playerSubscription = await this.gameArcardeService.addSubscription(gameSubscription,game,session)
