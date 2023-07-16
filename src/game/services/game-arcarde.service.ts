@@ -38,5 +38,11 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         gameArcarde.competitionGames.splice(competitionGameIndex,1)
         return gameArcarde.save({session})
     }
+
+    async getArcardeByPagination(page:number,limit:number)
+    {
+        if(page==-1) return this.findAll();
+        return this.findByPage({},page,limit)
+    }
     
 } 

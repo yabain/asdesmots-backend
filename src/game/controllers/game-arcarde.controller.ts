@@ -1,8 +1,8 @@
-import { Body, Controller, Get, HttpStatus, Post } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpStatus, ParseIntPipe, Post } from "@nestjs/common";
 import { Delete, Param, Req } from "@nestjs/common/decorators";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
-import { PlayerSubscriptionDTO, CreateGameArcardeDTO } from "../dtos";
+import { PlayerSubscriptionDTO, CreateGameArcardeDTO, PlayerUnSubscriptionDTO } from "../dtos";
 import { GameArcardePerms } from "../enum";
 import { CompetitionGameService, GameArcardeService } from "../services";
 import { GameSubscriptionService } from "../services/game-subscription.service";
@@ -117,6 +117,48 @@ export class GameArcardeController
      }
      
 
+     /**
+     * @api {get} /game-arcarde/:page/:limit Obtaining the list of arcades by pages and limits
+     * @apidescription Obtaining the list of arcades by pages and limits. To have the list of all the arcades, the page and limit parameters must have the value: `-1`. and therefore the url must be `/game-arcarde/-1/-1`
+     * @apiName get list of games arcarde by pages and limits
+     * @apiGroup Game Arcarde
+     * @apiParam {Number} page Page number; 
+     * @apiParam {Number}  limit Maximum number of elements loaded
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response Array
+     * @apiSuccess (200 Ok) {String} data.name Game arcarde name
+     * @apiSuccess (200 Ok) {String} data.description Game arcarde description
+     * @apiSuccess (200 Ok) {Boolean} data.isOnlineGame is set to true if the game is online and false otherwise
+     * @apiSuccess (200 Ok) {Boolean} data.canRegisterPlayer Is set to true if players can register or not
+     * @apiSuccess (200 Ok) {Boolean} data.isFreeRegistrationPlayer Is set to true if the participation in the games is free or not
+     * @apiSuccess (200 Ok) {Number} data.maxPlayersNumber  Maximum number of player
+     * @apiSuccess (200 Ok) {Date} data.startDate game start date
+     * @apiSuccess (200 Ok) {Date} data.endDate game end date
+     * @apiSuccess (200 Ok) {Date} data.startRegistrationDate game registration start date
+     * @apiSuccess (200 Ok) {Date} data.endRegistrationDate game registration end date
+     * @apiSuccess (200 Ok) {String} data.owner Arcade Creator ID
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+     @SecureRouteWithPerms()
+     @Get(":page/:limit")
+     async getAllAcardeByPage(
+        @Param("page",new DefaultValuePipe(-1), ParseIntPipe) page:number,
+        @Param("limit",new DefaultValuePipe(10),ParseIntPipe) limit:number,
+        @Req() request:Request)
+     {
+        let data=await this.gameArcardeService.getArcardeByPagination(page,limit);
+        return {
+            statusCode:HttpStatus.OK,
+            message:`Page ${page} Game arcarde`,
+            data
+        }
+     }
+
     /**
      * @api {get} /game-arcarde/:id Get game arcarde by id
      * @apidescription Get game arcarde details by id
@@ -188,7 +230,7 @@ export class GameArcardeController
      * @apidescription Desenregistrement d'un joueur a un jeu
      * @apiName Desenregistrement a un jeu
      * @apiGroup Game Arcarde
-     * @apiUse PlayerSubscriptionDTO
+     * @apiUse PlayerUnSubscriptionDTO
      * @apiUse apiSecurity
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description     * 
@@ -197,9 +239,9 @@ export class GameArcardeController
      * @apiUse apiError
      */
     @Delete("subscription")
-    async removeSubscription(@Body() addSubscriptionDTO:PlayerSubscriptionDTO)
+    async removeSubscription(@Body() addUnSubscriptionDTO:PlayerUnSubscriptionDTO)
     {
-        await this.gameSubscriptionService.removeGameArcardeSubscription(addSubscriptionDTO)
+        await this.gameSubscriptionService.removeGameArcardeSubscription(addUnSubscriptionDTO)
         return {
             statusCode:HttpStatus.OK,
             message:"user unregistration with success"

@@ -20,9 +20,9 @@ import { CreateGamePartDTO } from "./create-game-part.dto";
  * @apiBody {Number} maxOfWinners  Maximum number of winners per competition
  * @apiBody {String} lang Language of the competition. it can be "en" for English and "fr" for French
  * @apiBody {String} [parentCompetition] In case it is a sub competition, this value represents the parent competition
- * @apiBody {String[]} gameWinnerCriterias competition winning criteria ID table
- * @apiBody {String[]} gameJudgesID competition judge ID 
- * @apiBody {CreateGamePartDTO[]} gameParts game part
+ * @apiBody {String[]} [gameWinnerCriterias] competition winning criteria ID table
+ * @apiBody {String} [gameJudgeID] competition judge ID 
+ * @apiBody {GamePart[]} gameParts game part
  */
 
 export class CreateCompetitionGameDTO
@@ -70,6 +70,7 @@ export class CreateCompetitionGameDTO
     @IsNumber()
     maxOfWinners:number;
 
+    @IsOptional() //a changer lorsque nous alons gerer les critéres pour gager
     @IsMongoId({each:true})
     @ArrayMinSize(0)
     gameWinnerCriterias:ObjectId[];

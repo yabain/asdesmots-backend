@@ -3,7 +3,7 @@ import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import { UsersService } from "src/user/services";
-import { PlayerSubscriptionDTO } from "../dtos";
+import { PlayerSubscriptionDTO, PlayerUnSubscriptionDTO } from "../dtos";
 import { PlayerGameRegistration, PlayerGameRegistrationDocument } from "../models";
 import { GameArcardeService } from "./game-arcarde.service";
 import { PlayerGameRegistrationService } from "./player-game-registration.service";
@@ -78,7 +78,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
 
     }
 
-    async removeGameArcardeSubscription(gameSubscriptionDTO:PlayerSubscriptionDTO)
+    async removeGameArcardeSubscription(gameSubscriptionDTO:PlayerUnSubscriptionDTO)
     {
         let game = await this.gameArcardeService.findOneByField({_id:gameSubscriptionDTO.gameID});
         if(!game) throw  new NotFoundException({

@@ -24,6 +24,11 @@ export abstract class DataBaseService<T extends Document>
         return this.entityModel.find<T>({isDeleted:false}).sort({createdAt:1}).exec();
     }
 
+    async findByPage(select:Record<string,any>={},page=1,limit=10)
+    {
+        return this.entityModel.find(select).sort({createdAt:1}).limit(limit).skip(page*limit).exec()
+    }
+
     async findByField(entityObj:Record<string,any>):Promise<T[]>
     {
         return this.entityModel.find<T>({where:{...entityObj,isDeleted:false}}).sort({createdAt:1}).exec();

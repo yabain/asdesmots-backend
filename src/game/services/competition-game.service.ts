@@ -65,6 +65,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
                 })
             })
         }
+        else createCompetitionGameDTO.gameWinnerCriterias=[];
         // if(session) 
 
         const exectSaveCompetition = async (transaction)=>{
