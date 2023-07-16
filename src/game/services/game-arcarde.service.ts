@@ -44,5 +44,18 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         if(page==-1) return this.findAll();
         return this.findByPage({},page,limit)
     }
+
+    async getListArcardeLocation(id:string)
+    {
+        let data = await this.findOneByField({"_id":id});
+        if(!data) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'GameArcardeNotFound/GameArcarde',
+            message:[`Game arcarde not found`]
+        })
+
+        return data.competitionGames.map((competition)=> competition.localisation)
+
+    }
     
 } 

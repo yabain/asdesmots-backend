@@ -110,10 +110,10 @@ export class GameCompetitionController
 
     /**
      * 
-     * @api {get} /game-competition/:id update game competition
+     * @api {get} /game-competition/:id get game competition
      * @apiDescription get game competition by id
      * @apiParam {String} id Game competition unique ID
-     * @apiName Update game competition
+     * @apiName Get game competition
      * @apiGroup Game Competition
      * @apiUse apiSecurity
      * @apiUse apiDefaultResponse
@@ -136,8 +136,8 @@ export class GameCompetitionController
      * @apiSuccess (200 Ok) {String} lang Language of the competition. it can be "en" for English and "fr" for French
      * @apiSuccess (200 Ok) {String} [parentCompetition] In case it is a sub competition, this value represents the parent competition
      * @apiSuccess (200 Ok) {String[]} gameWinnerCriterias competition winning criteria ID table
-     * @apiSuccess (200 Ok) {String[]} gameJudgesID competition judge ID 
-     * @apiSuccess (200 Ok) {CreateGamePartDTO[]} gameJudges competition judges ID table
+     * @apiSuccess (200 Ok) {String} gameJudgeID competition judge ID 
+     * @apiSuccess (200 Ok) {GamePart[]} gameParts competition judges ID table
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiUse apiError

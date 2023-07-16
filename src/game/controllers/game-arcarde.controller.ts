@@ -118,6 +118,31 @@ export class GameArcardeController
      
 
      /**
+     * @api {get} /game-arcarde/:id/localisation Obtain the list of locations of an arcade by its id
+     * @apidescription Obtain the list of locations of an arcade by its id
+     * @apiParam {String} id Game Arcarde unique ID
+     * @apiName get location of game arcarde by ID 
+     * @apiGroup Game Arcarde
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Get(":id/localisation")
+     async getGameArcardeLocation(@Param("id",ObjectIDValidationPipe) id:string)
+     {
+        return {
+            statusCode:HttpStatus.OK,
+            message:`List of localisation game arcarde`,
+            data: await this.gameArcardeService.getListArcardeLocation(id)
+        }
+     }
+
+     /**
      * @api {get} /game-arcarde/:page/:limit Obtaining the list of arcades by pages and limits
      * @apidescription Obtaining the list of arcades by pages and limits. To have the list of all the arcades, the page and limit parameters must have the value: `-1`. and therefore the url must be `/game-arcarde/-1/-1`
      * @apiName get list of games arcarde by pages and limits
