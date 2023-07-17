@@ -112,5 +112,29 @@ export class RolesService extends DataBaseService<RoleDocument>
         return this.usersService.findByField({"roles":{"_id":roleId}})
 
     }
+
+    async deleteRole(roleId:string)
+    {
+      let role = await this.findOneByField({"_id":roleId});
+      if(!role) throw new BadRequestException({
+          statusCode:HttpStatus.BAD_REQUEST,
+          error:'Role Error',
+          message:["Role not found"]
+      });
+
+      let usersRole = await this.findUsersByRole(roleId);
+      return this.executeWithTransaction(async (session)=>{
+        //supprimer le role chez les utilisateurs
+        await Promise.all(usersRole.map(async (user)=>{
+          let index = user.roles.findIndex((r)=>r.id==role.id);
+          if(index>-1) {
+            user.roles.splice(index,1);
+            user.save({session})
+          }
+        }))
+        await this.delete({_id:roleId},session);
+      })
+      
+    }
         
 }

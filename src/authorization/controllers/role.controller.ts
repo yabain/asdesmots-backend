@@ -43,6 +43,33 @@ export class RoleController
         }
     }
 
+    /**
+     * 
+     * @api {delete} /roles delete role
+     * @apiDescription delete  role
+     * @apiName Delete role
+     * @apiGroup Authorization
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * @apiUse CreateRoleDTO
+     * 
+     * @apiSuccess (201 Created) {Number} statusCode status code
+     * @apiSuccess (201 Created) {String} Response Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiUse apiError
+     * 
+     */
+    @Delete(":roleId")
+    async deleteRole(@Param('roleId',ObjectIDValidationPipe) roleId:string)
+    {
+        return {
+            statusCode:HttpStatus.OK,
+            message:"List of roles",
+            data:await this.roleService.deleteRole(roleId)
+        }
+    }
+
      /**
      * @api {get} /roles/ Role list
      * @apidescription Get list of all roles
