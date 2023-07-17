@@ -52,7 +52,7 @@ export class GameCompetitionController
     @SecureRouteWithPerms(
         // GameCompetitionPerms.CREATE
     )
-    async create(@Body() createCompetitionGameDTO:CreateCompetitionGameDTO, @Param("gameArcardeID",ObjectIDValidationPipe) gameArcardeID:string)
+    async create(@Body() createCompetitionGameDTO:CreateCompetitionGameDTO, @Param("gameArcardeID") gameArcardeID:string)
     {
         return {
             statusCode:HttpStatus.CREATED,
@@ -99,7 +99,7 @@ export class GameCompetitionController
      */
     @Put(":id")
     @SecureRouteWithPerms()
-    async updateGameCompetition(@Body() updateGameCompetitionDTO:UpdateGameCompetitionGameDTO, @Param("id",ObjectIDValidationPipe) gameCompetitionID:String)
+    async updateGameCompetition(@Body() updateGameCompetitionDTO:UpdateGameCompetitionGameDTO, @Param("id") gameCompetitionID:String)
     {
         return {
             statusCode:HttpStatus.OK,

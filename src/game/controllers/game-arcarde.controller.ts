@@ -117,33 +117,10 @@ export class GameArcardeController
      }
      
 
-     /**
-     * @api {get} /game-arcarde/:id/localisation Obtain the list of locations of an arcade by its id
-     * @apidescription Obtain the list of locations of an arcade by its id
-     * @apiParam {String} id Game Arcarde unique ID
-     * @apiName get location of game arcarde by ID 
-     * @apiGroup Game Arcarde
-     * @apiUse apiSecurity
-     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
-     * @apiSuccess (200 Ok) {String} Response Description
-     * @apiSuccess (200 Ok) {Array} data response data
-     * 
-     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
-     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
-     * @apiUse apiError
-     */
-    @Get(":id/localisation")
-     async getGameArcardeLocation(@Param("id",ObjectIDValidationPipe) id:string)
-     {
-        return {
-            statusCode:HttpStatus.OK,
-            message:`List of localisation game arcarde`,
-            data: await this.gameArcardeService.getListArcardeLocation(id)
-        }
-     }
+     
 
      /**
-     * @api {get} /game-arcarde/:page/:limit Obtaining the list of arcades by pages and limits
+     * @api {get} /game-arcarde/list/:page/:limit Obtaining the list of arcades by pages and limits
      * @apidescription Obtaining the list of arcades by pages and limits. To have the list of all the arcades, the page and limit parameters must have the value: `-1`. and therefore the url must be `/game-arcarde/-1/-1`
      * @apiName get list of games arcarde by pages and limits
      * @apiGroup Game Arcarde
@@ -170,7 +147,7 @@ export class GameArcardeController
      * @apiUse apiError
      */
      @SecureRouteWithPerms()
-     @Get(":page/:limit")
+     @Get("list/:page/:limit")
      async getAllAcardeByPage(
         @Param("page",new DefaultValuePipe(-1), ParseIntPipe) page:number,
         @Param("limit",new DefaultValuePipe(10),ParseIntPipe) limit:number,
@@ -183,6 +160,61 @@ export class GameArcardeController
             data
         }
      }
+
+     /**
+     * @api {get} /game-arcarde/:id/subscription Obtention de la liste des souscripteur a une arcarde
+     * @apidescription Souscription d'un joueur a une arcarde
+     * @apiName Souscription a un jeu
+     * @apiGroup Game Arcarde
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response data
+     * @apiSuccess (200 Ok) {String} data._id identifiant 
+     * @apiSuccess (200 Ok) {Number} data.lifeGame nombre de vie du joueur
+     * @apiSuccess (200 Ok) {Boolean} data.hasLostGame Est définis sur vrai si le joueur a déjà perdu la parti
+     * @apiSuccess (200 Ok) {User} data.player Information sur le joueur. la strucuture de l'object est le même que celui d'un utilisateur
+     * @apiSuccess (200 Ok) {String} data.localisation zone de localisation  du jeu
+     * @apiSuccess (200 Ok) {Date} data.createdAt date e souscription du joueur a un jeu
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Get(":id/subscription")
+    async getSubscription(@Param("id",ObjectIDValidationPipe) id:string)
+    {
+        return {
+            statusCode:HttpStatus.CREATED,
+            message:"Get list of game subscriptor",
+            data:await this.gameArcardeService.getListArcardeSubscriptor(id)
+        }
+    }
+
+     /**
+     * @api {get} /game-arcarde/:id/localisation Obtain the list of locations of an arcade by its id
+     * @apidescription Obtain the list of locations of an arcade by its id
+     * @apiParam {String} id Game Arcarde unique ID
+     * @apiName get location of game arcarde by ID 
+     * @apiGroup Game Arcarde
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Get(":id/localisation")
+    async getGameArcardeLocation(@Param("id",ObjectIDValidationPipe) id:string)
+    {
+       return {
+           statusCode:HttpStatus.OK,
+           message:`List of localisation game arcarde`,
+           data: await this.gameArcardeService.getListArcardeLocation(id)
+       }
+    }
 
     /**
      * @api {get} /game-arcarde/:id Get game arcarde by id
