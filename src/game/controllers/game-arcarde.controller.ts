@@ -22,7 +22,7 @@ export class GameArcardeController
     /**
      * 
      * @api {post} /game-arcarde create new game arcarde
-     * @apiDescription create new game arcard
+     * @apiDescription create new game arcarde. When creating a new arcade, a root competition with the same name is directly created and associated with the arcade. thus any other competition that will be created must be taken as a sub-competition (more or less of several levels) of this one
      * @apiName Create game arcarde
      * @apiGroup Game Arcarde
      * @apiUse apiSecurity
