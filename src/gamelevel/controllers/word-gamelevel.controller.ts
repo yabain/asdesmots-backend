@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpStatus, NotFoundException, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, NotFoundException, Param, Post, Put } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
-import { CreateWordGameLevelDTO } from "../dtos";
+import { CreateWordGameLevelDTO, UpdateWordGameLevelDTO } from "../dtos";
 import { WordGameLevelPerms } from "../enums";
 import { GameLevelService, WordGameLevelService } from "../services";
 
@@ -85,6 +85,47 @@ export class WordGameLevelController
             statusCode:HttpStatus.OK,
             message:'List of words in a game level',
             data: data.words
+        }
+    }
+
+    /**
+     * @api {put} /gamelevel/:gamelevelID/word/:wordGameID Word update
+     * @apidescription Updating a word based on its ID and game level id
+     * @apiParam {String} gamelevelID game level id
+     * @apiParam {String} wordGameID word id
+     * @apiName Word update
+     * @apiGroup Game Level
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Put("/gamelevel/:gamelevelID/word/:wordGameID")
+    @SecureRouteWithPerms(
+        // WordGameLevelPerms.READ_ALL
+    )
+    async updateWordGameLevelList(@Param("gamelevelID",ObjectIDValidationPipe) gamelevelID:string,@Param("wordGameID",ObjectIDValidationPipe) wordGamelevelID:string,@Body() updateWordGame:UpdateWordGameLevelDTO)
+    {
+        let gameLevel = await this.gameLevelService.findOneByField({_id:gamelevelID})
+        if(!gameLevel) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["Game level not found"]
+        })
+        let wordGameIndex = gameLevel.words.findIndex((word)=>word.id==wordGamelevelID);
+        if(wordGameIndex<0) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"GameLevel/WordGame-NotFound",
+            message:["Word Game not found"]
+        })
+        await gameLevel.words[wordGameIndex].update(updateWordGame)
+        return {
+            statusCode:HttpStatus.OK,
+            message:'Word update completed successfully'
         }
     }
 

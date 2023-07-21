@@ -88,7 +88,7 @@ export class User extends Document
     @Prop({require:true,enum:AUTH_TYPE,default:AUTH_TYPE.EMAIL_PASSWORD})
     authType:AUTH_TYPE;
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:Role.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:Role.name}],default:[]})
     roles:Role[]
     
 

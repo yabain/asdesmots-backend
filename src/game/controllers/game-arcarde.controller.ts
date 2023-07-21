@@ -165,6 +165,7 @@ export class GameArcardeController
      * @api {get} /game-arcarde/:id/subscription Obtention de la liste des souscripteur a une arcarde
      * @apidescription Souscription d'un joueur a une arcarde
      * @apiName Souscription a un jeu
+     * @apiParam {String} id Identifiant de l'arcarde 
      * @apiGroup Game Arcarde
      * @apiUse apiSecurity
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code

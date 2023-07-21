@@ -11,14 +11,13 @@ import { WordGameLevelLangType } from "../enums";
 export class CreateWordGameLevelDTO
 {
     @IsString()
-    @MinLength(4)
-    @MaxLength(65)
+    @MinLength(1)
+    @MaxLength(254)
     name:String;
 
     @IsOptional()
     @IsString()
-    @MinLength(4)
-    @MaxLength(65)
+    @MinLength(1)
     description:String;
 
     @IsMongoId()

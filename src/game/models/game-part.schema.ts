@@ -30,7 +30,7 @@ export class GamePart extends Document //Manche de jeux
     @Prop({default:""})
     description:string;
     
-    @Prop({type:[mongoose.Types.ObjectId],ref:GameRound.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:GameRound.name}],default:[]})
     gameRound:GameRound[];
 
     @Prop({type:mongoose.Types.ObjectId,ref:GameLevel.name,default:null})

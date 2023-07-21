@@ -59,10 +59,10 @@ export class GameArcarde extends Document
     @Prop({type:Date,default:Date.now()})
     endRegistrationDate:Date;
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:PlayerGameRegistration.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:PlayerGameRegistration.name}],default:[]})
     playerGameRegistrations:PlayerGameRegistration[];
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:CompetitionGame.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:CompetitionGame.name}],default:[]})
     competitionGames:CompetitionGame[];
 
     @Prop({default:Date.now(),required:true})

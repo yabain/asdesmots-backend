@@ -6,7 +6,8 @@ export abstract class DataBaseService<T extends Document>
 {
     constructor(
         public entityModel:Model<T>,
-        public connection:mongoose.Connection
+        public connection:mongoose.Connection,
+        public toPopuloate:string[]=[]
         ){}
 
     createInstance(createEntityDTO)
@@ -21,17 +22,17 @@ export abstract class DataBaseService<T extends Document>
 
     async findAll(): Promise<T[]>
     {
-        return this.entityModel.find<T>({isDeleted:false}).sort({createdAt:1}).exec();
+        return this.entityModel.find<T>({isDeleted:false}).sort({createdAt:1}).populate(this.toPopuloate).exec();
     }
 
     async findByPage(select:Record<string,any>={},page=1,limit=10)
     {
-        return this.entityModel.find(select).sort({createdAt:1}).limit(limit).skip(page*limit).exec()
+        return this.entityModel.find(select).sort({createdAt:1}).limit(limit).skip(page*limit).populate(this.toPopuloate).exec()
     }
 
     async findByField(entityObj:Record<string,any>):Promise<T[]>
     {
-        return this.entityModel.find<T>({where:{...entityObj,isDeleted:false}}).sort({createdAt:1}).exec();
+        return this.entityModel.find<T>({where:{...entityObj,isDeleted:false}}).sort({createdAt:1}).populate(this.toPopuloate).exec();
     }
 
     async findOneByField(entityObj:Record<string,any>,select:Record<string,any>={}):Promise<T>

@@ -8,13 +8,12 @@ import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 export class CreateGameLevelDTO
 {
     @IsString()
-    @MinLength(4)
-    @MaxLength(65)
+    @MinLength(1)
+    @MaxLength(100)
     name:String;
 
     @IsOptional()
     @IsString()
-    @MinLength(4)
-    @MaxLength(65)
+    @MinLength(1)
     description:String;
 }

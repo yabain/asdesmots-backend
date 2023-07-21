@@ -9,9 +9,10 @@ export class GameLevelService extends DataBaseService<GameLevelDocument>
 {
     constructor(
         @InjectModel(GameLevel.name) gameLevelModel: Model<GameLevelDocument>,
-        @InjectConnection() connection: mongoose.Connection
+        @InjectConnection() connection: mongoose.Connection,
+        
         ){
-            super(gameLevelModel,connection);
+            super(gameLevelModel,connection,["words"]);
     }  
     
     // async deleteGameLevel(gameLevelID:string):Promise<any>

@@ -1,8 +1,8 @@
-import { Controller, Post,Get, Body, HttpStatus, Delete, Param, NotFoundException } from "@nestjs/common";
+import { Controller, Post,Get, Body, HttpStatus, Delete, Param, NotFoundException, Put } from "@nestjs/common";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { GameLevelPerms } from "../enums";
 import { GameLevelService, WordGameLevelService } from "../services";
-import { CreateGameLevelDTO } from "./../dtos"
+import { CreateGameLevelDTO, UpdateGameLevelDTO } from "./../dtos"
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 @Controller("gamelevel")
@@ -118,6 +118,40 @@ export class GameLevelController
         return {
             statusCode: HttpStatus.OK,
             message:'Game of words deleted successfully'
+        }
+    }
+
+    /**
+     * @api {put} /gamelevel/:gamelevelID Game level update
+     * @apidescription Updating game level by id
+     * @apiParam {String} gamelevelID game level id
+     * @apiName Game level update
+     * @apiGroup Game Level
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Put("/gamelevel/:gamelevelID")
+    @SecureRouteWithPerms(
+        // WordGameLevelPerms.READ_ALL
+    )
+    async updateWordGameLevelList(@Param("gamelevelID",ObjectIDValidationPipe) gamelevelID:string,@Body() updateGameLevel:UpdateGameLevelDTO)
+    {
+        let gameLevel = await this.gameLevelService.findOneByField({_id:gamelevelID})
+        if(!gameLevel) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["Game level not found"]
+        })
+       
+        await gameLevel.update(updateGameLevel)
+        return {
+            statusCode:HttpStatus.OK,
+            message:'Game level update completed successfully'
         }
     }
 }

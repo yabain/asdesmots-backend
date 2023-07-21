@@ -9,7 +9,6 @@ export type WordGameLevelDocument = HydratedDocument<WordGameLevel>
 @Schema({
     toObject:{
         transform(doc, ret, options) {
-            if(ret.owner) ret.owner=ret.owner._id;
             delete ret.__v
             delete ret.isDeleted
 
@@ -17,7 +16,6 @@ export type WordGameLevelDocument = HydratedDocument<WordGameLevel>
     },
     toJSON:{
         transform(doc, ret, options) {
-            if(ret.owner) ret.owner=ret.owner._id;
             delete ret.__v
             delete ret.isDeleted
         },

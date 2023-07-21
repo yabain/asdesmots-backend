@@ -15,7 +15,6 @@ export type CompetitionGameDocument = HydratedDocument<CompetitionGame>
 @Schema({
     toObject:{
         transform(doc, ret, options) {
-            if(ret.owner) ret.owner=ret.owner._id;
             delete ret.__v
             delete ret.isDeleted
 
@@ -23,7 +22,6 @@ export type CompetitionGameDocument = HydratedDocument<CompetitionGame>
     },
     toJSON:{
         transform(doc, ret, options) {
-            if(ret.owner) ret.owner=ret.owner._id;
             delete ret.__v
             delete ret.isDeleted
         },
@@ -68,19 +66,19 @@ export class CompetitionGame extends Document
     @Prop({default:1})
     maxOfWinners:Number;
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:GameWinnerCriteria.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:GameWinnerCriteria.name}],default:[]})
     gameWinnerCriterias:GameWinnerCriteria[];
 
     @Prop({type:mongoose.Types.ObjectId,ref:User.name,default:null})
     gameJudge:User;
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:GamePart.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:GamePart.name}],default:[]})
     gameParts:GamePart[];
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:GameWinner.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:GameWinner.name}],default:[]})
     gameWinners:GameWinner[];
 
-    @Prop({type:[mongoose.Types.ObjectId],ref:PlayerGameRegistration.name,default:[]})
+    @Prop({type:[{type:mongoose.Types.ObjectId,ref:PlayerGameRegistration.name}],default:[]})
     playerGameRegistrations:PlayerGameRegistration[];
 
     @Prop({type:mongoose.Types.ObjectId,ref:CompetitionGame.name,default:null})
