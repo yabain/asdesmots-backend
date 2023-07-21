@@ -98,7 +98,24 @@ export class GameArcardeController
      * @apiSuccess (200 Ok) {Date} data.endDate game end date
      * @apiSuccess (200 Ok) {Date} data.startRegistrationDate game registration start date
      * @apiSuccess (200 Ok) {Date} data.endRegistrationDate game registration end date
-     * @apiSuccess (200 Ok) {String} data.owner Arcade Creator ID
+     * @apiSuccess (200 Ok) {String} data.owner Arcade Creator ID competitionGames
+     * @apiSuccess (200 Ok) {Array} data.competitionGames Game competitions list
+     * @apiSuccess (200 Ok) {String {4..65}} data.competitionGames.name Game competition name
+     * @apiSuccess (200 Ok) {String {4..65}} data.competitionGames.description Game competition description
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.level level of games
+     * @apiSuccess (200 Ok) {Boolean} data.competitionGames.isSinglePart It's set to true if it's a one-party competition
+     * @apiSuccess (200 Ok) {Boolean} data.competitionGames.canRegisterPlayer is set to true if players can register for the competition
+     * @apiSuccess (200 Ok) {String} data.competitionGames.localisation  competition location area
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxPlayerLife  Maximum number of lives of a player in the competition
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxTimeToPlay  Number of times defined in seconds to rent to a player to enter a word.
+     * @apiSuccess (200 Ok) {Date} data.competitionGames.startDate game start date
+     * @apiSuccess (200 Ok) {Date} data.competitionGames.endDate game end date
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxOfWinners  Maximum number of winners per competition
+     * @apiSuccess (200 Ok) {String} data.competitionGames.lang Language of the competition. it can be "en" for English and "fr" for French
+     * @apiSuccess (200 Ok) {String} data.competitionGames.parentCompetition In case it is a sub competition, this value represents the parent competition
+     * @apiSuccess (200 Ok) {String[]} data.competitionGames.gameWinnerCriterias competition winning criteria ID table
+     * @apiSuccess (200 Ok) {String[]} data.competitionGames.gameJudgesID competition judge ID 
+     * @apiSuccess (200 Ok) {GamePart[]} data.competitionGames.gameJudges competition judges ID table
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
@@ -141,6 +158,23 @@ export class GameArcardeController
      * @apiSuccess (200 Ok) {Date} data.startRegistrationDate game registration start date
      * @apiSuccess (200 Ok) {Date} data.endRegistrationDate game registration end date
      * @apiSuccess (200 Ok) {String} data.owner Arcade Creator ID
+     * @apiSuccess (200 Ok) {Array} data.competitionGames Game competitions list
+     * @apiSuccess (200 Ok) {String {4..65}} data.competitionGames.name Game competition name
+     * @apiSuccess (200 Ok) {String {4..65}} data.competitionGames.description Game competition description
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.level level of games
+     * @apiSuccess (200 Ok) {Boolean} data.competitionGames.isSinglePart It's set to true if it's a one-party competition
+     * @apiSuccess (200 Ok) {Boolean} data.competitionGames.canRegisterPlayer is set to true if players can register for the competition
+     * @apiSuccess (200 Ok) {String} data.competitionGames.localisation  competition location area
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxPlayerLife  Maximum number of lives of a player in the competition
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxTimeToPlay  Number of times defined in seconds to rent to a player to enter a word.
+     * @apiSuccess (200 Ok) {Date} data.competitionGames.startDate game start date
+     * @apiSuccess (200 Ok) {Date} data.competitionGames.endDate game end date
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxOfWinners  Maximum number of winners per competition
+     * @apiSuccess (200 Ok) {String} data.competitionGames.lang Language of the competition. it can be "en" for English and "fr" for French
+     * @apiSuccess (200 Ok) {String} data.competitionGames.parentCompetition In case it is a sub competition, this value represents the parent competition
+     * @apiSuccess (200 Ok) {String[]} data.competitionGames.gameWinnerCriterias competition winning criteria ID table
+     * @apiSuccess (200 Ok) {String[]} data.competitionGames.gameJudgesID competition judge ID 
+     * @apiSuccess (200 Ok) {GamePart[]} data.competitionGames.gameJudges competition judges ID table
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
@@ -237,6 +271,23 @@ export class GameArcardeController
      * @apiSuccess (200 Ok) {Date} data.endDate game end date
      * @apiSuccess (200 Ok) {Date} data.startRegistrationDate game registration start date
      * @apiSuccess (200 Ok) {Date} data.endRegistrationDate game registration end date
+     * @apiSuccess (200 Ok) {Array} data.competitionGames Game competitions list
+     * @apiSuccess (200 Ok) {String {4..65}} data.competitionGames.name Game competition name
+     * @apiSuccess (200 Ok) {String {4..65}} data.competitionGames.description Game competition description
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.level level of games
+     * @apiSuccess (200 Ok) {Boolean} data.competitionGames.isSinglePart It's set to true if it's a one-party competition
+     * @apiSuccess (200 Ok) {Boolean} data.competitionGames.canRegisterPlayer is set to true if players can register for the competition
+     * @apiSuccess (200 Ok) {String} data.competitionGames.localisation  competition location area
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxPlayerLife  Maximum number of lives of a player in the competition
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxTimeToPlay  Number of times defined in seconds to rent to a player to enter a word.
+     * @apiSuccess (200 Ok) {Date} data.competitionGames.startDate game start date
+     * @apiSuccess (200 Ok) {Date} data.competitionGames.endDate game end date
+     * @apiSuccess (200 Ok) {Number} data.competitionGames.maxOfWinners  Maximum number of winners per competition
+     * @apiSuccess (200 Ok) {String} data.competitionGames.lang Language of the competition. it can be "en" for English and "fr" for French
+     * @apiSuccess (200 Ok) {String} data.competitionGames.parentCompetition In case it is a sub competition, this value represents the parent competition
+     * @apiSuccess (200 Ok) {String[]} data.competitionGames.gameWinnerCriterias competition winning criteria ID table
+     * @apiSuccess (200 Ok) {String[]} data.competitionGames.gameJudgesID competition judge ID 
+     * @apiSuccess (200 Ok) {GamePart[]} data.competitionGames.gameJudges competition judges ID table
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found

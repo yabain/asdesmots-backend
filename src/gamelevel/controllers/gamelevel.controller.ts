@@ -77,10 +77,14 @@ export class GameLevelController
     )
     async getGameLevelList()
     {
+        let gamesLevel = await this.gameLevelService.findAll()
         return {
             statusCode:HttpStatus.OK,
             message:'List of game levels',
-            data: await this.gameLevelService.findAll()
+            data: gamesLevel.map((gameLevel)=>{
+                let glevel= {...gameLevel.toJSON(),words: gameLevel.words.map(word=>word.id)}
+                return glevel;
+            })
         }
     }
 

@@ -37,7 +37,7 @@ export abstract class DataBaseService<T extends Document>
 
     async findOneByField(entityObj:Record<string,any>,select:Record<string,any>={}):Promise<T>
     {
-        return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec();
+        return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec().then((result)=>result.populate(this.toPopuloate));
     }
 
     async update(filter:Record<string,any>,toUpdate:Record<string,any>,session=null):Promise<T>

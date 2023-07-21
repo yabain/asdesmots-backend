@@ -19,7 +19,7 @@ import { CreateGamePartDTO } from "./create-game-part.dto";
  * @apiBody {Date} endDate game end date
  * @apiBody {Number} maxOfWinners  Maximum number of winners per competition
  * @apiBody {String} lang Language of the competition. it can be "en" for English and "fr" for French
- * @apiBody {String} [parentCompetition] In case it is a sub competition, this value represents the parent competition
+ * @apiBody {String} parentCompetition In case it is a sub competition, this value represents the parent competition
  * @apiBody {String[]} [gameWinnerCriterias] competition winning criteria ID table
  * @apiBody {String} [gameJudgeID] competition judge ID 
  * @apiBody {GamePart[]} gameParts game part
