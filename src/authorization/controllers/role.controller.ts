@@ -43,6 +43,53 @@ export class RoleController
         }
     }
 
+
+    /**
+     * @api {get} /roles/:roleID/users get list of users by roleId
+     * @apidescription get list of users by roleId
+     * @apiParam {String} id role unique ID
+     * @apiName get list of users by roleId
+     * @apiGroup Authorization
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data
+     * @apiSuccess (200 Ok) {Object} data.user Users information
+     * @apiSuccess (200 Ok) {String} data.user._id User id
+     * @apiSuccess (200 Ok) {String} data.user.firstName User firstname
+     * @apiSuccess (200 Ok) {String} data.user.lastName User lastname
+     * @apiSuccess (200 Ok) {String} data.user.email User email
+     * @apiSuccess (200 Ok) {Boolean} data.user.emailConfirmed is it a valid user account?
+     * @apiSuccess (200 Ok) {String} data.user.profilPicture user picture profile
+     * @apiSuccess (200 Ok) {String} data.user.country user country
+     * @apiSuccess (200 Ok) {String} data.user.location user location
+     * @apiSuccess (200 Ok) {String} data.user.permissions user permission
+     * @apiSuccess (200 Ok) {String} data.user.createAt Account creation date
+     * @apiSuccess (200 Ok) {String} data.user.userSetting Account settings
+     * @apiSuccess (200 Ok) {String} data.user.userSetting.language Account language
+     * @apiSuccess (200 Ok) {String} data.user.userSetting.theme Account theme
+     * @apiSuccess (200 Ok) {String} data.user.userSetting.currency Account currency
+     * @apiSuccess (200 Ok) {String} data.user.userSetting.isEnglishTimeFormatFor accounts whose date respects the English format
+     * @apiSuccess (200 Ok) {String} data.user.createAt Account creation date
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @SecureRouteWithPerms()
+    @Get('/:roleID/users')
+    async getListOfUserByRoleId(@Param('roleId',ObjectIDValidationPipe) roleId:string)
+    {        
+        return {
+            statusCode:HttpStatus.OK,
+            message:"List of users by role",
+            data:await this.userService.findByField({
+                    'roles.id':roleId
+                })
+        }
+    }
+
+
     /**
      * 
      * @api {delete} /roles delete role
