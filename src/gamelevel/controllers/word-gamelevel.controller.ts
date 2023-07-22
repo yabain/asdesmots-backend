@@ -104,7 +104,7 @@ export class WordGameLevelController
      * @apiError (Error 4xx) 404-NotFound User not found
      * @apiUse apiError
      */
-    @Put("/gamelevel/:gamelevelID/word/:wordGameID")
+    @Put(":gamelevelID/word/:wordGameID")
     @SecureRouteWithPerms(
         // WordGameLevelPerms.READ_ALL
     )
