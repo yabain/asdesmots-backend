@@ -47,7 +47,7 @@ export class RoleController
     /**
      * @api {get} /roles/:roleID/users get list of users by roleId
      * @apidescription get list of users by roleId
-     * @apiParam {String} id role unique ID
+     * @apiParam {String} roleID role unique ID
      * @apiName get list of users by roleId
      * @apiGroup Authorization
      * @apiUse apiSecurity
@@ -77,14 +77,14 @@ export class RoleController
      * @apiUse apiError
      */
     @SecureRouteWithPerms()
-    @Get('/:roleID/users')
-    async getListOfUserByRoleId(@Param('roleId',ObjectIDValidationPipe) roleId:string)
+    @Get(':roleID/users')
+    async getListOfUserByRoleId(@Param('roleID',ObjectIDValidationPipe) roleId:string)
     {        
         return {
             statusCode:HttpStatus.OK,
             message:"List of users by role",
             data:await this.userService.findByField({
-                    'roles.id':roleId
+                    'roles._id':roleId
                 })
         }
     }
@@ -92,8 +92,9 @@ export class RoleController
 
     /**
      * 
-     * @api {delete} /roles delete role
+     * @api {delete} /roles/:roleId delete role
      * @apiDescription delete  role
+     * @apiParam {String} roleId role unique ID
      * @apiName Delete role
      * @apiGroup Authorization
      * @apiUse apiSecurity
