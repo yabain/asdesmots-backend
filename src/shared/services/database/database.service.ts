@@ -32,12 +32,12 @@ export abstract class DataBaseService<T extends Document>
 
     async findByField(entityObj:Record<string,any>):Promise<T[]>
     {
-        return this.entityModel.find<T>({where:{...entityObj,isDeleted:false}}).sort({createdAt:1}).populate(this.toPopuloate).exec();
+        return this.entityModel.find<T>({...entityObj,isDeleted:false}).sort({createdAt:1}).populate(this.toPopuloate).exec();
     }
 
     async findOneByField(entityObj:Record<string,any>,select:Record<string,any>={}):Promise<T>
     {
-        return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec().then((result)=>result.populate(this.toPopuloate));
+        return this.entityModel.findOne<T>({...entityObj,isDeleted:false}).select(select).exec().then((result)=>result?result.populate(this.toPopuloate):null);
     }
 
     async update(filter:Record<string,any>,toUpdate:Record<string,any>,session=null):Promise<T>

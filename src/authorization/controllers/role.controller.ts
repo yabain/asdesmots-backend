@@ -84,7 +84,7 @@ export class RoleController
             statusCode:HttpStatus.OK,
             message:"List of users by role",
             data:await this.userService.findByField({
-                    'roles._id':roleId
+                    'roles':{$in:{"_id":roleId}}
                 })
         }
     }
@@ -242,6 +242,7 @@ export class RoleController
      * @apiName AddRoleToUser
      * @apiGroup AddRoleUser
      * @apiGroup Authorization
+     * @apiUse AddRoleUser
      * @apiUse apiSecurity
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
      * @apiSuccess (201 Created) {String} Response Description
@@ -267,6 +268,7 @@ export class RoleController
      * @apiName AddPermToRole
      * @apiGroup AssignPermissionRoleDTO
      * @apiGroup Authorization
+     * @apiUse AssignPermissionRoleDTO
      * @apiUse apiSecurity
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
      * @apiSuccess (201 Created) {String} Response Description

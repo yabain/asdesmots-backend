@@ -2,8 +2,8 @@ import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
 import { CompetitionGame, CompetitionGameDocument } from "../models";
-import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
+import { BadRequestException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import { ApplyGameWriteriaToGammeDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
 import { GamePartService } from "./game-part.service";
@@ -54,18 +54,18 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
             })
         }
 
-        if(createCompetitionGameDTO.gameWinnerCriterias)
-        {
-            gamesCriteria = await createCompetitionGameDTO.gameWinnerCriterias.map((criteriaID)=> this.gameWinnerCriteriaService.findOneByField({"_id":criteriaID}))
-            gamesCriteria.forEach((criteria)=>{
-                if(!criteria) throw new NotFoundException({
-                    statusCode:HttpStatus.NOT_FOUND,
-                    error:'NotFound/GameCompetition-WinnerCompetition',
-                    message:[`A winning criterion of the competition is not found`]
-                })
-            })
-        }
-        else createCompetitionGameDTO.gameWinnerCriterias=[];
+        // if(createCompetitionGameDTO.gameWinnerCriterias)
+        // {
+        //     gamesCriteria = await createCompetitionGameDTO.gameWinnerCriterias.map((criteriaID)=> this.gameWinnerCriteriaService.findOneByField({"_id":criteriaID}))
+        //     gamesCriteria.forEach((criteria)=>{
+        //         if(!criteria) throw new NotFoundException({
+        //             statusCode:HttpStatus.NOT_FOUND,
+        //             error:'NotFound/GameCompetition-WinnerCompetition',
+        //             message:[`A winning criterion of the competition is not found`]
+        //         })
+        //     })
+        // }
+        // else createCompetitionGameDTO.gameWinnerCriterias=[];
         // if(session) 
 
         const exectSaveCompetition = async (transaction)=>{
@@ -144,10 +144,31 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
             parentCompetition,
             gameWinnerCriterias: gamesCriteria
         })
-
-
     }
 
+    async appyCriteriaToGame( applyGameWriteriaToGammeDTO:ApplyGameWriteriaToGammeDTO)
+    {
+        let gameCompetition = await this.findOneByField({_id:applyGameWriteriaToGammeDTO.gameID});
+        if(!gameCompetition) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'GameCompetitionNotFound/GameCompetition',
+            message:[`Game competition not found`]
+        })
+
+        return this.executeWithTransaction(async (session)=>{
+            applyGameWriteriaToGammeDTO.gammeWinnersID.map(async (gameCriteriaID)=>{
+                let gameCriteria = await this.gameWinnerCriteriaService.findOneByField({_id:gameCriteriaID});
+                if(!gameCriteria) throw new BadRequestException({
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    error:'GameCriteriaNotFound/GameCompetition',
+                    message:[`Game criteria not found`]
+                })
+                gameCompetition.gameWinnerCriterias.push(gameCriteria);
+            });
+            return gameCompetition.save({session})                        
+        })
+    }
+    
     async addSubscription()
     {
         

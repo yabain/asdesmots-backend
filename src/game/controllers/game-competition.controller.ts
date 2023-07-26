@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, Put } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
-import { CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
+import { ApplyGameWriteriaToGammeDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { GameCompetitionPerms } from "../enum";
 import { CompetitionGameService } from "../services";
 
@@ -58,6 +58,35 @@ export class GameCompetitionController
             statusCode:HttpStatus.CREATED,
             message:"Game competition Created",
             data:await this.competitionGameService.createNewCompetition(createCompetitionGameDTO,gameArcardeID)
+        }
+    }
+
+    /**
+     * @api {put} /game-competition/apply-criteria Apply a game winning criteria list to a game
+     * @apidescription Apply a game winning criteria list to a game
+     * @apiName Apply list of winning criteria to a game
+     * @apiGroup Game Competition
+     * @apiUse ApplyGameWriteriaToGammeDTO
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response Array
+     * @apiSuccess (200 Ok) data.name  Winner criteria name
+     * @apiSuccess (200 Ok) data.description Winner criteria description
+     * @apiSuccess (200 Ok) data.gameWinnerCriteriaType Winner criteria type
+     * @apiSuccess (200 Ok) data.createdAt Creation date of the winning criteria
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Put("apply-criteria")
+    async applyGameWriteriaToGamme(@Body() applyGameWriteriaToGammeDTO:ApplyGameWriteriaToGammeDTO)
+    {
+        await this.competitionGameService.appyCriteriaToGame(applyGameWriteriaToGammeDTO);
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Criterion winning a competition",
         }
     }
 
