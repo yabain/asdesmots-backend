@@ -12,6 +12,7 @@ import { GameArcardeService } from "./game-arcarde.service";
 @Injectable()
 export class CompetitionGameService extends DataBaseService<CompetitionGameDocument>
 {
+    
     constructor(
         @InjectModel(CompetitionGame.name) competitionGameModel: Model<CompetitionGameDocument>,
         @InjectConnection() connection: mongoose.Connection,
@@ -155,18 +156,31 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
             message:[`Game competition not found`]
         })
 
-        return this.executeWithTransaction(async (session)=>{
-            applyGameWriteriaToGammeDTO.gammeWinnersID.map(async (gameCriteriaID)=>{
-                let gameCriteria = await this.gameWinnerCriteriaService.findOneByField({_id:gameCriteriaID});
-                if(!gameCriteria) throw new BadRequestException({
-                    statusCode: HttpStatus.BAD_REQUEST,
-                    error:'GameCriteriaNotFound/GameCompetition',
-                    message:[`Game criteria not found`]
-                })
-                gameCompetition.gameWinnerCriterias.push(gameCriteria);
-            });
-            return gameCompetition.save({session})                        
+        applyGameWriteriaToGammeDTO.gammeWinnersID.map(async (gameCriteriaID)=>{
+            let gameCriteria = await this.gameWinnerCriteriaService.findOneByField({_id:gameCriteriaID});
+            if(!gameCriteria) throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                error:'GameCriteriaNotFound/GameCompetition',
+                message:[`Game criteria not found`]
+            })
+            gameCompetition.gameWinnerCriterias.push(gameCriteria);
+        });
+        return gameCompetition.save();
+    }
+
+    async removeCriteriaToGame(applyGameWriteriaToGammeDTO: ApplyGameWriteriaToGammeDTO) {
+        let gameCompetition = await this.findOneByField({_id:applyGameWriteriaToGammeDTO.gameID});
+        if(!gameCompetition) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'GameCompetitionNotFound/GameCompetition',
+            message:[`Game competition not found`]
         })
+
+        applyGameWriteriaToGammeDTO.gammeWinnersID.map((gameCriterieaID)=>{
+            let gameCriteriaIndex=gameCompetition.gameWinnerCriterias.findIndex((criteriaID)=>criteriaID.id==gameCriterieaID);
+            if(gameCriteriaIndex>-1) gameCompetition.gameWinnerCriterias.splice(gameCriteriaIndex,1);
+        })
+        return gameCompetition.save() 
     }
     
     async addSubscription()

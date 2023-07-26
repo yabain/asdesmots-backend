@@ -17,10 +17,10 @@ export class GameWinnerCriteriaController
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
      * @apiSuccess (200 Ok) {Object} data response Array
-     * @apiSuccess (200 Ok) data.name  Winner criteria name
-     * @apiSuccess (200 Ok) data.description Winner criteria description
-     * @apiSuccess (200 Ok) data.gameWinnerCriteriaType Winner criteria type
-     * @apiSuccess (200 Ok) data.createdAt Creation date of the winning criteria
+     * @apiSuccess (200 Ok) {String} data.name  Winner criteria name
+     * @apiSuccess (200 Ok) {String} data.description Winner criteria description
+     * @apiSuccess (200 Ok) {String} data.gameWinnerCriteriaType Winner criteria type
+     * @apiSuccess (200 Ok) {Date} data.createdAt Creation date of the winning criteria
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found

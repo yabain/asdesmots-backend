@@ -71,10 +71,10 @@ export class GameCompetitionController
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
      * @apiSuccess (200 Ok) {Object} data response Array
-     * @apiSuccess (200 Ok) data.name  Winner criteria name
-     * @apiSuccess (200 Ok) data.description Winner criteria description
-     * @apiSuccess (200 Ok) data.gameWinnerCriteriaType Winner criteria type
-     * @apiSuccess (200 Ok) data.createdAt Creation date of the winning criteria
+     * @apiSuccess (200 Ok) {String} data.name  Winner criteria name
+     * @apiSuccess (200 Ok) {String} data.description Winner criteria description
+     * @apiSuccess (200 Ok) {String} data.gameWinnerCriteriaType Winner criteria type
+     * @apiSuccess (200 Ok) {Date} data.createdAt Creation date of the winning criteria
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
@@ -86,7 +86,36 @@ export class GameCompetitionController
         await this.competitionGameService.appyCriteriaToGame(applyGameWriteriaToGammeDTO);
         return {
             statusCode:HttpStatus.OK,
-            message:"Criterion winning a competition",
+            message:"Winning criterion of a competition successfully added",
+        }
+    }
+
+    /**
+     * @api {delete} /game-competition/remove-criteria Remove a game winning criteria list to a game
+     * @apidescription Remove a game winning criteria list to a game
+     * @apiName Remove list of winning criteria to a game
+     * @apiGroup Game Competition
+     * @apiUse ApplyGameWriteriaToGammeDTO
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response Array
+     * @apiSuccess (200 Ok) {String} data.name  Winner criteria name
+     * @apiSuccess (200 Ok) {String} data.description Winner criteria description
+     * @apiSuccess (200 Ok) {String} data.gameWinnerCriteriaType Winner criteria type
+     * @apiSuccess (200 Ok) {Date} data.createdAt Creation date of the winning criteria
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Put("remove-criteria")
+    async removeGameWriteriaToGamme(@Body() applyGameWriteriaToGammeDTO:ApplyGameWriteriaToGammeDTO)
+    {
+        await this.competitionGameService.removeCriteriaToGame(applyGameWriteriaToGammeDTO);
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Criterion winner of a competition withdraw successfully",
         }
     }
 
