@@ -8,6 +8,8 @@ import { GameArcardeController, GameCompetitionController, GameWinnerCriteriaCon
 import { CompetitionGame, CompetitionGameSchema, GameArcarde, GameArcardeSchema, GamePart, GamePartSchema, GameRound, GameRoundSchema, GameWinner, GameWinnerCriteria, GameWinnerCriteriaSchema, GameWinnerSchema, PlayerGameRegistration, PlayerGameRegistrationSchema } from "./models";
 import { CompetitionGameService, GameArcardeService, GamePartService, GameWinnerCriteriaService, GameWinnerEvaluateService, PlayerGameRegistrationService } from "./services";
 import { GameSubscriptionService } from "./services/game-subscription.service";
+import { CommandModule } from "nestjs-command";
+import { AddNewGameWinnerCriterialCommand } from "./scripts";
 
 @Module({
     controllers:[
@@ -29,7 +31,8 @@ import { GameSubscriptionService } from "./services/game-subscription.service";
         SharedModule,
         UserModule,
         AuthorizationModule,
-        GameLevelModule
+        GameLevelModule,
+        CommandModule
     ],
     providers:[
         CompetitionGameService,
@@ -38,7 +41,8 @@ import { GameSubscriptionService } from "./services/game-subscription.service";
         GameSubscriptionService,
         GamePartService,
         PlayerGameRegistrationService,
-        GameWinnerEvaluateService
+        GameWinnerEvaluateService,
+        AddNewGameWinnerCriterialCommand
     ],
     exports:[CompetitionGameService,GameArcardeService,GamePartService]
 })

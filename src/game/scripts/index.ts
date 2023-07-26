@@ -1,0 +1,1 @@
+export * from "./add-new-game-winner-criterial.command"

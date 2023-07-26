@@ -21,6 +21,7 @@
     "start:dev": "env-cmd -f env/.env.dev env-cmd -f env/.env.dev nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "winnercriterial:updatedb":"env-cmd -f env/.env.dev npx nestjs-command gamewinnercriterial:updatetodb",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
