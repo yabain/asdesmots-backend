@@ -8,6 +8,8 @@ export class GameWinnerCriteriaController
     constructor(
         private winnerCriteriaService:GameWinnerCriteriaService
     ){}
+
+
      /**
      * @api {get} /winner-criteria List of winning criteria 
      * @apidescription List of winning criteria

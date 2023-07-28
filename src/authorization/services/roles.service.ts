@@ -16,7 +16,7 @@ export class RolesService extends DataBaseService<RoleDocument>
         private permissionService:PermissionsService,
         private usersService:UsersService
         ){
-            super(roleModel,connection);
+            super(roleModel,connection,["permissions"]);
     }  
 
     async assignPermissionToRole(addPermissionToRole:AssignPermissionRoleDTO)

@@ -1,10 +1,8 @@
 import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
-import { GameArcarde, GameArcardeDocument, GameWinnerCriteria, GameWinnerCriteriaDocument } from "../models";
-import { BadRequestException, HttpStatus, Injectable } from "@nestjs/common";
-import { ApplyGameWriteriaToGammeDTO } from "../dtos";
-import { CompetitionGameService } from "./competition-game.service";
+import { GameWinnerCriteria, GameWinnerCriteriaDocument } from "../models";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class GameWinnerCriteriaService extends DataBaseService<GameWinnerCriteriaDocument>
@@ -14,5 +12,7 @@ export class GameWinnerCriteriaService extends DataBaseService<GameWinnerCriteri
         @InjectConnection() connection: mongoose.Connection,
         ){
             super(gameWinnerCreteriaModel,connection);
-    }     
+    }   
+    
+   
 } 

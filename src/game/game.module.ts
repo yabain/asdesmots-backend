@@ -8,15 +8,15 @@ import { GameArcardeController, GameCompetitionController, GameWinnerCriteriaCon
 import { CompetitionGame, CompetitionGameSchema, GameArcarde, GameArcardeSchema, GamePart, GamePartSchema, GameRound, GameRoundSchema, GameWinner, GameWinnerCriteria, GameWinnerCriteriaSchema, GameWinnerSchema, PlayerGameRegistration, PlayerGameRegistrationSchema } from "./models";
 import { CompetitionGameService, GameArcardeService, GamePartService, GameWinnerCriteriaService, GameWinnerEvaluateService, PlayerGameRegistrationService } from "./services";
 import { GameSubscriptionService } from "./services/game-subscription.service";
+
 import { CommandModule } from "nestjs-command";
-import { AddNewGameWinnerCriterialCommand } from "./scripts";
+import { AddNewGameWinnerCriterialScript } from "./scripts";
 
 @Module({
     controllers:[
         GameArcardeController,
         GameCompetitionController,
         GameWinnerCriteriaController,
-    
     ],
     imports:[
         MongooseModule.forFeature([
@@ -32,7 +32,7 @@ import { AddNewGameWinnerCriterialCommand } from "./scripts";
         UserModule,
         AuthorizationModule,
         GameLevelModule,
-        CommandModule
+        CommandModule,
     ],
     providers:[
         CompetitionGameService,
@@ -42,8 +42,14 @@ import { AddNewGameWinnerCriterialCommand } from "./scripts";
         GamePartService,
         PlayerGameRegistrationService,
         GameWinnerEvaluateService,
-        AddNewGameWinnerCriterialCommand
+        AddNewGameWinnerCriterialScript
     ],
-    exports:[CompetitionGameService,GameArcardeService,GamePartService]
+    exports:[
+        CompetitionGameService,
+        GameArcardeService,
+        GamePartService, 
+        AddNewGameWinnerCriterialScript, 
+        CommandModule
+    ]
 })
 export class GameModule{}

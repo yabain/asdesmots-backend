@@ -1,22 +1,24 @@
 import { Injectable } from "@nestjs/common";
-import { GameWinnerCriteria } from "../models";
-import { Command } from "nestjs-command";
 import { GameWinnerCriteriaService } from "../services";
 import { GameWinnerCriteriaData } from "./game-winner-criterial.data";
 import { UtilsFunc } from "src/shared/utils/utils.func";
+import { Command,  } from "nestjs-command";
+
 
 @Injectable()
-export class AddNewGameWinnerCriterialCommand
+export class AddNewGameWinnerCriterialScript
 {
-    constructor(private gameWinnerCriterialService:GameWinnerCriteriaService){}
+    constructor(private gameWinnerCriterialService:GameWinnerCriteriaService){
+
+    }
 
     @Command({
         command:'gamewinnercriterial:updatetodb',
-        describe:'Update game winner criterial to DB'
+        describe:"Update game winner criterial to DB"
     })
-    async updateGameWinnerCriteriaToDB()
+    async run(passedParams: string[], options?: Record<string, any>)
     {
-        this.gameWinnerCriterialService.executeWithTransaction(async (session)=>{
+        return this.gameWinnerCriterialService.executeWithTransaction(async (session)=>{
             let gameWinnerCriterialInDB = await this.gameWinnerCriterialService.findAll();
 
             //delete winner criteria
@@ -26,8 +28,9 @@ export class AddNewGameWinnerCriterialCommand
             //add winner criteria
             let gameWinnerCriterialAdd = UtilsFunc.getWinnerCriteriaDifference(GameWinnerCriteriaData,gameWinnerCriterialInDB);
             await this.addGameWinnerCriteriaToDB(gameWinnerCriterialAdd,session);
+            console.log("Update Game Winner Successfully")
+            return;
         })
-        console.log(" Update Winner Criterial")
     }
     
     

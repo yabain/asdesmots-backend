@@ -1,1 +1,1 @@
-export * from "./add-new-game-winner-criterial.command"
+export * from "./add-new-game-winner-criterial.script"

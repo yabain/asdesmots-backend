@@ -242,7 +242,7 @@ export class RoleController
      * @apiName AddRoleToUser
      * @apiGroup AddRoleUser
      * @apiGroup Authorization
-     * @apiUse AddRoleUser
+     * @apiUse AddRoleUserDTO
      * @apiUse apiSecurity
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
      * @apiSuccess (201 Created) {String} Response Description
@@ -292,7 +292,7 @@ export class RoleController
      * @api {delete} /roles/remove-user Remove a role to a user
      * @apidescription Add a role to a user
      * @apiName RemoveRoleToUser
-     * @apiGroup AddRoleUser
+     * @apiUse AddRoleUserDTO
      * @apiGroup Authorization
      * @apiUse apiSecurity
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
@@ -316,7 +316,7 @@ export class RoleController
      * @api {delete} /roles/remove-perm Remove permission from a role
      * @apidescription Remove permission from a role
      * @apiName RemovePermToRole
-     * @apiGroup AssignPermissionRoleDTO
+     * @apiUse AssignPermissionRoleDTO
      * @apiGroup Authorization
      * @apiUse apiSecurity
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
