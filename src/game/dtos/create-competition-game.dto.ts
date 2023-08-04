@@ -9,7 +9,7 @@ import { CreateGamePartDTO } from "./create-game-part.dto";
  * @apiDefine CreateCompetitionGameDTO Create new game competition
  * @apiBody {String {4..65}} name Game competition name
  * @apiBody {String {4..65}} description Game competition description
- * @apiBody {Number} level level of games
+ * @apiBody {String} gameLevel ID of games level
  * @apiBody {Boolean} isSinglePart It's set to true if it's a one-party competition
  * @apiBody {Boolean} [canRegisterPlayer] is set to true if players can register for the competition
  * @apiBody {String} localisation  competition location area
@@ -38,8 +38,8 @@ export class CreateCompetitionGameDTO
     @MaxLength(65)
     description:string;
 
-    @IsNumber()
-    level:number;
+    @IsMongoId()
+    gameLevel:ObjectId;
 
     @IsBoolean()
     isSinglePart:Boolean;

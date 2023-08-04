@@ -29,7 +29,9 @@ export class GameCompetitionController
      * @apiSuccess (201 Created) {Object} data response data
      * @apiSuccess (201 Created) {String {4..65}} name Game competition name
      * @apiSuccess (201 Created) {String {4..65}} description Game competition description
-     * @apiSuccess (201 Created) {Number} level level of games
+     * @apiSuccess (200 Ok) {Object} gameLevel level of games
+     * @apiSuccess (200 Ok) {String} gameLevel.name game level name
+     * @apiSuccess (200 Ok) {String} gameLevel.description game level description
      * @apiSuccess (201 Created) {Boolean} isSinglePart It's set to true if it's a one-party competition
      * @apiSuccess (201 Created) {Boolean} [canRegisterPlayer] is set to true if players can register for the competition
      * @apiSuccess (201 Created) {String} localisation  competition location area
@@ -136,7 +138,9 @@ export class GameCompetitionController
      * @apiSuccess (200 Ok) {Object} data response data
      * @apiSuccess (200 Ok) {String {4..65}} name Game competition name
      * @apiSuccess (200 Ok) {String {4..65}} description Game competition description
-     * @apiSuccess (200 Ok) {Number} level level of games
+     * @apiSuccess (200 Ok) {Object} gameLevel level of games
+     * @apiSuccess (200 Ok) {String} gameLevel.name game level name
+     * @apiSuccess (200 Ok) {String} gameLevel.description game level description
      * @apiSuccess (200 Ok) {Boolean} isSinglePart It's set to true if it's a one-party competition
      * @apiSuccess (200 Ok) {Boolean} [canRegisterPlayer] is set to true if players can register for the competition
      * @apiSuccess (200 Ok) {String} localisation  competition location area
@@ -182,7 +186,9 @@ export class GameCompetitionController
      * @apiSuccess (200 Ok) {Object} data response data
      * @apiSuccess (200 Ok) {String {4..65}} name Game competition name
      * @apiSuccess (200 Ok) {String {4..65}} description Game competition description
-     * @apiSuccess (200 Ok) {Number} level level of games
+     * @apiSuccess (200 Ok) {Object} gameLevel level of games
+     * @apiSuccess (200 Ok) {String} gameLevel.name game level name
+     * @apiSuccess (200 Ok) {String} gameLevel.description game level description
      * @apiSuccess (200 Ok) {Boolean} isSinglePart It's set to true if it's a one-party competition
      * @apiSuccess (200 Ok) {Boolean} [canRegisterPlayer] is set to true if players can register for the competition
      * @apiSuccess (200 Ok) {String} localisation  competition location area

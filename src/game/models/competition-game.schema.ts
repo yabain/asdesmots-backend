@@ -6,6 +6,7 @@ import { GamePart } from "./game-part.schema";
 import { GameWinnerCriteria } from "./game-winner-criteria.schema";
 import { GameWinner } from "./game-winner.schema";
 import { PlayerGameRegistration } from "./player-game-registration.schema";
+import { GameLevel } from "src/gamelevel/models";
 
 export type CompetitionGameDocument = HydratedDocument<CompetitionGame>
 
@@ -36,8 +37,8 @@ export class CompetitionGame extends Document
     @Prop({default:""})
     description:string;
 
-    @Prop({default:0})
-    level:Number;
+    @Prop({type:mongoose.Types.ObjectId,ref:GameLevel.name,default:null})
+    gameLevel:GameLevel;
 
     @Prop({default:true})
     isSinglePart:Boolean;

@@ -8,6 +8,7 @@ import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
 import { GamePartService } from "./game-part.service";
 import { GameArcardeService } from "./game-arcarde.service";
+import { GameLevelService } from "src/gamelevel/services";
 
 @Injectable()
 export class CompetitionGameService extends DataBaseService<CompetitionGameDocument>
@@ -19,14 +20,15 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         private usersService:UsersService,
         private gameWinnerCriteriaService:GameWinnerCriteriaService,
         private gamePartService:GamePartService,
-        private gameArcardeService:GameArcardeService
+        private gameArcardeService:GameArcardeService,
+        private gameLevelService:GameLevelService
         ){
-            super(competitionGameModel,connection);
+            super(competitionGameModel,connection,["gameLevel"]);
     }  
 
     async createNewCompetition(createCompetitionGameDTO,gameArcardeID:string,session=null,game=null)//CreateCompetitionGameDTO
     {
-        let judge = null,parentCompetition = null, gamesCriteria = [];
+        let judge = null,parentCompetition = null, gamesCriteria = [],gameLevel = null;
         let gameArcarde=game;
         if(!gameArcarde) gameArcarde = await this.gameArcardeService.findOneByField({_id:gameArcardeID});
         if(!gameArcarde)  throw new NotFoundException({
@@ -55,31 +57,46 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
             })
         }
 
-        // if(createCompetitionGameDTO.gameWinnerCriterias)
-        // {
-        //     gamesCriteria = await createCompetitionGameDTO.gameWinnerCriterias.map((criteriaID)=> this.gameWinnerCriteriaService.findOneByField({"_id":criteriaID}))
-        //     gamesCriteria.forEach((criteria)=>{
-        //         if(!criteria) throw new NotFoundException({
-        //             statusCode:HttpStatus.NOT_FOUND,
-        //             error:'NotFound/GameCompetition-WinnerCompetition',
-        //             message:[`A winning criterion of the competition is not found`]
-        //         })
-        //     })
-        // }
-        // else createCompetitionGameDTO.gameWinnerCriterias=[];
+        if(createCompetitionGameDTO.gameLevel)
+        {
+            gameLevel = await this.gameLevelService.findOneByField({"_id":createCompetitionGameDTO.gameLevel});
+            if(!gameLevel) throw new NotFoundException({
+                statusCode:HttpStatus.NOT_FOUND,
+                error:'NotFound/GameCompetition-GameLevel',
+                message:[`Game Level not found`]
+            })
+        }
+
+        if(createCompetitionGameDTO.gameWinnerCriterias)
+        {
+            gamesCriteria = await createCompetitionGameDTO.gameWinnerCriterias.map((criteriaID)=> this.gameWinnerCriteriaService.findOneByField({"_id":criteriaID}))
+            gamesCriteria.forEach((criteria)=>{
+                if(!criteria) throw new NotFoundException({
+                    statusCode:HttpStatus.NOT_FOUND,
+                    error:'NotFound/GameCompetition-WinnerCompetition',
+                    message:[`A winning criterion of the competition is not found`]
+                })
+            })
+        }
+        else createCompetitionGameDTO.gameWinnerCriterias=[];
+
+
         // if(session) 
 
         const exectSaveCompetition = async (transaction)=>{
 
-            let competitionGame= await this.create({
+            let competitionGame= await this.create(
+                {
                 ...createCompetitionGameDTO,
                 gameJudge:judge,
                 parentCompetition,
                 gameWinnerCriterias: gamesCriteria,
                 gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
                     (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,transaction))) :
-                    []
-            },transaction);
+                    [],
+                gameLevel
+                }
+            ,transaction);
             gameArcarde.competitionGames.push(competitionGame);
             await gameArcarde.save({session:transaction});
             return competitionGame
