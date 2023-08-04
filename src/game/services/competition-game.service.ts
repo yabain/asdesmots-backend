@@ -21,7 +21,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         private gameArcardeService:GameArcardeService,
         private gameLevelService:GameLevelService
         ){
-            super(competitionGameModel,connection,["gameLevel"]);
+            super(competitionGameModel,connection,["gameLevel","gameParts"]);
     }  
 
     async createNewCompetition(createCompetitionGameDTO,gameArcardeID:string,session=null,game=null)//CreateCompetitionGameDTO
