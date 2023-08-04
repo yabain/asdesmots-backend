@@ -5,20 +5,22 @@ import { GamePart, GamePartDocument } from "../models";
 import { CreateGamePartDTO } from "../dtos";
 import { HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
 import { CompetitionGameService } from "./competition-game.service";
+import { GameLevelService } from "src/gamelevel/services";
 @Injectable()
 export class GamePartService extends DataBaseService<GamePartDocument>
 {
     constructor(
         @InjectModel(GamePart.name) gamePartModel: Model<GamePartDocument>,
         @InjectConnection() connection: mongoose.Connection,
-        private gameCompetitionService:CompetitionGameService
+        private gameCompetitionService:CompetitionGameService,
+        private gameLevelService:GameLevelService
         ){
             super(gamePartModel,connection);
     } 
     
     async createNewGamePart(createGamePartDTO:CreateGamePartDTO)
     {
-        let gameLevel = await this.findOneByField({"_id":createGamePartDTO.gameLevel});
+        let gameLevel = await this.gameLevelService.findOneByField({"_id":createGamePartDTO.gameLevel});
         if(!gameLevel) throw new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
             error:'NotFound/GamePart-GameLevel',
