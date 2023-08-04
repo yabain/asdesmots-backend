@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 @Controller()
 export class AppController {
   
-  version = "1.3.2.1"
+  version = "1.3.3.0"
 
   constructor(private configService:ConfigService) {}
 
