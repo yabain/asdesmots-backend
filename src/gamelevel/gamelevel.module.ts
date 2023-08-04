@@ -19,6 +19,6 @@ import { GameLevelService, WordGameLevelService } from "./services";
         WordGameLevelService,
         GameLevelService
     ],
-    exports:[]
+    exports:[GameLevelService]
 })
 export class GameLevelModule{}

@@ -3,9 +3,9 @@ import mongoose, { Model } from "mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import { GamePart, GamePartDocument } from "../models";
 import { CreateGamePartDTO } from "../dtos";
-import { HttpStatus, NotFoundException } from "@nestjs/common";
+import { HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
 import { CompetitionGameService } from "./competition-game.service";
-
+@Injectable()
 export class GamePartService extends DataBaseService<GamePartDocument>
 {
     constructor(

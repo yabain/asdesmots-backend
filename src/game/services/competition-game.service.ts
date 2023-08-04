@@ -2,11 +2,10 @@ import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
 import { CompetitionGame, CompetitionGameDocument } from "../models";
-import { BadRequestException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
 import { ApplyGameWriteriaToGammeDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
-import { GamePartService } from "./game-part.service";
 import { GameArcardeService } from "./game-arcarde.service";
 import { GameLevelService } from "src/gamelevel/services";
 
@@ -19,7 +18,6 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         @InjectConnection() connection: mongoose.Connection,
         private usersService:UsersService,
         private gameWinnerCriteriaService:GameWinnerCriteriaService,
-        private gamePartService:GamePartService,
         private gameArcardeService:GameArcardeService,
         private gameLevelService:GameLevelService
         ){
@@ -91,9 +89,9 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
                 gameJudge:judge,
                 parentCompetition,
                 gameWinnerCriterias: gamesCriteria,
-                gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
-                    (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,transaction))) :
-                    [],
+                // gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
+                //     (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,transaction))) :
+                //     [],
                 gameLevel
                 }
             ,transaction);

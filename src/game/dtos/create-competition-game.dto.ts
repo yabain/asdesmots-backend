@@ -22,7 +22,6 @@ import { CreateGamePartDTO } from "./create-game-part.dto";
  * @apiBody {String} parentCompetition In case it is a sub competition, this value represents the parent competition
  * @apiBody {String[]} [gameWinnerCriterias] competition winning criteria ID table
  * @apiBody {String} [gameJudgeID] competition judge ID 
- * @apiBody {GamePart[]} gameParts game part
  */
 
 export class CreateCompetitionGameDTO
@@ -78,12 +77,6 @@ export class CreateCompetitionGameDTO
     @IsOptional()
     @IsMongoId()
     gameJudgeID:ObjectId;
-
-    @IsOptional()
-    @IsArray()
-    @ValidateNested({ each:true })
-    @Type(()=> CreateGamePartDTO)
-    gameParts:CreateGamePartDTO[];
 
     @IsOptional()
     @IsMongoId()
