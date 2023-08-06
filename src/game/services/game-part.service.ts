@@ -20,13 +20,6 @@ export class GamePartService extends DataBaseService<GamePartDocument>
     
     async createNewGamePart(createGamePartDTO:CreateGamePartDTO)
     {
-        let gameLevel = await this.gameLevelService.findOneByField({"_id":createGamePartDTO.gameLevel});
-        if(!gameLevel) throw new NotFoundException({
-            statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/GamePart-GameLevel',
-            message:[`Game level not found`]
-        })
-        
         let gameCompetition = await this.gameCompetitionService.findOneByField({"_id":createGamePartDTO.gameCompetitionID});
         if(!gameCompetition) throw new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
@@ -35,6 +28,7 @@ export class GamePartService extends DataBaseService<GamePartDocument>
         })
         return this.executeWithTransaction(async (session)=>{
             let newGamePart = this.createInstance(createGamePartDTO);
+            newGamePart.gameLevel=gameCompetition.gameLevel;
             gameCompetition.gameParts.push(newGamePart);
             if(gameCompetition.gameParts.length>1) gameCompetition.isSinglePart=false;
             newGamePart = await newGamePart.save({session});
@@ -78,7 +72,7 @@ export class GamePartService extends DataBaseService<GamePartDocument>
             statusCode:HttpStatus.NOT_FOUND,
             error:'NotFound/GamePart-GameCompetition',
             message:[`Competition not found`]
-        })
+        }) 
         return gameCompetition.gameParts;
     }
     

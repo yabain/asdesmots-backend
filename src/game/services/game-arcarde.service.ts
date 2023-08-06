@@ -11,7 +11,7 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         @InjectModel(GameArcarde.name) gameArcardeModel: Model<GameArcardeDocument>,
         @InjectConnection() connection: mongoose.Connection
         ){
-            super(gameArcardeModel,connection,['competitionGames']);
+            super(gameArcardeModel,connection,['competitionGames','competitionGames.gameWinnerCriterias']);
     }  
 
     async addSubscription(playerSubscription:PlayerGameRegistration,gameArcarde:GameArcarde,session=null)

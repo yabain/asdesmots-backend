@@ -8,9 +8,7 @@ import { ObjectId } from "mongoose";
  * @apiBody {String {4..65}} name Game part name
  * @apiBody {String {4..65}} description Game part description
  * @apiBody {String} gameCompetitionID Game competition ID
- * @apiBody {String} gameLevel game level identifier
  * @apiBody {Number} numberOfWord Number of words in the game.Number of words per player. this will represent the number of turns per player
- * @apiBody {Number} maxPlayersNumber  Maximum number of player
  * @apiBody {Date} [startDate] game part start date
  * @apiBody {Date} [endDate] game part end date
  */
@@ -29,9 +27,6 @@ export class CreateGamePartDTO
     @MinLength(4)
     @MaxLength(65)
     description:string;
-
-    @IsMongoId()
-    gameLevel:ObjectId
 
     @IsNumber()
     @Min(1)
