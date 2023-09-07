@@ -1,8 +1,8 @@
-import { Body, Controller, DefaultValuePipe, Get, HttpStatus, ParseIntPipe, Post } from "@nestjs/common";
-import { Delete, Param, Req } from "@nestjs/common/decorators";
+import { Body, Controller, DefaultValuePipe, Get, HttpStatus, NotFoundException, ParseIntPipe, Post } from "@nestjs/common";
+import { Delete, Param, Put, Req } from "@nestjs/common/decorators";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
-import { PlayerSubscriptionDTO, CreateGameArcardeDTO, PlayerUnSubscriptionDTO } from "../dtos";
+import { PlayerSubscriptionDTO, CreateGameArcardeDTO, PlayerUnSubscriptionDTO, ChangeGameArcardeStateDTO } from "../dtos";
 import { GameArcardePerms } from "../enum";
 import { CompetitionGameService, GameArcardeService } from "../services";
 import { GameSubscriptionService } from "../services/game-subscription.service";
@@ -134,6 +134,30 @@ export class GameArcardeController
      }
      
 
+    /**
+     * @api {put} /game-arcarde/state Changing the state of the arcarde. this allows you to start and end an arcade
+     * @apidescription Changing the state of the arch. this allows you to start and end an arcade
+     * @apiName Changing the state of the arcarde.
+     * @apiGroup Game Arcarde
+     * @apiUse ChangeGameArcardeStateDTO
+     * @apiUse apiSecurity 
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+    
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+     @SecureRouteWithPerms()
+     @Put('/state')
+     async changeArcardeState(@Body() changeGameStateDTO:ChangeGameArcardeStateDTO)
+     {
+        await this.gameArcardeService.changeGameArcarde(changeGameStateDTO);
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Update game Arcarde state",
+        }
+     }
      
 
      /**

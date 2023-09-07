@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, Put } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
-import { ApplyGameWriteriaToGammeDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
+import { ApplyGameWriteriaToGammeDTO, ChangeGameCompetitionStateDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { GameCompetitionPerms } from "../enum";
 import { CompetitionGameService } from "../services";
 
@@ -90,6 +90,31 @@ export class GameCompetitionController
             statusCode:HttpStatus.OK,
             message:"Winning criterion of a competition successfully added",
         }
+    }
+
+    /**
+     * @api {put} /game-competition/state Changing the state of the competition. this allows you to start and end an arcade
+     * @apidescription Changing the state of the competition. this allows you to start and end an competition
+     * @apiName Changing the state of the arcarde.
+     * @apiGroup Game Competition
+     * @apiUse ChangeGameCompetitionStateDTO
+     * @apiUse apiSecurity 
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+    
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @SecureRouteWithPerms()
+    @Put('/state')
+    async changeArcardeState(@Body() changeGameStateDTO:ChangeGameCompetitionStateDTO)
+    {
+       await this.competitionGameService.changeGameCompetiton(changeGameStateDTO);
+       return {
+           statusCode:HttpStatus.OK,
+           message:"Update game competition state",
+       }
     }
 
     /**

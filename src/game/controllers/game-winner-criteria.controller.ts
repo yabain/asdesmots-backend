@@ -43,7 +43,7 @@ export class GameWinnerCriteriaController
      * @api {get} /winner-criteria/:competitionID  get list of winning criteria by competition ID
      * @apidescription get list of winning criteria by competition ID
      * @apiName get list of winning criteria by competition ID
-     * @apiParam {String} id Game competition unique ID
+     * @apiParam {String} competitionID Game competition unique ID
      * @apiGroup Game Winner Criteria
      * @apiUse apiSecurity
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code

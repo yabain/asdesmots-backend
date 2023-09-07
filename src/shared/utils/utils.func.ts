@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io'
 export class UtilsFunc
 {
 
@@ -11,5 +12,10 @@ export class UtilsFunc
     arrayDiffWinnerCriteria(array1,array2)
     {
         return [...UtilsFunc.getWinnerCriteriaDifference(array1,array2),...UtilsFunc.getWinnerCriteriaDifference(array2,array1)]
+    }
+
+    static emitMessage(message:string,body:any,clients:Socket[])
+    {
+      clients.forEach((client)=> client.emit(message,body))
     }
 }

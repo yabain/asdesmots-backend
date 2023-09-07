@@ -1,4 +1,4 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone } from "class-validator";
 
 /**
  * @apiDefine CreateUserDTO Create user information
@@ -52,7 +52,7 @@ export class CreateUserDTO
     location:string;
 
     @IsOptional()
-    @IsPhoneNumber()
+    @IsMobilePhone()
     phoneNumber:string;
 
 }

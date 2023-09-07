@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import mongoose, { Document, HydratedDocument } from "mongoose";
 import { GameLevel } from "src/gamelevel/models";
 import { GameRound } from "./game-round.schema";
+import { GameState } from "../enum";
 
 export type GamePartDocument = HydratedDocument<GamePart>
 
@@ -24,6 +25,7 @@ export type GamePartDocument = HydratedDocument<GamePart>
 })
 export class GamePart extends Document //Manche de jeux
 {
+    
     @Prop({default:"", unique:true})
     name:string;
 
@@ -38,6 +40,9 @@ export class GamePart extends Document //Manche de jeux
 
     @Prop({type:Number,default:1})
     numberOfWord:Number
+
+    @Prop({enum:GameState,default:GameState.NO_START})
+    gameState:GameState;
 
     @Prop({type:Date,default:Date.now()})
     startDate:Date;

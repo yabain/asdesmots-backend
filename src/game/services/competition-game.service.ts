@@ -2,12 +2,13 @@ import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
 import { CompetitionGame, CompetitionGameDocument } from "../models";
-import { BadRequestException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
-import { ApplyGameWriteriaToGammeDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
+import { BadRequestException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
+import { ApplyGameWriteriaToGammeDTO, ChangeGameCompetitionStateDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { UsersService } from "src/user/services";
 import { GameWinnerCriteriaService } from "./game-winner-criteria.service";
 import { GameArcardeService } from "./game-arcarde.service";
 import { GameLevelService } from "src/gamelevel/services";
+import { GameState } from "../enum";
 
 @Injectable()
 export class CompetitionGameService extends DataBaseService<CompetitionGameDocument>
@@ -208,5 +209,43 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     {
         
     }
+
+    async changeGameCompetiton( changeGameStateDTO:ChangeGameCompetitionStateDTO)
+    {
+        let gameArcarde = await this.gameArcardeService.findOneByField({_id: changeGameStateDTO.gameArcardeID});
+        if(!gameArcarde) throw new NotFoundException({
+            statusCode:HttpStatus.NOT_FOUND,
+            error:'NotFound/GameCompetition-changestate',
+            message:[`Game arcarde not found`]   
+        })
+        let dateNow = new Date();
+        if( gameArcarde.gameState!=GameState.RUNNING ) throw new ForbiddenException({
+            statusCode:HttpStatus.FORBIDDEN,
+            error:'Forbidden/GameCompetition-changestate-start',
+            message:[`The state of the arcade must be in "In Progress" state for the competition to start`]  
+        })
+
+        let competition = gameArcarde.competitionGames.find((compet)=>compet.id==changeGameStateDTO.gameCompetitionID);
+        if(!competition) throw new NotFoundException({
+            statusCode:HttpStatus.NOT_FOUND,
+            error:'NotFound/GameCompetition-changestate-start',
+            message:[`The competition was not found`]  
+        })
+
+        if( changeGameStateDTO.state==GameState.RUNNING && (dateNow < competition.startDate ||  dateNow> competition.endDate)) throw new ForbiddenException({
+            statusCode:HttpStatus.FORBIDDEN,
+            error:'Forbidden/GameCompetition-changestate-start',
+            message:[`The current date does not correspond to the start and end date of the game`]  
+        })
+        else if(changeGameStateDTO.state==GameState.END && dateNow< gameArcarde.endDate) throw new ForbiddenException({
+            statusCode:HttpStatus.FORBIDDEN,
+            error:'Forbidden/GameCompetition-changestate-end',
+            message:[`The competition is over! it is no longer possible to start it`]  
+        })
+
+        // gameArcarde.competitionGames
+        competition.gameState=changeGameStateDTO.state;
+        return competition.update();        
+    } 
     
 } 

@@ -3,6 +3,7 @@ import mongoose, { Document, HydratedDocument } from "mongoose";
 import { CompetitionGame } from "./competition-game.schema";
 import { PlayerGameRegistration } from "./player-game-registration.schema";
 import { User } from "src/user/models";
+import { GameState } from "../enum";
 
 export type GameArcardeDocument = HydratedDocument<GameArcarde>
 
@@ -58,6 +59,10 @@ export class GameArcarde extends Document
 
     @Prop({type:Date,default:Date.now()})
     endRegistrationDate:Date;
+
+    @Prop({enum:GameState,default:GameState.NO_START})
+    gameState:GameState;
+
 
     @Prop({type:[{type:mongoose.Types.ObjectId,ref:PlayerGameRegistration.name}],default:[]})
     playerGameRegistrations:PlayerGameRegistration[];

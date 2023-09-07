@@ -7,6 +7,7 @@ import { GameWinnerCriteria } from "./game-winner-criteria.schema";
 import { GameWinner } from "./game-winner.schema";
 import { PlayerGameRegistration } from "./player-game-registration.schema";
 import { GameLevel } from "src/gamelevel/models";
+import { GameState } from "../enum";
 
 export type CompetitionGameDocument = HydratedDocument<CompetitionGame>
 
@@ -64,6 +65,9 @@ export class CompetitionGame extends Document
     @Prop({default:false})
     isStarted:Boolean;
 
+    @Prop({default:2})
+    minOfPlayers:Number;
+
     @Prop({default:1})
     maxOfWinners:Number;
 
@@ -84,6 +88,9 @@ export class CompetitionGame extends Document
 
     @Prop({type:mongoose.Types.ObjectId,ref:CompetitionGame.name,default:null})
     parentCompetition:CompetitionGame;
+
+    @Prop({enum:GameState,default:GameState.NO_START})
+    gameState:GameState;
 
     @Prop({enum:WordGameLevelLangType,default:WordGameLevelLangType.FR})
     lang:WordGameLevelLangType;

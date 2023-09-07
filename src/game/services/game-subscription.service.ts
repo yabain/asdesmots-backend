@@ -72,6 +72,8 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             let gameSubscription = await this.playerGameRegistrationService.create({player,localisation:gameSubscriptionDTO.localisation},session);
             let playerSubscription = await this.gameArcardeService.addSubscription(gameSubscription,game,session)
             game.playerGameRegistrations.push(gameSubscription);
+
+            //TODO Souscrire a un game en fonction de la localisation et du niveau
             await game.save({session});
             return playerSubscription;
         })
