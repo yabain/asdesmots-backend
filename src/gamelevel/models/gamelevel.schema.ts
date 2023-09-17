@@ -33,6 +33,9 @@ export class GameLevel extends Document
     @Prop({type:[{type:mongoose.Types.ObjectId,ref:WordGameLevel.name}],default:[]})
     words:WordGameLevel[]
 
+    @Prop({type:Number,default:1,unique:true})
+    level:number
+
     @Prop({default:Date.now(),required:true})
     createdAt:Date
 }

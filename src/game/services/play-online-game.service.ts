@@ -1,17 +1,19 @@
 import { BadRequestException, ForbiddenException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { Socket } from 'socket.io'
 import { GameState } from "../enum";
-import { CompetitionGame, GamePart, PlayerGameRegistration } from "../models";
+import { CompetitionGame, GamePart, GameRound, PlayerGameRegistration } from "../models";
 import { CompetitionGameService } from "./competition-game.service";
 import { JoinGameDTO } from "../dtos";
 import { ObjectId } from "mongoose";
 import { PlayerGameRegistrationService } from "./player-game-registration.service";
 import { GamePartService } from "./game-part.service";
 import { UtilsFunc } from "src/shared/utils/utils.func";
+import { GameRoundService } from "./game-round.service";
+import { GameLevelService } from "src/gamelevel/services";
 
 
 @Injectable()
-export class PlayGameService
+export class PlayOnlineGameService
 {
     games:Map<ObjectId,
         {
@@ -21,12 +23,17 @@ export class PlayGameService
                 client:Socket
             }[],
             gameParts:Map<ObjectId,GamePart>,
-            currentGamePartID:string,
+            currentGamePartID:ObjectId,
+            currentPlayerIndex:number,
+            gameRound:GameRound,
             playingPlayID?:string,
             gameGlobalState:GameState
         }>=new Map();
 
-    constructor(private gameCompetitionService:CompetitionGameService,private playerGameRegistration:PlayerGameRegistrationService, private gamePartService:GamePartService){}
+    constructor(private gameCompetitionService:CompetitionGameService,private playerGameRegistration:PlayerGameRegistrationService,
+          private gamePartService:GamePartService,
+          private gameRoundService:GameRoundService,
+          private gameLevelService:GameLevelService){}
 
     async joinGame(joinGame:JoinGameDTO,client:Socket)
     {
@@ -47,6 +54,8 @@ export class PlayGameService
                 players:[],
                 gameParts,
                 currentGamePartID:null,
+                currentPlayerIndex:-1,
+                gameRound:null,
                 gameGlobalState:GameState.WAITING_PLAYER
             }
             this.games.set(game.id,gameObject)
@@ -82,16 +91,14 @@ export class PlayGameService
             ...this.getListOfPlayerRegistration()
         };
     }
-    getListOfClients():Socket[]
+    getListOfClients()
     {
-        return Array.from(this.games.values()).map((games)=>games.players)
-        .reduce((prev,curr)=>[...prev,...curr.map((clt)=>clt.client)],[]);
+        return Array.from(this.games.values()).map((games)=>games.players).reduce((prev,curr)=>[...prev,...curr.map((clt)=>clt.client)],[]);
     }
 
-    getListOfPlayerRegistration():PlayerGameRegistration[]
+    getListOfPlayerRegistration()
     {
-        return Array.from(this.games.values()).map((g)=>g.players)
-        .reduce((prev,curr)=>[...prev,...curr.map((client)=>client.player)],[]);
+        return Array.from(this.games.values()).map((g)=>g.players).reduce((prev,curr)=>[...prev,...curr.map((client)=>client.player)],[]);
     }
 
     async startPart(gamePartID:ObjectId,competitionID:ObjectId)
@@ -111,5 +118,87 @@ export class PlayGameService
         foundGamePart.gameState=gameState;
         foundGamePart.startDate=gamePart.startDate;
         return { gameState }
+    }
+
+    async endPart(gamePartID:ObjectId,competitionID:ObjectId)
+    {
+        let gamePart = await this.gamePartService.findOneByField({_id:gamePartID});
+        if(!gamePart) throw new NotFoundException({
+            statusCode:HttpStatus.NOT_FOUND,
+            error:'NotFound/GamePart',
+            message:[`Game part not found`]
+        })
+
+        gamePart.gameState=GameState.END;
+        gamePart.endDate=new Date()
+        await gamePart.update();
+        let foundGamePart = this.games.get(competitionID).gameParts.get(gamePartID);
+        foundGamePart.gameState=GameState.END;
+        foundGamePart.startDate=gamePart.startDate;
+        UtilsFunc.emitMessage("game-statechange",
+                {gameState:GameState.END},this.getListOfClients()
+            )
+        return { gameState:GameState.END }
+    }
+
+    
+    async getNexPlayerWithWordAndLevel(competitionID)
+    {
+        //ici on doit selectionner le projet joeur, a jouer, le projet mot en fonction du type de compétition 
+        //et du niveau dumot
+        
+        //Selection du projet joueur
+        let competition = this.games.get(competitionID);
+        let gamePart = competition.gameParts.get(competition.currentGamePartID);
+        let gameRound=competition.gameRound;
+        competition.currentPlayerIndex++;
+
+        //Si c'est le dernier joueur du round
+        if(competition.currentPlayerIndex==competition.players.length)
+        {
+            //on a terminer ce round
+
+            //si c'est le dernier round On termine la partie
+            if(gamePart.gameRound.length-1==gameRound.step) 
+                return this.endPart(gamePart.id,competition.competition.id) 
+            else{
+                //si c'est pas le dernier Round alors on démarre un nouveau
+                let newGameRound = this.gameRoundService.createInstance({
+                    step:gameRound.step+1                    
+                })
+                newGameRound.gameLevel = await this.processNewGameLevel(competitionID,gamePart.id,newGameRound)
+                await newGameRound.save()
+            }
+        }
+        /**
+         *  {
+            competition:CompetitionGame,
+            players:{
+                player:PlayerGameRegistration,
+                client:Socket
+            }[],
+            gameParts:Map<ObjectId,GamePart>,
+            currentGamePartID:ObjectId,
+            currentPlayerIndex:number,
+            gameRound:GameRound,
+            playingPlayID?:string,
+            gameGlobalState:GameState
+        }
+         */
+    }
+
+    //On détecte le niveau du jeu
+    async processNewGameLevel(competitionID,gamePartID,gameRound:GameRound)
+    {
+        let competition = this.games.get(competitionID);
+        let gamePart = this.games.get(competitionID).gameParts.get(gamePartID);
+        if(competition.competition.isSinglePart && gameRound.step%2==0 && gameRound.step==0)
+        {
+            let newGameLevel = await this.gameLevelService.findOneByField({
+                level: gameRound.gameLevel.level+1
+            });
+            if(newGameLevel) return newGameLevel
+        }
+        return gameRound.gameLevel;
     }
 }

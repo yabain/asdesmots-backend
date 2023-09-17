@@ -34,7 +34,7 @@ $ npm install
 
 ## Running the app
 
-```bash
+```bcash
 # development
 $ npm run start
 
