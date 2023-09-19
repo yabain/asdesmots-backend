@@ -18,4 +18,9 @@ export class UtilsFunc
     {
       clients.forEach((client)=> client.emit(message,body))
     }
+
+    static purgeString(word:string)
+    {
+      return word.toLowerCase()
+    }
 }

@@ -73,7 +73,14 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             let playerSubscription = await this.gameArcardeService.addSubscription(gameSubscription,game,session)
             game.playerGameRegistrations.push(gameSubscription);
 
-            //TODO Souscrire a un game en fonction de la localisation et du niveau
+            let gameCompetition = game.competitionGames.find((competition)=>competition.localisation==gameSubscriptionDTO.localisation)
+            if(!gameCompetition) throw  new NotFoundException({
+                statusCode:HttpStatus.NOT_FOUND,
+                error:'NotFound/CompetitionGame-subscription',
+                message:[`Location-based gaming competition not found`]
+            })
+            gameSubscription.competition=gameCompetition;
+            await gameCompetition.save({session});
             await game.save({session});
             return playerSubscription;
         })

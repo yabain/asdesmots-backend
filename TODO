@@ -2,3 +2,4 @@
 -- Authentification par Tel/mot de passe
 -- Rénitilialiser le mot de passe en passant par code OTP envoyé par SMS
 -- Prendre en compte le nombre minimum de joeur par compétition
+-- Doit supprimer la compétition dans la liste des compétition dans le service PlayOnlineGameService

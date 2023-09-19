@@ -1,6 +1,6 @@
 import { WebSocketGateway, SubscribeMessage, MessageBody, ConnectedSocket } from "@nestjs/websockets";
 import { Socket } from 'socket.io'
-import { GameStartDTO, JoinGameDTO } from "../dtos";
+import { GameStartDTO, JoinGameDTO, PlayGameDTO } from "../dtos";
 import { PlayOnlineGameService } from "../services/";
 import { ForbiddenException } from "@nestjs/common";
 
@@ -37,6 +37,12 @@ export class GameGatewayWS
         } catch (error) {
             client.emit("join-game-error",error)
         }
+    }
+
+    @SubscribeMessage('game-play')
+    async playGame(@MessageBody() playGameDTO:PlayGameDTO, @ConnectedSocket() client:Socket)
+    {
+
     }
 
 }

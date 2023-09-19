@@ -24,14 +24,17 @@ export type PlayerGameRegistrationDocument = HydratedDocument<PlayerGameRegistra
 export class PlayerGameRegistration extends Document
 {
 
-    @Prop({default:0})
-    lifeGame:Number;
+    @Prop({default:3})
+    lifeGame:number;
 
     @Prop({default:false})
     hasLostGame:Boolean;
 
     @Prop({type:mongoose.Types.ObjectId,ref:User.name,default:null})
     player:User;    
+
+    @Prop({type:mongoose.Types.ObjectId,ref:"CompetitionGame",default:null})
+    competition:any
 
     @Prop({unique:true})
     localisation:string
