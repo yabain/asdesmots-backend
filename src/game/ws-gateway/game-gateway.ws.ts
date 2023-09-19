@@ -42,7 +42,7 @@ export class GameGatewayWS
     @SubscribeMessage('game-play')
     async playGame(@MessageBody() playGameDTO:PlayGameDTO, @ConnectedSocket() client:Socket)
     {
-
+        this.playGameService.gamePlay(playGameDTO)
     }
 
 }

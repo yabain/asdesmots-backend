@@ -75,4 +75,21 @@ Afin de compétir, chaque joueur doit adhérer a une partie qui été lancé (pa
 Si les conditions de démarrage d'une partie est compléte alors l'état de la parti passe a `running_game` pour signaler que partie a commencé. <br/> 
 Alors tous les participants recoivent une notification du type `game-statechange` avec pour corps celui précédent et dont le gameState est passé à `running_game`. <br/>
 Associer a célà, tous les joueurs précédement connecté recoivent une notification du type `new-player` avec pour corps la liste des utilisateurs dont le contenu est semblable au resultat de la requete  [Liste des utilisateurs](https://asdesmots-apidoc.yaba-in.com/#api-Authorization-get_list_of_users_by_roleId)
+
+## 3. Lancement du jeu
+Cette section décris entiérement le processus du jeu. Ce processus se ségement en plusieurs sous section:
+
+### a. Sélection d'un mot
+La sélection d'un mot consiste à selectionner un joueur et un mot en fonction du niveau du jeu et de communiquer le joeur sélection a tous les joueurs connecté. Pour ce faire l'évenement du type `game-play` et le contenu du corps est le suivant: 
+  ```Typescript
+   {
+        gameRound:GameRound, //du type GameRound qui correspond au round courrant
+        gameWord: wordGameLevel, //du type WordGameLevel // qui contient le mot sélectionné
+        player: User  //du type User
+    }
+  ```
+
+### b. Emission du mot par l'utilisateur
+L'émission du mot par l'utilisateur correspond au fait que l'utilisateur sélectionné saissi le mot dans le champs d'entré et envoi vers le serveur. dans ce cas l'évenement a appélé est `game-play` avec pour contenu du corps suivant:
+
 </p>
