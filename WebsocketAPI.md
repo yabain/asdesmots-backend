@@ -90,6 +90,18 @@ La sélection d'un mot consiste à selectionner un joueur et un mot en fonction 
   ```
 
 ### b. Emission du mot par l'utilisateur
-L'émission du mot par l'utilisateur correspond au fait que l'utilisateur sélectionné saissi le mot dans le champs d'entré et envoi vers le serveur. dans ce cas l'évenement a appélé est `game-play` avec pour contenu du corps suivant:
-
-</p>
+L'émission du mot par l'utilisateur correspond au fait que l'utilisateur sélectionné saissi le mot dans le champs d'entré et envoi vers le serveur. dans ce cas l'évenementà appélé est `game-play` avec pour contenu du corps suivant:
+ ```Typescript
+   {
+        competitionID:ObjectId, //Identifiant de la compétition
+        playerID: ObjectId, //Identifiant du joueur
+        word: string  //Mot saisi par l'utilisateur
+    }
+  ```
+Une fois le mot envoyé par l'utilisateur, le serveur traite le men fonction du mot correct qui est en interne et compare les mots sur plan orthographique.
+Dans l'éventualité ou l'orthographe n'est pas  correct, un du type `game-player-lifegame`
+ 
+ 
+ 
+ 
+ </p>

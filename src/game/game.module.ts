@@ -6,7 +6,7 @@ import { SharedModule } from "src/shared/shared.module";
 import { UserModule } from "src/user/user.module";
 import { GameArcardeController, GameCompetitionController, GamePartController, GameWinnerCriteriaController } from "./controllers";
 import { CompetitionGame, CompetitionGameSchema, GameArcarde, GameArcardeSchema, GamePart, GamePartSchema, GameRound, GameRoundSchema, GameWinner, GameWinnerCriteria, GameWinnerCriteriaSchema, GameWinnerSchema, PlayerGameRegistration, PlayerGameRegistrationSchema } from "./models";
-import { CompetitionGameService, GameArcardeService, GamePartService, GameWinnerCriteriaService, GameWinnerEvaluateService, PlayerGameRegistrationService,PlayOnlineGameService } from "./services";
+import { CompetitionGameService, GameArcardeService, GamePartService, GameRoundService, GameWinnerCriteriaService, GameWinnerEvaluateService, PlayerGameRegistrationService,PlayOnlineGameService } from "./services";
 import { GameSubscriptionService } from "./services/game-subscription.service";
 
 import { CommandModule } from "nestjs-command";
@@ -43,7 +43,8 @@ import { AddNewGameWinnerCriterialScript } from "./scripts";
         GamePartService,
         PlayerGameRegistrationService,
         GameWinnerEvaluateService,
-        AddNewGameWinnerCriterialScript
+        AddNewGameWinnerCriterialScript,
+        GameRoundService,
     ],
     exports:[
         CompetitionGameService,
@@ -51,7 +52,7 @@ import { AddNewGameWinnerCriterialScript } from "./scripts";
         GamePartService, 
         AddNewGameWinnerCriterialScript, 
         CommandModule,
-        PlayOnlineGameService
+        GameRoundService
     ]
 })
 export class GameModule{}
