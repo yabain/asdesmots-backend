@@ -245,7 +245,7 @@ export class PlayOnlineGameService
 
         //on passe au joueur suivant
         let newPlayerInfos = await this.getNexPlayerWithWordAndLevel(playGameDTO.competitionID)
-        if(newPlayerInfos==-1) await this.endPart(competition.currentGamePartID,competition.competition.id)
+        if(newPlayerInfos!=-1) await this.endPart(competition.currentGamePartID,competition.competition.id)
         return newPlayerInfos
    }
 }

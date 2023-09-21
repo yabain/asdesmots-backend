@@ -98,10 +98,18 @@ L'émission du mot par l'utilisateur correspond au fait que l'utilisateur sélec
         word: string  //Mot saisi par l'utilisateur
     }
   ```
-Une fois le mot envoyé par l'utilisateur, le serveur traite le men fonction du mot correct qui est en interne et compare les mots sur plan orthographique.
-Dans l'éventualité ou l'orthographe n'est pas  correct, un du type `game-player-lifegame`
- 
- 
- 
- 
+Une fois le mot envoyé par l'utilisateur, le serveur traite le mot fonction du mot correct qui est en interne et compare les mots sur plan orthographique.
+- Dans l'éventualité ou l'orthographe n'est pas  correct, un du type `game-player-lifegame` est envoyé a tous les utilisateurs afin de les prévenir de la modification de l'état du joueur avec pour corps le contenu suivant: 
+```Typescript
+{
+    player: PlayerGameRegistration, //joueur
+    lifeGame:Number //Vie restant du joueur
+}
+```
+ L'orsque le niveau de vie `lifeGame` tombe à 0, alors le joueur est rétiré de la partie
+- Dans l'éventualité où le mot est correct, alors rien n'est pas.
+
+Une fois cela fait, si la partie est terminé alors un évenemnt de type `game-statechange` est envoyé comme décris dans la partie ...     
+ Si a l'inverse la parti n'est pas terminé alors on lance un nouveau round avec un nouveau évenement `game-play` envoyé a tous les joueurs qui spécifie le joueur courant dont le contenu est décris dans la sectoin `3.a Sélection d'un mot` 
+
  </p>
