@@ -22,7 +22,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         private gameArcardeService:GameArcardeService,
         private gameLevelService:GameLevelService
         ){
-            super(competitionGameModel,connection,["gameLevel","gameParts","gameWinnerCriterias"]);
+            super(competitionGameModel,connection,["gameLevel","gameParts","gameWinnerCriterias","playerGameRegistrations"]);
     }  
 
     async createNewCompetition(createCompetitionGameDTO,gameArcardeID:string,session=null,game=null)//CreateCompetitionGameDTO
@@ -248,4 +248,15 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         return competition.update();        
     } 
     
+    async getListCompetitorSubscriptor(id:string)
+    {
+        let data = await this.findOneByField({"_id":id});
+        if(!data) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'GameCompetitionNotFound/GameCompetition',
+            message:[`Game compétition not found`]
+        })
+        return data.playerGameRegistrations
+
+    }
 } 

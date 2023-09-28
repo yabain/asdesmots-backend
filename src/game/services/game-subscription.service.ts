@@ -18,7 +18,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         private userService:UsersService,
         private playerGameRegistrationService:PlayerGameRegistrationService
     ){
-        super(gameArcardeModel,connection);
+        super(gameArcardeModel,connection,[]);
     }
 
     async addGameArcardeSubscription(gameSubscriptionDTO:PlayerSubscriptionDTO)
@@ -42,7 +42,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             message:[`Paid games not yet supported.`]
         })
 
-        if(game.maxPlayersNumber>=game.playerGameRegistrations.length) throw new BadRequestException({
+        if(game.maxPlayersNumber<=game.playerGameRegistrations.length) throw new BadRequestException({
             statusCode: HttpStatus.BAD_REQUEST,
             error:'MaxPlayer/GameArcarde-subscription',
             message:[`Maximum number of players already reached`]
@@ -54,15 +54,13 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             error:'NotFound/PlayerGame-subscription',
             message:[`Player not found`]
         })
-
-        let foundPlayer = game.playerGameRegistrations.findIndex((player)=>player.player.id==gameSubscriptionDTO.playerID)
+        let foundPlayer = game.playerGameRegistrations.findIndex((pl)=> pl.player._id.toString()==gameSubscriptionDTO.playerID)
         if(foundPlayer>=0) throw new BadRequestException({
             statusCode: HttpStatus.BAD_REQUEST,
             error:'AlreadyExists/GameArcarde-subscription',
             message:[`Player already subscribed to the game`]
         })
-
-        if(game.startRegistrationDate>(new Date()) || game.endRegistrationDate<(new Date())) throw new BadRequestException({
+        if(game.startRegistrationDate>(new Date()) || game.endRegistrationDate<(new Date()) ) throw new BadRequestException({
             statusCode: HttpStatus.BAD_REQUEST,
             error:'DateRegistration/GameArcarde-subscription',
             message:[`Unable to register player for this game because player registration date is not allowed for this game`]

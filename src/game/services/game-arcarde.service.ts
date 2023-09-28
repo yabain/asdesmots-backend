@@ -13,7 +13,7 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         @InjectModel(GameArcarde.name) gameArcardeModel: Model<GameArcardeDocument>,
         @InjectConnection() connection: mongoose.Connection
         ){
-            super(gameArcardeModel,connection,['competitionGames','competitionGames.gameWinnerCriterias']);
+            super(gameArcardeModel,connection,['competitionGames','competitionGames.gameWinnerCriterias','playerGameRegistrations','playerGameRegistrations.player']);
     }  
 
     async changeGameArcarde( changeGameStateDTO:ChangeGameArcardeStateDTO)
@@ -37,8 +37,9 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         })
 
         // gameArcarde.competitionGames
-        gameArcarde.gameState=changeGameStateDTO.state;
-        return gameArcarde.update();
+        // gameArcarde.gameState=changeGameStateDTO.state;
+        // console.log("changeGameArcarde ", gameArcarde,changeGameStateDTO)
+        return this.update({_id:changeGameStateDTO.gameArcardeID},{gameState:changeGameStateDTO.state}) //gameArcarde.update();
         
     } 
     async addSubscription(playerSubscription:PlayerGameRegistration,gameArcarde:GameArcarde,session=null)
@@ -93,8 +94,7 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
             error:'GameArcardeNotFound/GameArcarde',
             message:[`Game arcarde not found`]
         })
-
-        return data.competitionGames.map((competition)=> competition.playerGameRegistrations)
+        return data.playerGameRegistrations
 
     }
     

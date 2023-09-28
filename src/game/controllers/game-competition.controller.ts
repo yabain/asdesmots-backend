@@ -197,9 +197,9 @@ export class GameCompetitionController
 
     /**
      * 
-     * @api {get} /game-competition/subscriber/:id get game competition
+     * @api {get} /game-competition/subscriber/:id get game competition by subscriber id
      * @apiDescription get game competition by subscriber id
-     * @apiParam {String} user unique ID
+     * @apiParam {String} id user unique ID
      * @apiName Get game competition by subscriber id
      * @apiGroup Game Competition
      * @apiUse apiSecurity
@@ -236,13 +236,44 @@ export class GameCompetitionController
     @SecureRouteWithPerms()
     async getGameCompetitionBySubscriber(@Param("id",ObjectIDValidationPipe) id:string)
     {
+        console.log("id ",id)
         return {
             statusCode:HttpStatus.OK,
-            message:"Game competition details",
+            message:"Game competition subscriber details",
             data:await this.competitionGameService.findByField({"playerGameRegistrations.player.id":id})
         }
     }
 
+    /**
+     * @api {get} /game-competition/:id/subscription Obtention de la liste des souscripteur a une compétition
+     * @apidescription  Obtention de la liste des souscripteur a une compétition
+     * @apiName  Obtention de la liste des souscripteur a une compétition
+     * @apiParam {String} id Identifiant de compétition 
+     * @apiGroup Game Competition
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Object} data response data
+     * @apiSuccess (200 Ok) {String} data._id identifiant 
+     * @apiSuccess (200 Ok) {Number} data.lifeGame nombre de vie du joueur
+     * @apiSuccess (200 Ok) {Boolean} data.hasLostGame Est définis sur vrai si le joueur a déjà perdu la parti
+     * @apiSuccess (200 Ok) {String} data.player Identifiant du joueur. 
+     * @apiSuccess (200 Ok) {String} data.localisation zone de localisation  du jeu
+     * @apiSuccess (200 Ok) {Date} data.createdAt date e souscription du joueur a un jeu
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Get(":id/subscription")
+    async getSubscription(@Param("id",ObjectIDValidationPipe) id:string)
+    {
+        return {
+            statusCode:HttpStatus.CREATED,
+            message:"Get list of competition subscriptor",
+            data:await this.competitionGameService.getListCompetitorSubscriptor(id)
+        }
+    }
 
     /**
      * 

@@ -232,7 +232,7 @@ export class GameArcardeController
      * @apiSuccess (200 Ok) {String} data._id identifiant 
      * @apiSuccess (200 Ok) {Number} data.lifeGame nombre de vie du joueur
      * @apiSuccess (200 Ok) {Boolean} data.hasLostGame Est définis sur vrai si le joueur a déjà perdu la parti
-     * @apiSuccess (200 Ok) {User} data.player Information sur le joueur. la strucuture de l'object est le même que celui d'un utilisateur
+     * @apiSuccess (200 Ok) {String} data.player Indentifiant du joueur.
      * @apiSuccess (200 Ok) {String} data.localisation zone de localisation  du jeu
      * @apiSuccess (200 Ok) {Date} data.createdAt date e souscription du joueur a un jeu
      * 
