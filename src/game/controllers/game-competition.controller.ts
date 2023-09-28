@@ -3,13 +3,14 @@ import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { ApplyGameWriteriaToGammeDTO, ChangeGameCompetitionStateDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { GameCompetitionPerms } from "../enum";
-import { CompetitionGameService } from "../services";
+import { CompetitionGameService, PlayerGameRegistrationService } from "../services";
 
 @Controller("game-competition")
 export class GameCompetitionController
 {
     constructor(
-        private competitionGameService:CompetitionGameService
+        private competitionGameService:CompetitionGameService,
+        private playerGameSubscription:PlayerGameRegistrationService
     ){}
 
     /**
@@ -237,11 +238,12 @@ export class GameCompetitionController
     async getGameCompetitionBySubscriber(@Param("id",ObjectIDValidationPipe) id:string)
     {
         //To Debug
-        // console.log("id ", await this.competitionGameService.findAll())
+        // console.log("id ", id)
+        console.log("dqsdf ",await this.playerGameSubscription.findAll() )
         return {
             statusCode:HttpStatus.OK,
             message:"Game competition subscriber details",
-            data:await this.competitionGameService.findByField({"playerGameRegistrations.player":id})
+            data:await this.playerGameSubscription.findByField({"player.id":id})
         }
     }
 

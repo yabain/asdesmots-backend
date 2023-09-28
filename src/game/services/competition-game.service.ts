@@ -244,8 +244,9 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         })
 
         // gameArcarde.competitionGames
-        competition.gameState=changeGameStateDTO.state;
-        return competition.update();        
+        // competition.gameState=changeGameStateDTO.state;
+        return this.update({_id:changeGameStateDTO.gameCompetitionID},{gameState:changeGameStateDTO.state}) 
+        // return competition.update();        
     } 
     
     async getListCompetitorSubscriptor(id:string)

@@ -11,7 +11,7 @@ export class PlayerGameRegistrationService extends DataBaseService<PlayerGameReg
         @InjectModel(PlayerGameRegistration.name) playerGameRegistrationModel: Model<PlayerGameRegistrationDocument>,
         @InjectConnection() connection: mongoose.Connection
         ){
-            super(playerGameRegistrationModel,connection);
+            super(playerGameRegistrationModel,connection,["player"]);
     }  
     
 } 
