@@ -66,7 +66,7 @@ export class PlayOnlineGameService
         else  gameObject = this.games.get(joinGame.competitionID);
         let player = gameObject.players.find(player => player.player.id==joinGame.playerID);
         if(!player) {
-            player=await this.playerGameRegistration.findOneByField({"player.id":joinGame,localisation:joinGame.localisation,"competition.id":joinGame.competitionID});
+            player=await this.playerGameRegistration.findOneByField({"player.id":joinGame,"competition.id":joinGame.competitionID});
             if(!player) throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 error:'GameLocationNotFound/GameCompetition-joingame',

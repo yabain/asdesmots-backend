@@ -60,7 +60,6 @@ Afin de compétir, chaque joueur doit adhérer a une partie qui été lancé (pa
 
     playerID:ObjectId, //Identifiant du joueur
 
-    localisation:string //localisation de la compétiton
 }
 ```
 

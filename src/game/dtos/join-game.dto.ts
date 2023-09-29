@@ -8,7 +8,4 @@ export class JoinGameDTO
 
     @IsMongoId()
     playerID:ObjectId;
-
-    @IsString()
-    localisation:string;
 }

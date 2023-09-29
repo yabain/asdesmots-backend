@@ -29,7 +29,7 @@ export class GameGatewayWS
         }
     }
 
-    @SubscribeMessage('join-game')
+    @SubscribeMessage('join-game') 
     async joinGame(@MessageBody() joinGameDTO:JoinGameDTO, @ConnectedSocket() client:Socket)
     {
         try {            
