@@ -11,6 +11,7 @@ import { GameSubscriptionService } from "./services/game-subscription.service";
 
 import { CommandModule } from "nestjs-command";
 import { AddNewGameWinnerCriterialScript } from "./scripts";
+import { GameGatewayWS } from "./ws-gateway";
 
 @Module({
     controllers:[
@@ -45,6 +46,8 @@ import { AddNewGameWinnerCriterialScript } from "./scripts";
         GameWinnerEvaluateService,
         AddNewGameWinnerCriterialScript,
         GameRoundService,
+        PlayOnlineGameService,
+        GameGatewayWS
     ],
     exports:[
         CompetitionGameService,
