@@ -4,7 +4,11 @@ import { GameStartDTO, JoinGameDTO, PlayGameDTO } from "../dtos";
 import { PlayOnlineGameService } from "../services/";
 import { ForbiddenException } from "@nestjs/common";
 
-@WebSocketGateway({namespace:'asdesmots'})
+@WebSocketGateway({
+    cors: {
+      origin: '*',
+    },
+  })
 export class GameGatewayWS
 {
     constructor(private playGameService:PlayOnlineGameService){}
