@@ -68,7 +68,7 @@ export class GameArcardeController
                         level:0,
                         isSinglePart:false,
                         canRegisterPlayer:createGameArcardeDTO.canRegisterPlayer,
-                        localisation:"",
+                        localisation:createGameArcardeDTO.localisation,
                         maxPlayerLife:0,
                         startDate:createGameArcardeDTO.startDate,
                         endDate:createGameArcardeDTO.endDate,

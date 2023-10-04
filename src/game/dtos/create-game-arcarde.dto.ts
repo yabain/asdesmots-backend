@@ -12,6 +12,7 @@ import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, Max, MaxLength, Min,
  * @apiBody {Number} maxPlayersNumber  Maximum number of player
  * @apiBody {Date} startDate game start date
  * @apiBody {Date} endDate game end date
+ * @apiBody {String} localisation  competition location area
  * @apiBody {Date} startRegistrationDate game registration start date
  * @apiBody {Date} endRegistrationDate game registration end date
  */
@@ -43,6 +44,12 @@ export class CreateGameArcardeDTO
     @Min(1)
     maxPlayersNumber:Number;
 
+    
+    @IsString()
+    @MinLength(4)
+    @MaxLength(65)
+    localisation:String
+    
     @Transform(({value})=> value && new Date(value))
     @IsDate()
     startDate:Date;
