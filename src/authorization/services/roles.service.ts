@@ -20,27 +20,26 @@ export class RolesService extends DataBaseService<RoleDocument>
   }
 
   async assignPermissionToRole(addPermissionToRole: AssignPermissionRoleDTO) {
+
+
     let role = await this.findOneByField({ "_id": addPermissionToRole.roleId });
     if (!role) throw new BadRequestException({
       statusCode: HttpStatus.BAD_REQUEST,
       error: 'Role Error',
       message: ["Role not found"]
     });
-    
+
     // New fonctionnality
-    await Promise.all(addPermissionToRole.permissionId.map(async (permissionID) => {
+    let permsToUpdate = await Promise.all(addPermissionToRole.permissionId.map(async (permissionID) => {
       let perm = await this.permissionService.findOneByField({ "_id": permissionID });
       if (!perm) throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         error: 'Permission Error',
         message: ["Permission not found"]
       });
-      
-      // find existe permission
-      let foundperm = role.permissions.find((existpern) => existpern._id == perm);
-      if(!foundperm) return role.permissions.push(perm)
-        return await this.delete(foundperm);
+      return Promise.resolve(perm);
     }));
+    role.permissions = [...permsToUpdate];
     return role.save();
   }
 
