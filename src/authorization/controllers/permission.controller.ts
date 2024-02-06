@@ -20,7 +20,7 @@ export class PermissionController
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
      * @apiSuccess (200 Ok) {Array} data response data
-     * @apiSuccess (200 Ok) {String} data.permission._id Permission id
+     * @apiSuccess (200 Ok) {String} data._id Permission id
      * @apiSuccess (200 Ok) {String} data.permission.name Permission name
      * @apiSuccess (200 Ok) {String} data.permission.description Permission description
      * @apiSuccess (200 Ok) {String} data.permission.name Permission name
