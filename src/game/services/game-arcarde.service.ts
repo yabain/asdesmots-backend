@@ -97,5 +97,17 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         return data.playerGameRegistrations
 
     }
+
+    // delete arcarde
+    async deleteArcardeByID(id: string)
+    {
+        let arcadeFound = await this.findOneByField({"_id":id});
+        if(!arcadeFound) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'GameArcardeNotFound/GameArcarde',
+            message:[`Game arcarde not found`]
+        })
+        return await this.delete(id);
+    }
     
 } 

@@ -380,4 +380,26 @@ export class GameArcardeController
             message:"user unregistration with success"
         }
     }
+
+    /**
+     * @api {delete} /game-arcarde/:id delete arcarde
+     * @apidescription delete arcarde by id
+     * @apiParam {String} id Game Arcarde unique ID
+     * @apiName delete game arcarde by ID
+     * @apiGroup Game Arcarde
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiUse apiError
+     */
+    @Delete(":id")
+    async DeleteArcarde(@Param("id") id:string){
+        await this.gameArcardeService.deleteArcardeByID(id);
+        return {
+            statusCode:HttpStatus.OK,
+            message:"Arcarde removal completed successfully"
+        }
+    }
 }
