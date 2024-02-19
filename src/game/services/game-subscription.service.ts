@@ -102,7 +102,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
             message:[`Player not found`]
         })
 
-        let foundPlayer = game.playerGameRegistrations.findIndex((player)=>player.player.id==gameSubscriptionDTO.playerID)
+        let foundPlayer = game.playerGameRegistrations.findIndex((player)=>player.player._id==gameSubscriptionDTO.playerID)
         if(foundPlayer<0) throw new BadRequestException({
             statusCode: HttpStatus.BAD_REQUEST,
             error:'NotFound/PlayerGameRegistration-unsubscription',
