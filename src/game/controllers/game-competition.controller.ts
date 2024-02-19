@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Param, Post, Put, Delete, Query, ParseArrayPipe } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { ApplyGameWriteriaToGammeDTO, ChangeGameCompetitionStateDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
@@ -65,9 +65,9 @@ export class GameCompetitionController
     }
 
     /**
-     * @api {put} /game-competition/apply-criteria Apply a game winning criteria list to a game
-     * @apidescription Apply a game winning criteria list to a game
-     * @apiName Apply list of winning criteria to a game
+     * @api {put} /game-competition/apply-criteria Apply a game winning criteria to a game
+     * @apidescription Apply a game winning criteria to a game
+     * @apiName Apply a winning criteria to a game
      * @apiGroup Game Competition
      * @apiUse ApplyGameWriteriaToGammeDTO
      * @apiUse apiSecurity
@@ -119,11 +119,10 @@ export class GameCompetitionController
     }
 
     /**
-     * @api {delete} /game-competition/remove-criteria Remove a game winning criteria list to a game
-     * @apidescription Remove a game winning criteria list to a game
-     * @apiName Remove list of winning criteria to a game
+     * @api {delete} /game-competition/remove-criteria/:gameId/:gameWinnerCriteriasId Remove a game winning criteria to a game
+     * @apidescription Remove a game winning criteria from a list of criterion of a game
+     * @apiName Remove a game winning criteria from a list of criterion of a game 
      * @apiGroup Game Competition
-     * @apiUse ApplyGameWriteriaToGammeDTO
      * @apiUse apiSecurity
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
@@ -137,15 +136,24 @@ export class GameCompetitionController
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
      * @apiUse apiError
      */
-    @Put("remove-criteria")
-    async removeGameWriteriaToGamme(@Body() applyGameWriteriaToGammeDTO:ApplyGameWriteriaToGammeDTO)
+    @Delete('remove-criteria/:gameId/:gameWinnerCriteriasId')
+    async removeGameWriteriaToGamme( 
+        @Param('gameId', ObjectIDValidationPipe) gameId: string, 
+        @Param('gameWinnerCriteriasId', ObjectIDValidationPipe) gameWinnerCriteriasId: string
+    )
     {
-        await this.competitionGameService.removeCriteriaToGame(applyGameWriteriaToGammeDTO);
+        const objectReceiveFromFrontend = {
+            gameID: gameId,
+            gammeWinnersID: gameWinnerCriteriasId
+        }
+        
         return {
             statusCode:HttpStatus.OK,
             message:"Criterion winner of a competition withdraw successfully",
+            data: await this.competitionGameService.removeCriteriaToGame(objectReceiveFromFrontend)
         }
     }
+    
 
     /**
      * 
@@ -325,6 +333,5 @@ export class GameCompetitionController
             data:await this.competitionGameService.findOneByField({"_id":id})
         }
     }
-
 
 }

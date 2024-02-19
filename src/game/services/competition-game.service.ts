@@ -167,42 +167,51 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     {
         let gameCompetition = await this.findOneByField({_id:applyGameWriteriaToGammeDTO.gameID});
         if(!gameCompetition) throw new BadRequestException({
-            statusCode: HttpStatus.BAD_REQUEST,
+            statusCode: HttpStatus.NOT_FOUND,
             error:'GameCompetitionNotFound/GameCompetition',
             message:[`Game competition not found`]
         })
+        console.log(gameCompetition);
 
-        await Promise.all(applyGameWriteriaToGammeDTO.gammeWinnersID.map(async (gameCriteriaID)=>{
-            let gameCriteria = await this.gameWinnerCriteriaService.findOneByField({_id:gameCriteriaID});
-            if(!gameCriteria) throw new BadRequestException({
-                statusCode: HttpStatus.BAD_REQUEST,
+        let criteriaExist = await gameCompetition.gameWinnerCriterias.find((id) => id._id.toString() == applyGameWriteriaToGammeDTO.gammeWinnersID);
+        console.log(criteriaExist);
+        if(criteriaExist) {
+            throw new BadRequestException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:'GameCriteria/AlreadyExiste',
+            message:[`Game criteria already exist`]
+            })
+        }else{
+            let winnerCriteria = await this.gameWinnerCriteriaService.findOneByField({_id: applyGameWriteriaToGammeDTO.gammeWinnersID})
+            console.log(winnerCriteria);
+            if(!winnerCriteria) {throw new BadRequestException({
+                statusCode: HttpStatus.NOT_FOUND,
                 error:'GameCriteriaNotFound/GameCompetition',
                 message:[`Game criteria not found`]
-            })
-            let foundCriteria = gameCompetition.gameWinnerCriterias.find((winnerCriterias)=> winnerCriterias.id==gameCriteria)
-            if(!foundCriteria) return gameCompetition.gameWinnerCriterias.push(gameCriteria);
-            throw new BadRequestException({
-                statusCode: HttpStatus.BAD_REQUEST,
-                error:'GameCriteria/AlreadyExiste',
-                message:[`Game criteria already existe`,`data: ${gameCriteriaID}`]
-            })
-        }))
-        return gameCompetition.save();
+            })} else{
+                await gameCompetition.gameWinnerCriterias.push(winnerCriteria);
+                return gameCompetition.save();
+            }
+        }
+
     }
 
-    async removeCriteriaToGame(applyGameWriteriaToGammeDTO: ApplyGameWriteriaToGammeDTO) {
-        let gameCompetition = await this.findOneByField({_id:applyGameWriteriaToGammeDTO.gameID});
+    async removeCriteriaToGame(objectReceiveFromFrontend) {
+        let gameCompetition = await this.findOneByField({_id:objectReceiveFromFrontend.gameID});
         if(!gameCompetition) throw new BadRequestException({
             statusCode: HttpStatus.BAD_REQUEST,
             error:'GameCompetitionNotFound/GameCompetition',
             message:[`Game competition not found`]
         })
 
-        applyGameWriteriaToGammeDTO.gammeWinnersID.map((gameCriterieaID)=>{
-            let gameCriteriaIndex=gameCompetition.gameWinnerCriterias.findIndex((criteriaID)=>criteriaID.id==gameCriterieaID);
-            if(gameCriteriaIndex>-1) gameCompetition.gameWinnerCriterias.splice(gameCriteriaIndex,1);
-        })
-        return gameCompetition.save() 
+        let gameCriteriaIndex = await gameCompetition.gameWinnerCriterias.findIndex((id)=> id._id.toString() == objectReceiveFromFrontend.gammeWinnersID)
+        if(gameCriteriaIndex > -1) {
+            await gameCompetition.gameWinnerCriterias.splice(gameCriteriaIndex, 1);
+        } else {
+            console.log('Critere introuvable')
+        }
+        
+        return gameCompetition.save();
     }
     
     async addSubscription()

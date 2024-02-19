@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Put } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Param, Put, Delete } from "@nestjs/common";
 import { CompetitionGameService, GameWinnerCriteriaService } from "../services";
 import { ApplyGameWriteriaToGammeDTO } from "../dtos";
 
@@ -68,6 +68,5 @@ export class GameWinnerCriteriaController
         }
         
     }
-
     
 }
