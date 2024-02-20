@@ -44,7 +44,7 @@ export class CreateGameArcardeDTO
     @Min(1)
     maxPlayersNumber:Number;
 
-    
+    @IsOptional()
     @IsString()
     @MinLength(4)
     @MaxLength(65)
