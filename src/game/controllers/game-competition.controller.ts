@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { ApplyGameWriteriaToGammeDTO, ChangeGameCompetitionStateDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
@@ -137,7 +137,7 @@ export class GameCompetitionController
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
      * @apiUse apiError
      */
-    @Put("remove-criteria")
+    @Delete("remove-criteria/:comptitionID/:gameCriterialId")
     async removeGameWriteriaToGamme(@Body() applyGameWriteriaToGammeDTO:ApplyGameWriteriaToGammeDTO)
     {
         await this.competitionGameService.removeCriteriaToGame(applyGameWriteriaToGammeDTO);
