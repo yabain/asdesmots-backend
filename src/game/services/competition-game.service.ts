@@ -214,6 +214,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         return gameCompetition.save();
     }
     
+    
     async addSubscription()
     {
         
@@ -268,5 +269,30 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         })
         return data.playerGameRegistrations
 
+    }
+
+    async getListCompetitionParticipants(id:string){
+
+        const listPlayer = [];
+        let competition = await this.findOneByField({"_id":id});
+        if(!competition) throw new BadRequestException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:'GameCompetitionNotFound/GameCompetition',
+            message:[`Game compétition not found`]
+        })
+        
+        for (let playerGameRegistration of competition.playerGameRegistrations){
+
+            let user = await this.usersService.findOneByField({_id: playerGameRegistration.player});
+            if(!user) throw new BadRequestException({
+                statusCode: HttpStatus.NOT_FOUND,
+                error:'PlayerNotFound/GameCompetition',
+                message:[`Player of that game competition not found`]
+            })
+            listPlayer.push(user);
+        }
+
+        console.log('list Of Player :', listPlayer);
+        return listPlayer;
     }
 } 

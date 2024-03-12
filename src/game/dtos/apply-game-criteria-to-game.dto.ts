@@ -11,6 +11,7 @@ export class ApplyGameWriteriaToGammeDTO
     @IsMongoId()
     gameID:ObjectId;
 
-    @IsMongoId()
+    @IsMongoId({each:true})
+    @ArrayMinSize(1)
     gammeWinnersID:ObjectId;  
 }

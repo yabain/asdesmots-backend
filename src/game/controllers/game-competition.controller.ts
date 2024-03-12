@@ -67,7 +67,7 @@ export class GameCompetitionController
     /**
      * @api {put} /game-competition/apply-criteria Apply a game winning criteria to a game
      * @apidescription Apply a game winning criteria to a game
-     * @apiName Apply a winning criteria to a game
+     * @apiName Apply winning criteria to a game
      * @apiGroup Game Competition
      * @apiUse ApplyGameWriteriaToGammeDTO
      * @apiUse apiSecurity
@@ -80,7 +80,7 @@ export class GameCompetitionController
      * @apiSuccess (200 Ok) {Date} data.createdAt Creation date of the winning criteria
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
-     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiError (Error 4xx) 404-NotFound Game Competition not found
      * @apiUse apiError
      */
     @Put("apply-criteria")
@@ -126,14 +126,9 @@ export class GameCompetitionController
      * @apiUse apiSecurity
      * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
      * @apiSuccess (200 Ok) {String} Response Description
-     * @apiSuccess (200 Ok) {Object} data response Array
-     * @apiSuccess (200 Ok) {String} data.name  Winner criteria name
-     * @apiSuccess (200 Ok) {String} data.description Winner criteria description
-     * @apiSuccess (200 Ok) {String} data.gameWinnerCriteriaType Winner criteria type
-     * @apiSuccess (200 Ok) {Date} data.createdAt Creation date of the winning criteria
      * 
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
-     * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
+     * @apiError (Error 4xx) 404-NotFound Game Competition not found
      * @apiUse apiError
      */
     @Delete('remove-criteria/:gameId/:gameWinnerCriteriasId')
@@ -146,11 +141,12 @@ export class GameCompetitionController
             gameID: gameId,
             gammeWinnersID: gameWinnerCriteriasId
         }
+
+        await this.competitionGameService.removeCriteriaToGame(objectReceiveFromFrontend)
         
         return {
             statusCode:HttpStatus.OK,
-            message:"Criterion winner of a competition withdraw successfully",
-            data: await this.competitionGameService.removeCriteriaToGame(objectReceiveFromFrontend)
+            message:"Criterion winner of a competition withdraw successfully"
         }
     }
     
@@ -333,5 +329,39 @@ export class GameCompetitionController
             data:await this.competitionGameService.findOneByField({"_id":id})
         }
     }
+
+    /**
+     * 
+     * @api {get} /game-competition/participants/:id get list participants of a game competition
+     * @apiDescription get all the participants of a game competition by id 
+     * @apiParam {String} id Game competition unique ID
+     * @apiName Get list participants of a game competition
+     * @apiGroup Game Competition
+     * @apiUse apiSecurity
+     * @apiUse apiDefaultResponse
+     * @apiPermission GameCompetitionPerms.OWNER
+     * 
+     * @apiSuccess (200 Ok) {Number} statusCode status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {User[]} data response data
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token
+     * @apiError (Error 4xx) 404-NotFound Game Competition not found/User not found
+     * @apiUse apiError
+     * 
+    */
+    
+    @Get("/participants/:id")
+    @SecureRouteWithPerms()
+    async getListParticipants(@Param("id", ObjectIDValidationPipe) id: string)
+    {
+
+        return {
+            statusCode:HttpStatus.OK,
+            message:"List of participants of a competition game",
+            data: await this.competitionGameService.getListCompetitionParticipants(id)
+        }
+    }
+
 
 }
