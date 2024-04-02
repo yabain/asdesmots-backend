@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, NotFoundException, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, NotFoundException, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { UserJwtAuthGuard } from "src/user/guards";
@@ -240,7 +240,6 @@ export class RoleController
      * @api {post} /roles/add-user Add a list of role to a user
      * @apidescription Add a list role to a user
      * @apiName AddRoleToUser
-     * @apiGroup AddRoleUser
      * @apiGroup Authorization
      * @apiUse AddRoleUserDTO
      * @apiUse apiSecurity
@@ -259,6 +258,41 @@ export class RoleController
         return {
             statusCode:HttpStatus.CREATED,
             message:"Assign role to user successfully"
+        }
+    }
+
+    /**
+     * @api {put} /roles/update-role/:roleID Update a role by Id 
+     * @apidescription Update a role by Id 
+     * @apiName UpdateRole
+     * @apiGroup Authorization
+     * @apiUse CreateRoleDTO
+     * @apiParam {String} id Role unique ID
+     * @apiSuccess (200 OK) {Number} statusCode HTTP status code
+     * @apiSuccess (200 OK) {String} Response Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound Role not found
+     * @apiUse apiError
+
+     */
+    @Put("update-role/:roleID")
+    async updateRole(
+        @Param('roleID', ObjectIDValidationPipe) roleID: string,
+        @Body() updateRoleDTO: CreateRoleDTO
+    ) 
+    {
+        let role = this.roleService.findOneByField({"_id": roleID})
+        if (!role) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error: 'role Error',
+            message: ["role not found"]
+        });
+
+        (await role).update(updateRoleDTO)
+        return {
+            statusCode:HttpStatus.OK,
+            message:'Role update completed successfully'
         }
     }
 
@@ -289,10 +323,9 @@ export class RoleController
     }
 
     /**
-     * @api {delete} /roles/remove-user Remove a role to a user
+     * @api {delete} /roles/remove-user/userId/roleId Remove a role to a user
      * @apidescription Add a role to a user
      * @apiName RemoveRoleToUser
-     * @apiUse AddRoleUserDTO
      * @apiGroup Authorization
      * @apiUse apiSecurity
      * @apiSuccess (201 Created) {Number} statusCode HTTP status code
@@ -302,10 +335,18 @@ export class RoleController
      * @apiError (Error 4xx) 404-NotFound User not found
      * @apiUse apiError
      */
-    @Delete("remove-user")
-    async removeRoleToUser(@Body() addRoleToUserDTO:AssignUserRoleDTO)
+    @Delete("remove-user/:userId/:roleId")
+    async removeRoleToUser(
+        @Param('userId', ObjectIDValidationPipe) userId: string,
+        @Param('roleId', ObjectIDValidationPipe) roleId: string
+    )
     {
-        await this.roleService.removeRoleToUser(addRoleToUserDTO)
+        const objectReceiveFromFrontend = {
+            userId: userId,
+            roleId: roleId
+        }
+
+        await this.roleService.removeRoleToUser(objectReceiveFromFrontend)
         return {
             statusCode:HttpStatus.CREATED,
             message:"Remove role to user successfully"
