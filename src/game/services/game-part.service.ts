@@ -15,7 +15,7 @@ export class GamePartService extends DataBaseService<GamePartDocument>
         private gameCompetitionService:CompetitionGameService,
         private gameLevelService:GameLevelService
         ){
-            super(gamePartModel,connection);
+            super(gamePartModel,connection,['gameLevel']);
     } 
     
     async createNewGamePart(createGamePartDTO:CreateGamePartDTO)
@@ -73,6 +73,7 @@ export class GamePartService extends DataBaseService<GamePartDocument>
             error:'NotFound/GamePart-GameCompetition',
             message:[`Competition not found`]
         }) 
+        
         return gameCompetition.gameParts;
     }
     

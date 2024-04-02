@@ -237,13 +237,10 @@ export class GameCompetitionController
     @SecureRouteWithPerms()
     async getGameCompetitionBySubscriber(@Param("id",ObjectIDValidationPipe) id:string)
     {
-        //To Debug
-        // console.log("id ", id)
-        console.log("dqsdf ",await this.playerGameSubscription.findAll() )
         return {
             statusCode:HttpStatus.OK,
             message:"Game competition subscriber details",
-            data:await this.playerGameSubscription.findByField({"player.id":id})
+            data:await this.playerGameSubscription.findByField({"player._id":id})
         }
     }
 

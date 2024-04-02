@@ -115,7 +115,8 @@ export class PlayOnlineGameService
             error:'NotFound/GamePart',
             message:[`Game part not found`]
         })
-
+        
+        // TODO check game state
         let gameState = this.games.get(competitionID).gameGlobalState
         gamePart.gameState=gameState;
         gamePart.startDate=new Date()
