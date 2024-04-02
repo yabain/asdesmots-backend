@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable } from "@nestjs/common";
+import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose"
 import mongoose, { Model } from "mongoose";
 import { Role, RoleDocument } from "../models";
@@ -60,7 +60,6 @@ export class RolesService extends DataBaseService<RoleDocument>
         return role.save();
     }
 
-
     async addRoleToUser(addRoleToUserDTO:AssignUserRoleDTO)
     {
         let user = await this.usersService.findOneByField({"_id":addRoleToUserDTO.userId});
@@ -69,16 +68,75 @@ export class RolesService extends DataBaseService<RoleDocument>
             error:'Role Error',
             message:["User not found"]
           });
-        let role = await this.findOneByField({"_id":addRoleToUserDTO.roleId});
-        if(!role) throw new BadRequestException({
+
+        let roleTableForUpdate = new Array<Role>;
+        for(let roleId of addRoleToUserDTO.roleId){
+
+          let role = await this.findOneByField({"_id":roleId});
+
+          if(!role) {
+            throw new BadRequestException({
             statusCode:HttpStatus.BAD_REQUEST,
             error:'Role Error',
             message:["Role not found"]
-          });
-
-          user.roles.push(role);
-          return user.save();
+            })
+          }else{
+            roleTableForUpdate.push(role);
+          }
+      }
+      user.roles = [];
+      for (let roleId of roleTableForUpdate){
+        user.roles.push(roleId);
+      }
+      return user.save();
     }
+
+//     async addRoleToUser(addRoleToUserDTO: AssignUserRoleDTO)
+//     {
+//       try {
+//         let user = await this.usersService.findOneByField({"_id":addRoleToUserDTO.userId});
+//         if(!user) throw new BadRequestException({
+//             statusCode:HttpStatus.BAD_REQUEST,
+//             error:'Role Error',
+//             message:["User not found"]
+//           });
+//         let roles = await this.findOneByField({"_id":{ $in: addRoleToUserDTO.roleId}});
+//         if (!Array.isArray(roles)) {
+//           throw new TypeError('La valeur de "roles" n\'est pas un tableau.');
+//         }
+    
+//         const missingRoleIds: string[] = [];
+    
+//         // Vérification de l'existence de tous les rôles
+//         roles.forEach((role) => {
+//           if (!addRoleToUserDTO.roleId.includes(role._id.toString())) {
+//             missingRoleIds.push(role._id.toString());
+//           }
+//         });
+    
+//         if (missingRoleIds.length > 0) {
+//           throw new NotFoundException({
+//             message: `Rôles introuvables avec les IDs: ${missingRoleIds.join(', ')}`,
+//           });
+//         }
+    
+//         // Association des rôles à l'utilisateur
+//         user.roles = roles.map((role) => role._id);
+//         await user.save();
+//       }catch(error) {
+// // Gestion des erreurs spécifiques
+//         if (error instanceof NotFoundException) {
+//           throw error;
+//         } else if (error instanceof TypeError) {
+//             throw new InternalServerErrorException({
+//             message: 'An error occurred while accessing the database.',
+//           });
+//         } else {
+//           throw error;
+//         }
+//       }
+       
+//     }
 
     async removeRoleToUser(removeRoleToUserDTO:AssignUserRoleDTO)
     {

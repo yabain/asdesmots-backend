@@ -247,6 +247,8 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
             error:'Forbidden/GameCompetition-changestate-start',
             message:[`The current date does not correspond to the start and end date of the game`]  
         })
+
+        // TODO A REVOIR
         else if(changeGameStateDTO.state==GameState.END && dateNow< gameArcarde.endDate) throw new ForbiddenException({
             statusCode:HttpStatus.FORBIDDEN,
             error:'Forbidden/GameCompetition-changestate-end',

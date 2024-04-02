@@ -67,6 +67,7 @@ export class PlayOnlineGameService
         let player = gameObject.players.find(player => player.player.id==joinGame.playerID);
         if(!player) {
             player=await this.playerGameRegistration.findOneByField({"player.id":joinGame,"competition.id":joinGame.competitionID});
+            // TODO A REVOIR
             if(!player) throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 error:'GameLocationNotFound/GameCompetition-joingame',
@@ -137,6 +138,7 @@ export class PlayOnlineGameService
         })
 
         gamePart.gameState=GameState.END;
+        // TODO A REVOIR
         gamePart.endDate=new Date()
         await gamePart.update();
         let foundGamePart = this.games.get(competitionID).gameParts.get(gamePartID);
