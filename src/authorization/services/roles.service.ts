@@ -60,100 +60,44 @@ export class RolesService extends DataBaseService<RoleDocument>
         return role.save();
     }
 
-    async addRoleToUser(addRoleToUserDTO:AssignUserRoleDTO)
+    async addRoleToUser(addRoleToUserDTO: AssignUserRoleDTO)
     {
-        let user = await this.usersService.findOneByField({"_id":addRoleToUserDTO.userId});
-        if(!user) throw new BadRequestException({
-            statusCode:HttpStatus.BAD_REQUEST,
-            error:'Role Error',
-            message:["User not found"]
+      let user = await this.usersService.findOneByField({"_id":addRoleToUserDTO.userId});
+      if(!user) throw new BadRequestException({
+          statusCode:HttpStatus.BAD_REQUEST,
+          error:'Role Error',
+          message:["User not found"]
+        });
+
+        let roleTableForUpdate = await Promise.all(addRoleToUserDTO.roleId.map(async (roleID) => {
+          let role = await this.findOneByField({ "_id": roleID });
+          if (!role) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error: 'role Error',
+            message: ["role not found"]
           });
-
-        let roleTableForUpdate = new Array<Role>;
-        for(let roleId of addRoleToUserDTO.roleId){
-
-          let role = await this.findOneByField({"_id":roleId});
-
-          if(!role) {
-            throw new BadRequestException({
-            statusCode:HttpStatus.BAD_REQUEST,
-            error:'Role Error',
-            message:["Role not found"]
-            })
-          }else{
-            roleTableForUpdate.push(role);
-          }
-      }
-      user.roles = [];
-      for (let roleId of roleTableForUpdate){
-        user.roles.push(roleId);
-      }
-      return user.save();
+          return Promise.resolve(role);
+        }));
+        user.roles = [...roleTableForUpdate];
+        return user.save();
     }
 
-//     async addRoleToUser(addRoleToUserDTO: AssignUserRoleDTO)
-//     {
-//       try {
-//         let user = await this.usersService.findOneByField({"_id":addRoleToUserDTO.userId});
-//         if(!user) throw new BadRequestException({
-//             statusCode:HttpStatus.BAD_REQUEST,
-//             error:'Role Error',
-//             message:["User not found"]
-//           });
-//         let roles = await this.findOneByField({"_id":{ $in: addRoleToUserDTO.roleId}});
-//         if (!Array.isArray(roles)) {
-//           throw new TypeError('La valeur de "roles" n\'est pas un tableau.');
-//         }
-    
-//         const missingRoleIds: string[] = [];
-    
-//         // Vérification de l'existence de tous les rôles
-//         roles.forEach((role) => {
-//           if (!addRoleToUserDTO.roleId.includes(role._id.toString())) {
-//             missingRoleIds.push(role._id.toString());
-//           }
-//         });
-    
-//         if (missingRoleIds.length > 0) {
-//           throw new NotFoundException({
-//             message: `Rôles introuvables avec les IDs: ${missingRoleIds.join(', ')}`,
-//           });
-//         }
-    
-//         // Association des rôles à l'utilisateur
-//         user.roles = roles.map((role) => role._id);
-//         await user.save();
-//       }catch(error) {
-// // Gestion des erreurs spécifiques
-//         if (error instanceof NotFoundException) {
-//           throw error;
-//         } else if (error instanceof TypeError) {
-//             throw new InternalServerErrorException({
-//             message: 'An error occurred while accessing the database.',
-//           });
-//         } else {
-//           throw error;
-//         }
-//       }
-       
-//     }
-
-    async removeRoleToUser(removeRoleToUserDTO:AssignUserRoleDTO)
+    async removeRoleToUser(objectReceiveFromFrontend)
     {
-        let user = await this.usersService.findOneByField({"_id":removeRoleToUserDTO.userId});
+        let user = await this.usersService.findOneByField({"_id": objectReceiveFromFrontend.userId});
         if(!user) throw new BadRequestException({
             statusCode:HttpStatus.BAD_REQUEST,
             error:'Role Error',
             message:["User not found"]
           });
-        let role = await this.findOneByField({"_id":removeRoleToUserDTO.roleId});
+        let role = await this.findOneByField({"_id": objectReceiveFromFrontend.roleId});
         if(!role) throw new BadRequestException({
             statusCode:HttpStatus.BAD_REQUEST,
             error:'Role Error',
             message:["Role not found"]
           });
 
-        let index = user.roles.findIndex((r)=>r.id==role.id);
+        let index = user.roles.findIndex((r)=>r.id==objectReceiveFromFrontend.roleId);
         if(index>-1) user.roles.splice(index,1);
 
         return user.save();
