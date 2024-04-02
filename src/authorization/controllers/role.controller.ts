@@ -237,8 +237,8 @@ export class RoleController
 
 
     /**
-     * @api {post} /roles/add-user Add a role to a user
-     * @apidescription Add a role to a user
+     * @api {post} /roles/add-user Add a list of role to a user
+     * @apidescription Add a list role to a user
      * @apiName AddRoleToUser
      * @apiGroup AddRoleUser
      * @apiGroup Authorization
