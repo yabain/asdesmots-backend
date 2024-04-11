@@ -1,4 +1,4 @@
-import { IsMongoId } from "class-validator";
+import { ArrayMinSize, IsMongoId } from "class-validator";
 import { ObjectId } from "mongoose";
 
 /**
@@ -13,6 +13,7 @@ export class AssignUserRoleDTO
     @IsMongoId()
     userId:string
 
-    @IsMongoId({each: true})
+    @IsMongoId({each:true})
+    @ArrayMinSize(1)
     roleId:Array<ObjectId>
 }

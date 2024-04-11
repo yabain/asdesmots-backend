@@ -253,7 +253,7 @@ export class RoleController
     @Post("add-user")
     async addRoleToUser(@Body() addRoleToUserDTO:AssignUserRoleDTO)
     {
-        await this.roleService.addRoleToUser(addRoleToUserDTO);
+        await this.roleService.addRolesToUser(addRoleToUserDTO);
 
         return {
             statusCode:HttpStatus.CREATED,
@@ -289,7 +289,7 @@ export class RoleController
             message: ["role not found"]
         });
 
-        (await role).update(updateRoleDTO)
+        await (await role).update(updateRoleDTO)
         return {
             statusCode:HttpStatus.OK,
             message:'Role update completed successfully'

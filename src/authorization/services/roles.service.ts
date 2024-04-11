@@ -6,6 +6,7 @@ import { DataBaseService } from "src/shared/services/database";
 import { AssignPermissionRoleDTO, AssignUserRoleDTO } from "../dtos";
 import { PermissionsService } from "./permissions.service";
 import { UsersService } from "src/user/services";
+import { session } from "passport";
 
 @Injectable()
 export class RolesService extends DataBaseService<RoleDocument>
@@ -60,28 +61,35 @@ export class RolesService extends DataBaseService<RoleDocument>
         return role.save();
     }
 
-    async addRoleToUser(addRoleToUserDTO: AssignUserRoleDTO)
-    {
-      let user = await this.usersService.findOneByField({"_id":addRoleToUserDTO.userId});
-      if(!user) throw new BadRequestException({
-          statusCode:HttpStatus.BAD_REQUEST,
-          error:'Role Error',
-          message:["User not found"]
+    async addRolesToUser(addRoleToUserDTO: AssignUserRoleDTO) {
+      let user = await this.usersService.findOneByField({ "_id": addRoleToUserDTO.userId });
+      if (!user) throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        error: 'Role Error',
+        message: ["User not found"]
+      });
+    
+      // Vérifier si l'utilisateur a déjà les rôles
+      const existingRoleIds = user.roles.map(r => r._id.toString());
+      const rolesToAdd = addRoleToUserDTO.roleId.filter(roleId => !existingRoleIds.includes(roleId));
+    
+      if (rolesToAdd.length === 0) {
+        return user; // Aucun nouveau rôle à ajouter
+      }
+    
+      const roles = await this.findByField({ "_id": { $in: rolesToAdd } });
+      if (roles.length !== rolesToAdd.length) {
+        throw new BadRequestException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          error: 'Role Error',
+          message: ["One or more roles not found"]
         });
-
-        let roleTableForUpdate = await Promise.all(addRoleToUserDTO.roleId.map(async (roleID) => {
-          let role = await this.findOneByField({ "_id": roleID });
-          if (!role) throw new NotFoundException({
-            statusCode: HttpStatus.NOT_FOUND,
-            error: 'role Error',
-            message: ["role not found"]
-          });
-          return Promise.resolve(role);
-        }));
-        user.roles = [...roleTableForUpdate];
-        return user.save();
+      }
+    
+      user.roles.push(...roles);
+      return user.save();
     }
-
+    
     async removeRoleToUser(objectReceiveFromFrontend)
     {
         let user = await this.usersService.findOneByField({"_id": objectReceiveFromFrontend.userId});
@@ -97,10 +105,11 @@ export class RolesService extends DataBaseService<RoleDocument>
             message:["Role not found"]
           });
 
-        let index = user.roles.findIndex((r)=>r.id==objectReceiveFromFrontend.roleId);
+        let index = user.roles.findIndex((r)=>r._id==objectReceiveFromFrontend.roleId);
+        console.log("index :", index)
         if(index>-1) user.roles.splice(index,1);
 
-        return user.save();
+        return await user.save();
     }
 
     async findUsersByRole(roleId:string)
@@ -111,6 +120,8 @@ export class RolesService extends DataBaseService<RoleDocument>
             error:'Role Error',
             message:["Role not found"]
             });
+        
+        let tabUserByRole = await this.usersService.findByField({"roles":{"_id":roleId}});
         return this.usersService.findByField({"roles":{"_id":roleId}})
 
     }
@@ -125,18 +136,18 @@ export class RolesService extends DataBaseService<RoleDocument>
       });
 
       let usersRole = await this.findUsersByRole(roleId);
-      return this.executeWithTransaction(async (session)=>{
+      
+      await this.executeWithTransaction(async (session)=>{
         //supprimer le role chez les utilisateurs
         await Promise.all(usersRole.map(async (user)=>{
-          let index = user.roles.findIndex((r)=>r.id==role.id);
+          let index = user.roles.findIndex((r)=>r._id.toString() == roleId);
           if(index>-1) {
             user.roles.splice(index,1);
             user.save({session})
           }
         }))
-        await this.delete({_id:roleId},session);
+        this.delete({_id:roleId});
       })
-      
     }
         
 }
