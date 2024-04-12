@@ -82,15 +82,67 @@ export class GameLevelController
             statusCode:HttpStatus.OK,
             message:'List of game levels',
             data: gamesLevel.map((gameLevel)=>{
-                let glevel= {...gameLevel.toJSON(),words: gameLevel.words.map(word=>word.id)}
+                let glevel= {...gameLevel.toJSON(),words: gameLevel.words}
                 return glevel;
             })
         }
     }
 
     /**
+     * @api {delete} /gamelevel/:gamelevelID/transfertLevelID Delete game level by id 
+     * @apidescription Delete game level by id and transfert word with another level
+     * @apiName Delete game level by id and tranfert word
+     * @apiParam {String} gamelevelID game level id
+     * @apiParam {String} transfertLevelID game level id
+     * @apiGroup Game Level
+     * @apiPermission GameLevelPerms.DELETE
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Delete(":gamelevelID/:transfertLevelID")
+    @SecureRouteWithPerms()
+    async deleteGameLevelList(@Param("gamelevelID",ObjectIDValidationPipe) gamelevelID:string,
+                              @Param("transfertLevelID", ObjectIDValidationPipe) transfertLevelID:string)
+    {
+        let gameLevel = await this.gameLevelService.findOneByField({"_id":gamelevelID});
+        if(!gameLevel) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["Game level not found"]
+        })
+
+        let transfertLevel = await this.gameLevelService.findOneByField({"_id":transfertLevelID});
+        if(!transfertLevel) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["Game level not found"]
+        })
+
+        
+        await this.gameLevelService.executeWithTransaction(async (session)=>{
+            
+            let gameL = await gameLevel.words.map((word) => {return word});
+            console.log('new gameL :', gameL);
+            transfertLevel.words = [...gameL];
+            console.log('new Level transfert w table :', transfertLevel);
+            await transfertLevel.save({session});
+            return this.gameLevelService.delete({_id:gamelevelID},session)
+        })
+        
+        return {
+            statusCode: HttpStatus.OK,
+            message:'Game of words deleted successfully'
+        }
+    }
+
+    /**
      * @api {delete} /gamelevel/:gamelevelID Delete game level by id
-     * @apidescription Delete game level by id
+     * @apidescription Delete game level who does not have words by id
      * @apiName Delete game level by id
      * @apiParam {String} gamelevelID game level id
      * @apiGroup Game Level
@@ -102,10 +154,10 @@ export class GameLevelController
      * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
      * @apiError (Error 4xx) 404-NotFound User not found
      * @apiUse apiError
-     */
+    */
     @Delete(":gamelevelID")
     @SecureRouteWithPerms()
-    async deleteGameLevelList(@Param("gamelevelID",ObjectIDValidationPipe) gamelevelID:string)
+    async deleteGameLevelListWithAnyWord(@Param("gamelevelID",ObjectIDValidationPipe) gamelevelID:string)
     {
         let gameLevel = await this.gameLevelService.findOneByField({"_id":gamelevelID});
         if(!gameLevel) throw new NotFoundException({
@@ -115,7 +167,6 @@ export class GameLevelController
         })
 
         await this.gameLevelService.executeWithTransaction(async (session)=>{
-            await Promise.all(gameLevel.words.map((word)=>this.wordGameLevelService.delete({"_id":word.id},session)));
             return this.gameLevelService.delete({_id:gamelevelID},session)
         })
         

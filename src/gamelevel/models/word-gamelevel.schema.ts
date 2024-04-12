@@ -24,7 +24,7 @@ export type WordGameLevelDocument = HydratedDocument<WordGameLevel>
 export class WordGameLevel extends Document
 {
 
-    @Prop({default:"",unique:true})
+    @Prop({default:""})
     name:string;
 
     @Prop({default:""})

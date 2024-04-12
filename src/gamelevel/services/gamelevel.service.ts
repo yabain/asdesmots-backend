@@ -12,7 +12,7 @@ export class GameLevelService extends DataBaseService<GameLevelDocument>
         @InjectConnection() connection: mongoose.Connection,
         
         ){
-            super(gameLevelModel,connection,["words"]);
+            super(gameLevelModel,connection, ["words"]);
     }  
     
     // async deleteGameLevel(gameLevelID:string):Promise<any>
