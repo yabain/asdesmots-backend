@@ -16,7 +16,7 @@ export class PlayerGameRegistrationService extends DataBaseService<PlayerGameReg
 
     async getListOfGameSubscriptionByPlayerId(playerId:string)
     {
-        return (await this.findAll()).filter((registration)=>registration.player._id);
+        return await Promise.all((await this.findAll()).filter((registration)=>registration.player._id).map((registration)=>registration.competition.populate(["gameParts","gameLevel"])));
     }
 
     
