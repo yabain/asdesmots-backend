@@ -240,7 +240,7 @@ export class GameCompetitionController
         return {
             statusCode:HttpStatus.OK,
             message:"Game competition subscriber details",
-            data:await this.playerGameSubscription.findByField({"player._id":id})
+            data:await this.playerGameSubscription.getListOfGameSubscriptionByPlayerId(id)
         }
     }
 

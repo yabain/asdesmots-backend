@@ -78,7 +78,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
                 message:[`Location-based gaming competition not found`]
             })
             gameSubscription.competition=gameCompetition;
-            await gameCompetition.save({session});
+            await gameSubscription.save({session});
             await game.save({session});
             return playerSubscription;
         })
@@ -118,6 +118,8 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
 
         })
     }
+
+    
 
     async addGameCompetitionSubscription()
     {

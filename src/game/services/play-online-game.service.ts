@@ -117,7 +117,8 @@ export class PlayOnlineGameService
         })
         
         // TODO check game state
-        let gameState = this.games.get(competitionID).gameGlobalState
+        // let gameState = this.games.get(competitionID).gameGlobalState
+        let gameState = GameState.WAITING_PLAYER;
         gamePart.gameState=gameState;
         gamePart.startDate=new Date()
         await gamePart.update();

@@ -76,5 +76,9 @@ export class GamePartService extends DataBaseService<GamePartDocument>
         
         return gameCompetition.gameParts;
     }
+
+    async changeGamePartState(gamePartState) {
+
+    }
     
 } 
