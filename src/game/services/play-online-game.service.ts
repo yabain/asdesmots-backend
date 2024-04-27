@@ -92,7 +92,7 @@ export class PlayOnlineGameService
         return Array.from(this.games.values()).map((g)=>g.players.map((client)=>client.player)).reduce((prev,curr)=>[...prev,...curr],[]);
     }
 
-    async startPart(gamePartID:ObjectId,competitionID:ObjectId)
+    async startPart(competitionID:ObjectId,gamePartID:ObjectId)
     {
         let gamePart = await this.gamePartService.findOneByField({_id:gamePartID});
         if(!gamePart) throw new NotFoundException({
@@ -112,7 +112,7 @@ export class PlayOnlineGameService
         if(gamePart.gameState===GameState.WAITING_PLAYER) return { gameState:GameState.WAITING_PLAYER };
         gamePart.gameState=GameState.WAITING_PLAYER;
         gamePart.startDate=new Date()
-        await gamePart.update();
+        await this.gamePartService.update({_id:gamePart._id},{gameState:GameState.WAITING_PLAYER,startDate:gamePart.startDate})
 
         
 
