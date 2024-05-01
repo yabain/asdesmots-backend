@@ -15,7 +15,7 @@ export class GamePartService extends DataBaseService<GamePartDocument>
         private gameCompetitionService:CompetitionGameService,
         private gameLevelService:GameLevelService
         ){
-            super(gamePartModel,connection,['gameLevel']);
+            super(gamePartModel,connection,["gameLevel"]);
     } 
     
     async createNewGamePart(createGamePartDTO:CreateGamePartDTO)

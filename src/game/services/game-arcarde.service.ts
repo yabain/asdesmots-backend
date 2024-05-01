@@ -82,7 +82,17 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
             message:[`Game arcarde not found`]
         })
 
-        return data.competitionGames.map((competition)=> competition.localisation)
+        let competitionTree:Map<string,{isLeaf:boolean,localisation:String}> = new Map();
+        data.competitionGames.forEach((competion)=>{
+            if(competion.parentCompetition)
+                competitionTree.set(competion.parentCompetition._id.toString(),{isLeaf:false,localisation:competion.localisation})
+
+            if(!competitionTree.has(competion._id.toString())) 
+                competitionTree.set(competion._id.toString(),{isLeaf:true,localisation:competion.localisation});
+          })
+        return Array.from(competitionTree.entries())
+            .filter((competition)=>competition[1].isLeaf==true)
+            .map((competition)=> competition[1].localisation)
 
     }
 
@@ -96,6 +106,18 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         })
         return data.playerGameRegistrations
 
+    }
+
+    // delete arcarde
+    async deleteArcardeByID(id: string)
+    {
+        let arcadeFound = await this.findOneByField({"_id":id});
+        if(!arcadeFound) throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            error:'GameArcardeNotFound/GameArcarde',
+            message:[`Game arcarde not found`]
+        })
+        return await this.delete(id);
     }
     
 } 

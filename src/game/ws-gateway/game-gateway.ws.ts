@@ -19,6 +19,7 @@ export class GameGatewayWS
         try {
             client.emit("start-game-part",await this.playGameService.startPart(gamePart.competitionID,gamePart.gamePartID))
         } catch (error) {
+            console.log(error)
             client.emit("start-game-part-error",error)
         }
     }

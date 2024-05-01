@@ -12,7 +12,7 @@ import { CreateGamePartDTO } from "./create-game-part.dto";
  * @apiBody {String} gameLevel ID of games level
  * @apiBody {Boolean} isSinglePart It's set to true if it's a one-party competition
  * @apiBody {Boolean} [canRegisterPlayer] is set to true if players can register for the competition
- * @apiBody {String} localisation  competition location area
+ * @apiBody {String} localisation  competition location area 
  * @apiBody {Number} maxPlayerLife  Maximum number of lives of a player in the competition
  * @apiBody {Number} maxTimeToPlay  Number of times defined in seconds to rent to a player to enter a word.
  * @apiBody {Date} startDate game start date

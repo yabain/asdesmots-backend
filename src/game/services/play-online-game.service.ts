@@ -20,8 +20,8 @@ export class PlayOnlineGameService
         {
             competition:CompetitionGame,
             players:{
-                player:PlayerGameRegistration,
-                client:Socket
+                player?:PlayerGameRegistration,
+                client?:Socket
             }[],
             gameParts:Map<ObjectId,GamePart>,
             currentGamePartID:ObjectId,
@@ -42,26 +42,11 @@ export class PlayOnlineGameService
         let gameObject = null,game=null;
         if(!this.games.has(joinGame.competitionID)) 
         {
-            game=await this.gameCompetitionService.findOneByField({_id:joinGame.competitionID});
-            if(game.gameState!=GameState.RUNNING) throw new ForbiddenException({
+            throw new ForbiddenException({
                 statusCode:HttpStatus.FORBIDDEN,
-                error:'Forbidden/GameCompetition-joingame',
-                message:[`The state of the competition must be in "In Progress" state for the competition to start`]  
+                error:'NotFound/GameCompetition-joingame',
+                message:[`Competition not found`]  
             })
-            let gameParts:Map<string,GamePart> = new Map<string,GamePart>();
-
-            (await this.gamePartService.getListOfPartOfCompetition(joinGame.competitionID)).forEach((gamePart)=>gameParts.set(gamePart.id,gamePart))
-            gameObject = {
-                competition:game,
-                players:[],
-                gameParts,
-                currentGamePartID:null,
-                currentPlayerIndex:-1,
-                gameRound:null,
-                currentWordGameLevel:null,
-                gameGlobalState:GameState.WAITING_PLAYER
-            }
-            this.games.set(game.id,gameObject)
         }
         else  gameObject = this.games.get(joinGame.competitionID);
         let player = gameObject.players.find(player => player.player.id==joinGame.playerID);
@@ -107,7 +92,7 @@ export class PlayOnlineGameService
         return Array.from(this.games.values()).map((g)=>g.players.map((client)=>client.player)).reduce((prev,curr)=>[...prev,...curr],[]);
     }
 
-    async startPart(gamePartID:ObjectId,competitionID:ObjectId)
+    async startPart(competitionID:ObjectId,gamePartID:ObjectId)
     {
         let gamePart = await this.gamePartService.findOneByField({_id:gamePartID});
         if(!gamePart) throw new NotFoundException({
@@ -115,17 +100,35 @@ export class PlayOnlineGameService
             error:'NotFound/GamePart',
             message:[`Game part not found`]
         })
+
+        let game=await this.gameCompetitionService.findOneByField({_id:competitionID});
         
-        // TODO check game state
-        // let gameState = this.games.get(competitionID).gameGlobalState
-        let gameState = GameState.WAITING_PLAYER;
-        gamePart.gameState=gameState;
+        if(game.gameState!=GameState.RUNNING) throw new ForbiddenException({
+            statusCode:HttpStatus.FORBIDDEN,
+            error:'Forbidden/GameCompetition-joingame',
+            message:[`The state of the competition must be in "In Progress" state for the competition to start`]  
+        })
+
+        if(gamePart.gameState===GameState.WAITING_PLAYER) return { gameState:GameState.WAITING_PLAYER };
+        gamePart.gameState=GameState.WAITING_PLAYER;
         gamePart.startDate=new Date()
-        await gamePart.update();
-        let foundGamePart = this.games.get(competitionID).gameParts.get(gamePartID);
-        foundGamePart.gameState=gameState;
-        foundGamePart.startDate=gamePart.startDate;
-        return { gameState }
+        await this.gamePartService.update({_id:gamePart._id},{gameState:GameState.WAITING_PLAYER,startDate:gamePart.startDate})
+
+        
+
+        let gameObject = {
+            competition:game,
+            players:[],
+            gameParts:new Map<ObjectId,GamePart>(),
+            currentGamePartID:null,
+            currentPlayerIndex:-1,
+            gameRound:null,
+            currentWordGameLevel:null,
+            gameGlobalState:GameState.WAITING_PLAYER
+        }
+        this.games.set(game.id,gameObject)
+
+        return { gameState:GameState.WAITING_PLAYER }
     }
 
     async endPart(gamePartID:ObjectId,competitionID:ObjectId)
