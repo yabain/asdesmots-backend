@@ -36,7 +36,7 @@ export class PlayerGameRegistration extends Document
     @Prop({type:mongoose.Types.ObjectId,ref:"CompetitionGame",default:null})
     competition:any
 
-    @Prop({unique:true})
+    @Prop()
     localisation:string
 
     @Prop({default:Date.now(),required:true})
