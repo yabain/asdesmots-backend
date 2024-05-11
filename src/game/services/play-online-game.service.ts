@@ -11,6 +11,7 @@ import { UtilsFunc } from "src/shared/utils/utils.func";
 import { GameRoundService } from "./game-round.service";
 import { GameLevelService } from "src/gamelevel/services";
 import { GameLevel, WordGameLevel } from "src/gamelevel/models";
+import { UsersService } from "src/user/services";
 
 
 @Injectable()
@@ -35,7 +36,8 @@ export class PlayOnlineGameService
     constructor(private gameCompetitionService:CompetitionGameService,private playerGameRegistration:PlayerGameRegistrationService,
           private gamePartService:GamePartService,
           private gameRoundService:GameRoundService,
-          private gameLevelService:GameLevelService){}
+          private gameLevelService:GameLevelService,
+          private userService: UsersService){}
 
     async joinGame(joinGame:JoinGameDTO,client:Socket)
     {
@@ -51,7 +53,7 @@ export class PlayOnlineGameService
         else  gameObject = this.games.get(joinGame.competitionID);
         let player = gameObject.players.find(player => player.player.id==joinGame.playerID);
         if(!player) {
-            player=await this.playerGameRegistration.findOneByField({"player.id":joinGame,"competition.id":joinGame.competitionID});
+            player=await this.playerGameRegistration.getPlayerSubscriber(joinGame.playerID,joinGame.competitionID);
             if(!player) throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 error:'GameLocationNotFound/GameCompetition-joingame',
@@ -59,7 +61,7 @@ export class PlayOnlineGameService
             })
             
             //notification de tous les précédents joueur du nouveau arrivant
-            UtilsFunc.emitMessage("new-player",{},this.getListOfClients());
+            UtilsFunc.emitMessage("new-player",{data: await this.userService.findByField({_id: joinGame.playerID})},this.getListOfClients());
             
             //Sauvegarde du nouveau joueur dans la liste des joueurs
             gameObject.players.push({player,client});
