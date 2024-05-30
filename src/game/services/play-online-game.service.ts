@@ -11,6 +11,7 @@ import { UtilsFunc } from "src/shared/utils/utils.func";
 import { GameRoundService } from "./game-round.service";
 import { GameLevelService } from "src/gamelevel/services";
 import { GameLevel, WordGameLevel } from "src/gamelevel/models";
+import { UsersService } from "src/user/services";
 
 
 @Injectable()
@@ -32,26 +33,43 @@ export class PlayOnlineGameService
             gameGlobalState:GameState
         }>=new Map();
 
-    constructor(private gameCompetitionService:CompetitionGameService,private playerGameRegistration:PlayerGameRegistrationService,
-          private gamePartService:GamePartService,
-          private gameRoundService:GameRoundService,
-          private gameLevelService:GameLevelService){}
+    constructor(private gameCompetitionService:CompetitionGameService,
+                private playerGameRegistration:PlayerGameRegistrationService,
+                private gamePartService:GamePartService,
+                private gameRoundService:GameRoundService,
+                private gameLevelService:GameLevelService,
+                private userService: UsersService){}
 
     async joinGame(joinGame:JoinGameDTO,client:Socket)
     {
         let gameObject = null,game=null;
         if(!this.games.has(joinGame.competitionID)) 
         {
-            throw new ForbiddenException({
-                statusCode:HttpStatus.FORBIDDEN,
-                error:'NotFound/GameCompetition-joingame',
-                message:[`Competition not found`]  
-            })
+            // throw new ForbiddenException({
+            //     statusCode:HttpStatus.FORBIDDEN,
+            //     error:'NotFound/GameCompetition-joingame',
+            //     message:[`Competition not found`]  
+            // })
+
+            game = await this.gameCompetitionService.findOneByField({_id:joinGame.competitionID});
+            let gameParts:Map<string,GamePart> = new Map<string,GamePart>();
+            (await this.gamePartService.getListOfPartOfCompetition(joinGame.competitionID)).forEach((gamePart)=>gameParts.set(gamePart.id,gamePart))
+            gameObject = {
+                competition:game,
+                players:[],
+                gameParts,
+                currentGamePartID:null,
+                currentPlayerIndex:-1,
+                gameRound:null,
+                currentWordGameLevel:null,
+                gameGlobalState:GameState.WAITING_PLAYER
+            }
+            this.games.set(game.id,gameObject)
         }
         else  gameObject = this.games.get(joinGame.competitionID);
         let player = gameObject.players.find(player => player.player.id==joinGame.playerID);
         if(!player) {
-            player=await this.playerGameRegistration.findOneByField({"player.id":joinGame,"competition.id":joinGame.competitionID});
+            player=await this.playerGameRegistration.getPlayerSubscriber(joinGame.playerID,joinGame.competitionID);
             if(!player) throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 error:'GameLocationNotFound/GameCompetition-joingame',
@@ -59,7 +77,7 @@ export class PlayOnlineGameService
             })
             
             //notification de tous les précédents joueur du nouveau arrivant
-            UtilsFunc.emitMessage("new-player",{},this.getListOfClients());
+            UtilsFunc.emitMessage("new-player",{data: await this.userService.findByField({_id: joinGame.playerID})},this.getListOfClients());
             
             //Sauvegarde du nouveau joueur dans la liste des joueurs
             gameObject.players.push({player,client});

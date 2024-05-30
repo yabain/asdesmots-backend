@@ -359,7 +359,7 @@ export class GameArcardeController
     }
 
     /**
-     * @api {delete} /game-arcarde/subscription desenregistrement d'un joueur a un jeu
+     * @api {Post} /game-arcarde/unSubscription desenregistrement d'un joueur a un jeu
      * @apidescription Desenregistrement d'un joueur a un jeu
      * @apiName Desenregistrement a un jeu
      * @apiGroup Game Arcarde
@@ -371,7 +371,7 @@ export class GameArcardeController
      * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
      * @apiUse apiError
      */
-    @Delete("subscription")
+    @Post("unSubscription")
     async removeSubscription(@Body() addUnSubscriptionDTO:PlayerUnSubscriptionDTO)
     {
         await this.gameSubscriptionService.removeGameArcardeSubscription(addUnSubscriptionDTO)

@@ -37,8 +37,9 @@ export class GameGatewayWS
     @SubscribeMessage('join-game') 
     async joinGame(@MessageBody() joinGameDTO:JoinGameDTO, @ConnectedSocket() client:Socket)
     {
-        try {            
+        try {
             client.emit("join-game",await this.playGameService.joinGame(joinGameDTO,client))
+            console.log(await this.playGameService.joinGame(joinGameDTO,client))
         } catch (error) {
             client.emit("join-game-error",error)
         }

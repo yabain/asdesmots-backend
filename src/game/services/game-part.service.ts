@@ -73,7 +73,12 @@ export class GamePartService extends DataBaseService<GamePartDocument>
             error:'NotFound/GamePart-GameCompetition',
             message:[`Competition not found`]
         }) 
+        
         return gameCompetition.gameParts;
+    }
+
+    async changeGamePartState(gamePartState) {
+
     }
     
 } 
