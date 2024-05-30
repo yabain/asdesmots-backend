@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Post,Body, HttpStatus, NotFoundException,ForbiddenException, Req, UseGuards } from "@nestjs/common"
+import { BadRequestException, Controller, Get, Post,Body, HttpStatus, NotFoundException,ForbiddenException, Req, UseGuards, NotAcceptableException } from "@nestjs/common"
 import { Request } from "express";
 import { ConfirmationEmailDTO } from "../dtos";
 import { UserJwtAuthGuard } from "../guards";
@@ -27,15 +27,21 @@ export class EmailConfirmationController
      * @apiError (Error 4xx) 400-BadRequest User email not supplied
      * @apiUse apiError
      */
-    @Get("send-confirmation")
+    @Post("send-confirmation")
     async sendEmailConfirmation(@Body() emailDTO:ConfirmationEmailDTO)
     {
         let user = await this.userService.findOneByField({"email":emailDTO.email})
-        if(!user) throw new NotFoundException({
-            statusCode: HttpStatus.NOT_FOUND,
+        if(!user) throw new NotAcceptableException({
+            statusCode: HttpStatus.NOT_ACCEPTABLE,
             error:"NotFound",
             message:["User not found"]
         })
+        else if(user.emailConfirmed) throw new ForbiddenException({
+            statusCode:HttpStatus.FORBIDDEN,
+            error:"EmailConfirmationForbidden",
+            message:"The email has already been confirmed"
+        })
+        
         await this.userEmailService.sendConfirmationEmail(user)
         return {
             statusCode:HttpStatus.OK,

@@ -1,4 +1,5 @@
-import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone } from "class-validator";
+import { MaxLength,MinLength,IsOptional,IsUrl,IsNotEmpty,IsString, Matches, IsPhoneNumber, IsMobilePhone, Validate } from "class-validator";
+import { UniqueValidator } from "src/shared/helpers/unique-validator";
 
 /**
  * @apiDefine CreateUserDTO Create user information
@@ -34,6 +35,9 @@ export class CreateUserDTO
     @IsNotEmpty()
     @IsString()
     @Matches("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])")
+    @Validate(UniqueValidator, ['email'], {
+        message: 'Email already exists',
+    })
     email:string;
 
     @IsOptional()
