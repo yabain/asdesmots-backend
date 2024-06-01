@@ -23,7 +23,7 @@ export class AuthLocalStrategy extends PassportStrategy(Strategy)
         if(!user) throw new UnauthorizedException({
             statusCode:HttpStatus.UNAUTHORIZED,
             error:'Authentification error',
-            message:['Email/password incorrect']
+            message:['Invalid email or password.']
         });
         return user;
     }

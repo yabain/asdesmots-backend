@@ -48,7 +48,7 @@
  * {
  *  statusCode: 401
  *  error: "Authentification error",
- *  message:[ "Email/password incorrect"  ]
+ *  message:[ "Invalid email or password."  ]
  * }
  */
 

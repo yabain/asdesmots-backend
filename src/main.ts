@@ -23,7 +23,7 @@ async function bootstrap() {
 
 
   app.enableCors();
-  app.useGlobalFilters(new MongoExceptionFilter());
+  // app.useGlobalFilters(new MongoExceptionFilter());
   app.useGlobalFilters(new AllHttpExceptionsFilter());
   useContainer(app.select(AppModule),{fallbackOnErrors:true});
   // await CommandFactory.run(UpdatePermsScript);
