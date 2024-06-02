@@ -13,6 +13,8 @@ import { SharedModule } from "src/shared/shared.module";
 import { UserEmailService } from "./services/user-email.service";
 import { EmailConfirmedGuard } from "./guards";
 import { ActivityModule } from "src/activity/activity.module";
+import { UniqueValidator } from "src/shared/helpers/unique-validator";
+import { JsonResponse } from "src/shared/helpers/json-response";
 
 
 @Module({
@@ -51,7 +53,9 @@ import { ActivityModule } from "src/activity/activity.module";
         AuthJwtStrategy,
         AuthOAuth20GoogleStrategy,
         UserEmailService,
-        EmailConfirmedGuard
+        EmailConfirmedGuard,
+        UniqueValidator,
+        JsonResponse
     ],
     exports:[
         UsersService,

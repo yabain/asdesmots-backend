@@ -41,7 +41,7 @@ export class AuthController
      * @apiSuccess (201 Created) {String} data.createAt Account creation date 
      * 
      * @apiError (Error 4xx) 400-BadRequest expected field was not submitted or does not have the correct type
-     * @apiError (Error 4xx) 400-BadRegistrationRequest Email already exist
+     * @apiError (Error 4xx) 409-BadRegistrationRequest Email already exist
      * @apiUse apiDefaultResponse
      * @apiUse apiBadRequestExampleUser
      */
@@ -96,7 +96,7 @@ export class AuthController
      * @apiSuccess (200 Ok) {String} data.access_token User access token 
      * 
      * @apiError (Error 4xx) 400-BadRequest expected field was not submitted or does not have the correct type
-     * @apiError (Error 4xx) 401-Unauthorized Email/password incorrect
+     * @apiError (Error 4xx) 401-Unauthorized Invalid email or password.
      * @apiError (Error 4xx) 403-Forbidden Account Disabled. Contact Support
      *  
      * @apiUse apiDefaultResponse
@@ -151,7 +151,7 @@ export class AuthController
      * @apiSuccess (200 Ok) {String} data.access_token User access token 
      * 
      * @apiError (Error 4xx) 400-BadRequest expected field was not submitted or does not have the correct type
-     * @apiError (Error 4xx) 401-Unauthorized Email/password incorrect
+     * @apiError (Error 4xx) 401-Unauthorized Invalid email or password.
      * @apiError (Error 4xx) 403-Forbidden Account Disabled. Contact Support
      *  
      * @apiUse apiDefaultResponse
@@ -205,7 +205,7 @@ export class AuthController
      * @apiSuccess (200 Ok) {String} data.access_token User access token 
      * 
      * @apiError (Error 4xx) 400-BadRequest expected field was not submitted or does not have the correct type
-     * @apiError (Error 4xx) 401-Unauthorized Email/password incorrect
+     * @apiError (Error 4xx) 401-Unauthorized Invalid email or password.
      * @apiError (Error 4xx) 403-Forbidden Account Disabled. Contact Support
      *  
      * @apiUse apiDefaultResponse
