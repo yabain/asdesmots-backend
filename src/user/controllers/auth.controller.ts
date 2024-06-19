@@ -1,9 +1,10 @@
-import { Body, Delete,Controller,HttpCode,HttpStatus,Post, Put, Req, UseGuards,Get, NotFoundException, Param, Res } from "@nestjs/common";
+import { Body, Delete,Controller,HttpCode,HttpStatus,Post, Put, Req, UseGuards,Get, NotFoundException, Param, Res, NotAcceptableException } from "@nestjs/common";
 import { Request, response, Response } from "express";
 import { ActivityLoggerService } from "src/activity/services";
+import { JsonResponse } from "src/shared/helpers/json-response";
 import { CustomJwtTokenService } from "src/shared/security";
 import { ConfirmationEmailDTO, CreateUserDTO,  LoginTelUserDTO,  ResetPasswordDTO } from "../dtos";
-import { AuthOAuth20GoogleGuard, EmailConfirmedGuard, UserAuthGuard, UserJwtAuthGuard } from "../guards";
+import { AccountStatusGuard, AuthOAuth20GoogleGuard, EmailConfirmedGuard, UserAuthGuard, UserJwtAuthGuard } from "../guards";
 import { AuthService, UsersService } from "../services";
 import { UserEmailService } from "../services/user-email.service";
 import { PasswordUtil } from "../utils";
@@ -16,7 +17,8 @@ export class AuthController
         private authService:AuthService,
         private userEmailService:UserEmailService,
         private activityLogService:ActivityLoggerService,
-        private customJwtTokenService:CustomJwtTokenService
+        private customJwtTokenService:CustomJwtTokenService,
+        private jsonResponse: JsonResponse
     ){}
 
     /**
@@ -104,25 +106,19 @@ export class AuthController
      * @apiUse apiBadRequestExampleUser
      * @apiUse apiLoginOrPasswordIncorrectExampleUser
      */
-    @UseGuards(EmailConfirmedGuard)
     @UseGuards(UserAuthGuard)
+    @UseGuards(AccountStatusGuard)
+    @UseGuards(EmailConfirmedGuard)
     @HttpCode(HttpStatus.OK)
     @Post("login")    
     async login(@Req() request:Request)
     {
-        let data=this.authService.login(request.user)
+        let data = await this.authService.login(request.user)
         await this.activityLogService.logActivity({
             owner:request.user,
             description:"New User Authentication"
         })
-        return {
-            statusCode:HttpStatus.OK,
-            message:"Authentication Success",
-            data:{
-                ...data,
-                user:request.user
-            }
-        }
+        return this.jsonResponse.success('Authentication Success', data)
     }
 
     /**
@@ -229,7 +225,6 @@ export class AuthController
 
 
     @UseGuards(UserJwtAuthGuard)
-    @UseGuards(EmailConfirmedGuard)
     @Get("refresh")
     async refreshToken()
     {

@@ -1,26 +1,19 @@
-import { CanActivate, ExecutionContext, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
-import { Observable } from "rxjs";
+import { CanActivate, ExecutionContext, Injectable, NotAcceptableException } from "@nestjs/common";
 import { UsersService } from "../services";
 
 @Injectable()
-export class EmailConfirmedGuard implements CanActivate
-{
-    constructor(private userService:UsersService){}
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        return new Promise<boolean>(async (resolve,reject)=>{
-            const request = context.switchToHttp().getRequest();
-            const response = context.switchToHttp().getResponse();
+export class EmailConfirmedGuard implements CanActivate {
+    constructor(private readonly userService: UsersService) {}
 
-            let user=await this.userService.findByField({"email":request.user.email});
-            if(user && user.length>0 && user[0].emailConfirmed) return resolve(true);
-            return response.status(HttpStatus.FORBIDDEN).json({
-                statusCode:HttpStatus.FORBIDDEN,
-                error:"EmailConfirmedForbidden",
-                message:["account email is not confirmed"]
-            })
-            // return reject(false);
-        })
-
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        const request = context.switchToHttp().getRequest();
+        const response = context.switchToHttp().getResponse();
+        
+        const email = request?.body?.email ?? response?.body?.email ?? response?.data?.user.email;
+        const user = await this.userService.findOneByField({"email":email});
+        if(user && !user.emailConfirmed) { 
+            throw new NotAcceptableException('Account email is not confirmed.');
+        }  
+        return true;
     }
-
 }

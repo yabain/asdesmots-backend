@@ -1,5 +1,6 @@
-import { BadRequestException, ForbiddenException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpStatus, Injectable, NotAcceptableException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { JsonResponse } from "src/shared/helpers/json-response";
 import { LoginTelUserDTO } from "../dtos";
 import { LoginUserDTO } from "../dtos/login-user.dto";
 import { AUTH_TYPE } from "../enums";
@@ -11,7 +12,7 @@ import { UsersService } from "./users.service";
 @Injectable()
 export class AuthService
 {
-  constructor(private usersService:UsersService, private jwtService:JwtService, 
+  constructor(private usersService:UsersService, private jwtService:JwtService,private jsonResponse:JsonResponse,
     private authOAuthGoogleStrategy:AuthOAuth20GoogleStrategy){}
 
   async validateUser(loginUserDTO:LoginUserDTO)
@@ -22,22 +23,13 @@ export class AuthService
     return null;
   }
 
-  login(user,field:string="Email")
+  async login(user,field:string="Email")
   {
-    if(user.isDeleted) throw new UnauthorizedException({
-      statusCode:HttpStatus.UNAUTHORIZED,
-      error:'Authentification error',
-      message:[`${field}/password incorrect`]
-    });
-
-    if(user.isDisabled) throw new ForbiddenException({
-      statusCode:HttpStatus.FORBIDDEN,
-      error:'Authentication blocked',
-      message:["Account Disabled. Contact Support"]
-  });
     const payload = {email:user.email, roles:user.roles,sub:user._id}
-    return {
-        access_token: this.jwtService.sign(payload)
+    const data = await this.usersService.findOneByField({email:user.email});
+    return await {
+      access_token: this.jwtService.sign(payload),
+      user: data
     }
   }
 

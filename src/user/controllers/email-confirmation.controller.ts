@@ -45,7 +45,7 @@ export class EmailConfirmationController
         await this.userEmailService.sendConfirmationEmail(user)
         return {
             statusCode:HttpStatus.OK,
-            message:"Account confirmation email has been sent",
+            message:"The new confirmation link has been sent.",
         }
     }
 
