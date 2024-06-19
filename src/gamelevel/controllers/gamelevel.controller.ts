@@ -77,14 +77,25 @@ export class GameLevelController
     )
     async getGameLevelList()
     {
-        let gamesLevel = await this.gameLevelService.findAll()
-        return {
+        let gamesLevel = await this.gameLevelService.findAll();
+        let enLength = 0;
+        let frLength = 0;
+        return await {
             statusCode:HttpStatus.OK,
             message:'List of game levels',
-            data: gamesLevel.map((gameLevel)=>{
-                let glevel= {...gameLevel.toJSON(),words: gameLevel.words.map(word=>word.id)}
-                return glevel;
-            })
+            data: {
+                levels: gamesLevel.map((gameLevel)=>{
+                    let glevel= {
+                        ...gameLevel.toJSON(),
+                        words: gameLevel.words.map(word=>word.id)
+                    };
+                    enLength += gameLevel.words.filter(wrd => wrd.type === 'en').length;
+                    frLength += gameLevel.words.filter(wrd => wrd.type === 'fr').length;
+                    return glevel;
+                }),
+                enWordsLength: enLength,
+                frWordsLength: frLength
+            }
         }
     }
 
