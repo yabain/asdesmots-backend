@@ -2,7 +2,7 @@ import { Controller, Post,Get, Body, HttpStatus, Delete, Param, NotFoundExceptio
 import { SecureRouteWithPerms } from "src/shared/security";
 import { GameLevelPerms } from "../enums";
 import { GameLevelService, WordGameLevelService } from "../services";
-import { CreateGameLevelDTO, UpdateGameLevelDTO } from "./../dtos"
+import { CreateGameLevelDTO, UpdateGameLevelDTO, SortGameLevelDTO } from "./../dtos"
 import { ObjectIDValidationPipe } from "src/shared/pipes";
 
 @Controller("gamelevel")
@@ -46,6 +46,35 @@ export class GameLevelController
     }
 
     /**
+     * @api {put} /gamelevel Game levels sort
+     * @apidescription sort game levels
+     * @apiParam {Array} gamelevels games levels
+     * @apiName Game level sort
+     * @apiGroup Game Level
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * @apiSuccess (200 Ok) {Array} data response data 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Put("/sort-list")
+    async sortLevelList(@Body() sortGameLevelDTO:SortGameLevelDTO[])
+    {
+        for(let srtItem of sortGameLevelDTO) {
+            // Get item's current level positions
+            const changingElem = await this.gameLevelService.findOneByField({ _id: srtItem.id });
+            
+            await this.gameLevelService.swapLevels(changingElem.level, srtItem.level);
+        };
+        return {
+            statusCode:HttpStatus.OK,
+            message:'Game level sorted successfully'
+        }
+    }
+
+    /**
      * @api {get} /gamelevel List of game levels
      * @apidescription Get the List of game levels
      * @apiName List of game levels
@@ -77,7 +106,7 @@ export class GameLevelController
     )
     async getGameLevelList()
     {
-        let gamesLevel = await this.gameLevelService.findAll();
+        let gamesLevel = await this.gameLevelService.findAll({level:1});
         let enLength = 0;
         let frLength = 0;
         return await {
@@ -135,7 +164,7 @@ export class GameLevelController
             message:'Game of words deleted successfully'
         }
     }
-
+    
     /**
      * @api {put} /gamelevel/:gamelevelID Game level update
      * @apidescription Updating game level by id
