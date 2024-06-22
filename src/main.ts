@@ -21,7 +21,6 @@ async function bootstrap() {
     transform:true
   }));
 
-
   app.enableCors();
   // app.useGlobalFilters(new MongoExceptionFilter());
   app.useGlobalFilters(new AllHttpExceptionsFilter());

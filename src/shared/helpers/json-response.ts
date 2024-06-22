@@ -1,16 +1,22 @@
 export class JsonResponse {
 
     success(message: any, data: any = null) {
-        return { 
+        return data ? { 
             message : message,
             data : data
         }
+        : { 
+            message : message,
+        }
     }  
     
-    error(message: string, data: any = null) {
-        return { 
+    error(message: string, errors: any = null) {
+        return errors ? { 
             message : message,
-            errors : data
+            errors : errors
+        }
+        : { 
+            message : message,
         }
     }
 }

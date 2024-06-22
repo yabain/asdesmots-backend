@@ -11,7 +11,7 @@ import { JWT_CONSTANT } from "src/shared/config";
 import { AuthJwtStrategy } from "./strategies/auth-jwt.strategy";
 import { SharedModule } from "src/shared/shared.module";
 import { UserEmailService } from "./services/user-email.service";
-import { EmailConfirmedGuard } from "./guards";
+import { EmailConfirmedGuard,AccountStatusGuard } from "./guards";
 import { ActivityModule } from "src/activity/activity.module";
 import { UniqueValidator } from "src/shared/helpers/unique-validator";
 import { JsonResponse } from "src/shared/helpers/json-response";
@@ -54,6 +54,7 @@ import { JsonResponse } from "src/shared/helpers/json-response";
         AuthOAuth20GoogleStrategy,
         UserEmailService,
         EmailConfirmedGuard,
+        AccountStatusGuard,
         UniqueValidator,
         JsonResponse
     ],
@@ -64,6 +65,8 @@ import { JsonResponse } from "src/shared/helpers/json-response";
         AuthOAuth20GoogleStrategy,
         JwtModule,
         UserEmailService,
-        EmailConfirmedGuard]
+        EmailConfirmedGuard,
+        AccountStatusGuard
+    ]
 })
 export class UserModule{}

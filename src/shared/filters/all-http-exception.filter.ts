@@ -1,36 +1,57 @@
-import { Catch, ArgumentsHost, Inject, HttpServer, HttpStatus, HttpException } from '@nestjs/common';
+import { Catch, ArgumentsHost, HttpException, ExceptionFilter } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { JsonResponse } from '../helpers/json-response';
- 
+
 @Catch(HttpException)
-export class AllHttpExceptionsFilter extends BaseExceptionFilter {
- 
-  catch(exception: any, host: ArgumentsHost) {
+export class AllHttpExceptionsFilter extends BaseExceptionFilter implements ExceptionFilter {
+  
+  catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const status = exception.getStatus();
-    // console.log("Exception ",exception.response)
+
+    const initialResponse = exception.getResponse();
+    
+    console.log(initialResponse);
+    if(status >= 200 && status <= 299) {
+      response.status(status).json(initialResponse);
+    } else {
+      let stringMessage = 'An error occurred while processing your request.';
+      let errorData = null;
   
-    // const message = (exception instanceof Error) ? exception.message : exception.message.error;
-    const error = exception.getResponse();
-    let stringMessage = 'An error occurred while processing your request.';
-    let errorData = [];
-    if(error instanceof String) { // If it is a thrown exception
-      stringMessage = error.toString();
-    } else if (error.message) { // If the error come from custom Jsonresponse class
-      stringMessage = error.message;
-      if(error.data) {
-        stringMessage = error.data;
+      // Utility function to check if a value is a valid JSON string
+      const isJSON = (str: string): boolean => {
+        try {
+          JSON.parse(str);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+  
+      // Parse error from JSON form if necessary
+      const error = typeof initialResponse === 'string' && isJSON(initialResponse) 
+        ? JSON.parse(initialResponse) 
+        : initialResponse;
+  
+      if (typeof error === 'string') { // If it is a thrown exception
+        stringMessage = error;
+      } else if (error.message) { // If the error comes from a custom JsonResponse class
+        stringMessage = error.message;
+        if (error.data) {
+          errorData = error.data;
+        }
+      } else { // If it is a common error
+        errorData = error;
       }
-    } else { // If it is a common error
-      stringMessage = error;
+    
+      let jsonResponse = new JsonResponse();
+      response
+        .status(status)
+        .json(
+          errorData ? jsonResponse.error(stringMessage, errorData) : 
+          jsonResponse.error(stringMessage)
+        );
     }
-    
-    let jsonResponse = new JsonResponse();
-    
-    response
-      .status(status)
-      // .json(exception.response);
-      .json(jsonResponse.error(stringMessage, errorData));
   }
 }
