@@ -11,6 +11,7 @@ export class UserEmailService
     async sendNewUserEmail(user:User)
     {
         return this.emailService.sendTemplateEmail(
+            'Welcome',
             this.configService.get<string>("TEAM_EMAIL_SENDER"),
             user.email,
             this.configService.get<string>("EMAIL_TEMPLATE_NEW_REGISTRATION"),
@@ -29,6 +30,7 @@ export class UserEmailService
             sub:user._id
         })
         return this.emailService.sendTemplateEmail(
+            'Account confirm',
             this.configService.get<string>("NO_REPLY_EMAIL_SENDER"),
             user.email,            
             this.configService.get<string>("EMAIL_TEMPLATE_ACCOUNT_CONFIRMATION"),
@@ -50,6 +52,7 @@ export class UserEmailService
             sub:user._id
         })
         return this.emailService.sendTemplateEmail(
+            'Password reset',
             this.configService.get<string>("NO_REPLY_EMAIL_SENDER"),
             user.email,            
             this.configService.get<string>("EMAIL_TEMPLATE_RESET_PASSWORD"),
