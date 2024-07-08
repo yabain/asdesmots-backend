@@ -22,10 +22,11 @@ export class EmailService
         return this.gmailEmailService.sendMail(emailObj)
     }
 
-    async sendTemplateEmail(sender,receiver,template,templateVar)
+    async sendTemplateEmail(subject,sender,receiver,template,templateVar)
     {
         return this.sendEmailWithGmail(
             new Email()
+            .subject(subject)
             .from(sender)
             .to(receiver)
             .templateVar(templateVar)
