@@ -8,8 +8,13 @@ import { User } from "../models";
 export class UserEmailService
 {
     constructor(private emailService:EmailService,private configService:ConfigService,private jwtService:JwtService){}
-    async sendNewUserEmail(user:User)
+    async sendNewUserEmail(user)
     {
+        const accessToken = this.jwtService.sign({
+            email:user.email,
+            permissions:[user.permissions],
+            sub:user._id
+        })
         return this.emailService.sendTemplateEmail(
             'Welcome',
             this.configService.get<string>("TEAM_EMAIL_SENDER"),
@@ -17,6 +22,7 @@ export class UserEmailService
             this.configService.get<string>("EMAIL_TEMPLATE_NEW_REGISTRATION"),
             {
                 userEmail: `${user.firstName} ${user.lastName}`,
+                confirmationLink:`${this.configService.get<string>("PUBLIC_FRONTEND_URL")}/mail/link-receive?token=${accessToken}`
             }
         );
     }

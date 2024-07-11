@@ -1,16 +1,20 @@
-import { Controller, Post,Get, Body, HttpStatus, Delete, Param, NotFoundException, Put } from "@nestjs/common";
+import { Controller, Post,Get, Body, HttpStatus, Delete, Param, NotFoundException, Put, forwardRef, Inject } from "@nestjs/common";
 import { SecureRouteWithPerms } from "src/shared/security";
 import { GameLevelPerms } from "../enums";
 import { GameLevelService, WordGameLevelService } from "../services";
 import { CreateGameLevelDTO, UpdateGameLevelDTO, SortGameLevelDTO } from "./../dtos"
 import { ObjectIDValidationPipe } from "src/shared/pipes";
+import { QueueService } from "src/queues/queue.service";
 
 @Controller("gamelevel")
 export class GameLevelController
 {
     constructor( 
+        @Inject(forwardRef(() => QueueService))
+        private readonly queueService: QueueService,
         private wordGameLevelService:WordGameLevelService,
-        private gameLevelService:GameLevelService){}
+        private gameLevelService:GameLevelService,
+    ) {}
 
     /**
      * @api {post} /gamelevel New game level
@@ -66,7 +70,9 @@ export class GameLevelController
             // Get item's current level positions
             const changingElem = await this.gameLevelService.findOneByField({ _id: srtItem.id });
             
-            await this.gameLevelService.swapLevels(changingElem.level, srtItem.level);
+            // await this.gameLevelService.swapLevels(changingElem.level, srtItem.level);
+            
+            await this.queueService.addSwapJob(changingElem.level, srtItem.level);
         };
         return {
             statusCode:HttpStatus.OK,
@@ -196,6 +202,49 @@ export class GameLevelController
         return {
             statusCode:HttpStatus.OK,
             message:'Game level update completed successfully'
+        }
+    }
+
+    /**
+     * @api {delete} /gamelevel/:fromLevelID/:toLevelID Delete game level by id
+     * @apidescription Delete game level by id
+     * @apiName Delete game level by id
+     * @apiParam {String} fromLevelID game level id
+     * @apiParam {String} toLevelID game level id
+     * @apiGroup Game Level
+     * @apiPermission GameLevelPerms.DELETE
+     * @apiUse apiSecurity
+     * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
+     * @apiSuccess (200 Ok) {String} Response Description
+     * 
+     * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token 
+     * @apiError (Error 4xx) 404-NotFound User not found
+     * @apiUse apiError
+     */
+    @Delete(":fromLevelID/:toLevelID")
+    @SecureRouteWithPerms()
+    async transferWordsAndDeleteGameLevel(
+        @Param("fromLevelID",ObjectIDValidationPipe) fromLevelID:string,
+        @Param("toLevelID",ObjectIDValidationPipe) toLevelID:string
+    ) {
+        let fromLevel = await this.gameLevelService.findOneByField({"_id":fromLevelID});
+        let toLevel = await this.gameLevelService.findOneByField({"_id":toLevelID});
+        if(!(fromLevel || toLevel)) throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error:"NotFound",
+            message:["One or more game level not found"]
+        })
+
+        await this.gameLevelService.executeWithTransaction(async (session)=>{
+            let toLevelWords = toLevel.words;
+            await Promise.all(fromLevel.words.map((word)=>toLevelWords.push(word)));
+            await this.gameLevelService.update({_id: toLevelID},{words:toLevelWords})
+            return this.gameLevelService.delete({_id:fromLevel},session)
+        })
+        
+        return {
+            statusCode: HttpStatus.OK,
+            message:'Game of words deleted successfully'
         }
     }
 }
