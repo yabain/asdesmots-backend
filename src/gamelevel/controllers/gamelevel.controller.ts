@@ -66,14 +66,11 @@ export class GameLevelController
     @Put("/sort-list")
     async sortLevelList(@Body() sortGameLevelDTO:SortGameLevelDTO[])
     {
-        for(let srtItem of sortGameLevelDTO) {
-            // Get item's current level positions
-            const changingElem = await this.gameLevelService.findOneByField({ _id: srtItem.id });
-            
-            // await this.gameLevelService.swapLevels(changingElem.level, srtItem.level);
-            
-            await this.queueService.addSwapJob(changingElem.level, srtItem.level);
-        };
+        // for(let srtItem of sortGameLevelDTO) {
+        //     const changingElem = await this.gameLevelService.findOneByField({ _id: srtItem.id });
+        //     await this.gameLevelService.swapLevels(changingElem.level, srtItem.level);
+        // };
+        await this.queueService.addSwapJob(sortGameLevelDTO);
         return {
             statusCode:HttpStatus.OK,
             message:'Game level sorted successfully'
