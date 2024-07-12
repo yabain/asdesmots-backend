@@ -1,5 +1,6 @@
 import { IsEnum, IsMongoId, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import { WordGameLevelLangType } from "../enums";
+import { IsUnique } from "../validators/word-unique";
 
 /**
  * @apiDefine CreateWordGameLevelDTO Create a new word from a game level
@@ -13,6 +14,7 @@ export class CreateWordGameLevelDTO
     @IsString()
     @MinLength(1)
     @MaxLength(254)
+    @IsUnique({ message: 'Word already exists'})
     name:String;
 
     @IsOptional()
