@@ -1,4 +1,5 @@
 import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsUnique } from "../validators/level-unique";
 
 /**
  * @apiDefine CreateGameLevelDTO Create new game level
@@ -10,6 +11,7 @@ export class CreateGameLevelDTO
     @IsString()
     @MinLength(1)
     @MaxLength(100)
+    @IsUnique({ message: 'Level already exists'})
     name:String;
 
     @IsOptional()
