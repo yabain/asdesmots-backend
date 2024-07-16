@@ -55,7 +55,9 @@ export default () => ({
     GOOGLE_ACCOUNT_EMAIL: process.env.GOOGLE_ACCOUNT_EMAIL,
     GOOGLE_ACCOUNT_PASSWORD: process.env.GOOGLE_ACCOUNT_PASSWORD,
     GOOGLE_ACCOUNT_SMTP: "smtp.gmail.com",
-
+  
+    REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_PORT: process.env.REDIS_PORT
 
   });
   

@@ -4,9 +4,9 @@ import { ActivityModule } from './activity/activity.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthorizationModule } from './authorization/authorization.module';
-import { PermsGuard } from './authorization/guards';
 import { GameModule } from './game/game.module';
 import { GameLevelModule } from './gamelevel/gamelevel.module';
+import { QueuesModule } from './queues/queues.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -15,7 +15,8 @@ import { UserModule } from './user/user.module';
     ActivityModule,
     AuthorizationModule,
     GameLevelModule,
-    GameModule
+    GameModule,
+    QueuesModule
   ],
   controllers: [AppController],
   providers: [

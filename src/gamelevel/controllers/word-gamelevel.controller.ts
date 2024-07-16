@@ -173,8 +173,4 @@ export class WordGameLevelController
             message:'Word deleted successfully'
         }
     }
-
-
-    
-
 }
