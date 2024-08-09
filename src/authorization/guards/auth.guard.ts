@@ -15,20 +15,17 @@ export class AuthGuard implements CanActivate {
     }
 
     const token = authHeader.split(' ')[1];
-    
-    console.log('token',token);
 
     if (!token) {
       return false;
     }
 
     const user = await this.authService.validateToken(token);
-    console.log('user',user);
     if (!user) {
       return false;
     }
 
-    request.user = user; // Attachez l'utilisateur à la requête
+    request.authUser = user; // Attachez l'utilisateur à la requête
     return true;
   }
 }

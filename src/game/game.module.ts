@@ -13,6 +13,7 @@ import { CommandModule } from "nestjs-command";
 import { AddNewGameWinnerCriterialScript } from "./scripts";
 import { GameGatewayWS } from "./ws-gateway";
 import { JsonResponse } from "src/shared/helpers/json-response";
+import { UniqueArcadeValidator } from "./validators/arcade-unique";
 
 @Module({
     controllers:[
@@ -50,6 +51,7 @@ import { JsonResponse } from "src/shared/helpers/json-response";
         PlayOnlineGameService,
         GameGatewayWS,
         JsonResponse,
+        UniqueArcadeValidator
     ],
     exports:[
         CompetitionGameService,

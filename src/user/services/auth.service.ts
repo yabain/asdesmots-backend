@@ -108,12 +108,16 @@ export class AuthService {
     };
   }
 
-  async validateToken(token: string): Promise<User | null> {
+  async validateToken(token: string): Promise<any> {
     try {
-      const decoded = jwt.verify(token, JWT_CONSTANT.secret) as User;
+      const decoded = jwt.verify(token, JWT_CONSTANT.secret);
       return decoded;
     } catch (err) {
-      return null; // Si la vérification échoue, retournez null
+      throw new UnauthorizedException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        error: 'Invalid token',
+        message: ['The token has expired'],
+      });
     }
   }
 }

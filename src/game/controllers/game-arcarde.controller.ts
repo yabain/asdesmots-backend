@@ -76,16 +76,16 @@ export class GameArcardeController {
   // @SecureRouteWithPerms(
   //     GameArcardePerms.CREATE
   // )
-  // @UseGuards(AuthGuard)
-  @Post("")
+  @UseGuards(AuthGuard)
+  @Post()
   async create(
     @Body() createGameArcardeDTO: CreateGameArcardeDTO,
     @Req() request: Request,
     @Res() res: Response
   ) {
-    console.log(request.user);
+    const user = request.authUser
     const userConnected = await this.usersService.findOneByField({
-      email: request.user["email"],
+      email: user.email,
     });
     await this.gameArcardeService.executeWithTransaction(async (session) => {
       const gameArcarde = await this.gameArcardeService.create(
@@ -444,10 +444,10 @@ export class GameArcardeController {
    */
   @Delete(":id")
   async DeleteArcarde(@Param("id") id: string) {
-    await this.gameArcardeService.deleteArcardeByID(id);
+    await this.gameArcardeService.delete({"_id":id});
     return {
       statusCode: HttpStatus.OK,
-      message: "Arcarde removal completed successfully",
+      message: "Arcarde successfully deleted",
     };
   }
 }
