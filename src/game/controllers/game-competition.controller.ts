@@ -150,7 +150,6 @@ export class GameCompetitionController
         }
     }
     
-
     /**
      * 
      * @api {put} /game-competition/:id update game competition
@@ -359,6 +358,5 @@ export class GameCompetitionController
             data: await this.competitionGameService.getListCompetitionParticipants(id)
         }
     }
-
 
 }
