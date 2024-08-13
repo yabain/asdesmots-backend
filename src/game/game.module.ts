@@ -14,6 +14,7 @@ import { AddNewGameWinnerCriterialScript } from "./scripts";
 import { GameGatewayWS } from "./ws-gateway";
 import { JsonResponse } from "src/shared/helpers/json-response";
 import { UniqueArcadeValidator } from "./validators/arcade-unique";
+import { UniqueCompetitionValidator } from "./validators/competition-unique";
 
 @Module({
     controllers:[
@@ -51,7 +52,8 @@ import { UniqueArcadeValidator } from "./validators/arcade-unique";
         PlayOnlineGameService,
         GameGatewayWS,
         JsonResponse,
-        UniqueArcadeValidator
+        UniqueArcadeValidator,
+        UniqueCompetitionValidator
     ],
     exports:[
         CompetitionGameService,

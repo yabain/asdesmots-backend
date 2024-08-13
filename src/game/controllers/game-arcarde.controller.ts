@@ -39,8 +39,8 @@ export class GameArcardeController {
   constructor(
     private gameArcardeService: GameArcardeService,
     private gameSubscriptionService: GameSubscriptionService,
-    private gameCompetitionService: CompetitionGameService,
     private usersService: UsersService,
+    private competitionGameService: CompetitionGameService,
     private jsonResponse: JsonResponse
   ) {}
 
@@ -93,7 +93,7 @@ export class GameArcardeController {
         session
       );
 
-      await this.gameCompetitionService.createNewCompetition(
+      await this.competitionGameService.createNewCompetition(
         {
           name: gameArcarde.name,
           description: gameArcarde.description,
@@ -115,7 +115,7 @@ export class GameArcardeController {
     return res
       .status(HttpStatus.CREATED)
       .json(
-        this.jsonResponse.success("Arcade successfully created", request.user)
+        this.jsonResponse.success("Arcade successfully created")
       );
   }
 
@@ -444,6 +444,8 @@ export class GameArcardeController {
    */
   @Delete(":id")
   async DeleteArcarde(@Param("id") id: string) {
+    
+    await this.competitionGameService.delete({"arcadeId":id});
     await this.gameArcardeService.delete({"_id":id});
     return {
       statusCode: HttpStatus.OK,

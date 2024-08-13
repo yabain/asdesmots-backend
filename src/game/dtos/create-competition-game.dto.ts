@@ -3,6 +3,7 @@ import { ArrayMinSize, IsArray, IsBoolean, IsDate, IsEnum, IsMongoId, IsNumber, 
 import { ObjectId } from "mongoose";
 import { WordGameLevelLangType } from "src/gamelevel/enums";
 import { CreateGamePartDTO } from "./create-game-part.dto";
+import { IsUnique } from "../validators/competition-unique";
 
 
 /**
@@ -29,6 +30,7 @@ export class CreateCompetitionGameDTO
     @IsString()
     @MinLength(4)
     @MaxLength(65)
+    @IsUnique({ message: 'Competition already exists'})
     name:string;
 
     @IsOptional()
