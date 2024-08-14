@@ -95,6 +95,7 @@ export class GameArcardeController {
 
       await this.competitionGameService.createNewCompetition(
         {
+          arcadeId: gameArcarde._id,
           name: gameArcarde.name,
           description: gameArcarde.description,
           level: 0,

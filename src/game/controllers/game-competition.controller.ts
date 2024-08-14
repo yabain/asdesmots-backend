@@ -42,14 +42,14 @@ export class GameCompetitionController {
 
   @SecureRouteWithPerms()
   @Get('/by-arcade/:arcadeId')
-  async getByAllArcardeByArcade(
+  async getCompetitionsByArcade(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const data = await this.competitionGameService.findByField({ arcadeId: arcadeId });
+    const data = await this.competitionGameService.findByField({ 'arcadeId': arcadeId });
     return res
       .status(HttpStatus.OK)
-      .json(this.jsonResponse.success('Competition list', data));
+      .json(this.jsonResponse.success('Arcade competition list', data));
   }
 
   /**
@@ -172,7 +172,7 @@ export class GameCompetitionController {
   async deletecompetition(
     @Param('competitionId', ObjectIDValidationPipe) competitionId: string,
   ) {
-    
+
     await this.competitionGameService.delete({"parentCompetition":competitionId});
     await this.competitionGameService.delete({"_id":competitionId});
 
