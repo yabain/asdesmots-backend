@@ -9,14 +9,14 @@ import { ObjectId } from "mongoose";
  */
 export class PlayerSubscriptionDTO
 {
-    @IsMongoId()
-    gameID:ObjectId;
+    // @IsMongoId()
+    // gameID:ObjectId;
 
-    @IsMongoId()
-    playerID:ObjectId;
+    // @IsMongoId()
+    // playerID:ObjectId;
 
-    @IsString()
-    @MinLength(4)
-    @MaxLength(65)
+    // @IsString()
+    // @MinLength(4)
+    // @MaxLength(65)
     localisation:string
 }

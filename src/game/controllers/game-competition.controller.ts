@@ -19,6 +19,7 @@ import {
   ApplyGameWriteriaToGammeDTO,
   ChangeGameCompetitionStateDTO,
   CreateCompetitionGameDTO,
+  PlayerSubscriptionDTO,
   UpdateGameCompetitionGameDTO,
 } from '../dtos';
 import { GameCompetitionPerms } from '../enum';
@@ -40,7 +41,7 @@ export class GameCompetitionController {
     private usersService: UsersService,
   ) {}
 
-  @Get('/by-arcade/:arcadeId')
+  @Get('by-arcade/:arcadeId')
   async getCompetitionsByArcade(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
@@ -56,7 +57,7 @@ export class GameCompetitionController {
   }
 
   
-  @Get('/arcade-competition-and-sub-competitions/:arcadeId')
+  @Get('arcade-competition-and-sub-competitions/:arcadeId')
   async getArcadeCompetitionsWithSubCompetitions(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
@@ -64,13 +65,41 @@ export class GameCompetitionController {
     const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
     const data = parentCompetition ? await this.competitionGameService.associateCompetitionAndChildren(parentCompetition, []) : [];
 
-    // console.log('competition with children', data)
-
     return res
       .status(HttpStatus.OK)
       .json(this.jsonResponse.success('Arcade competition', data));
   }
 
+  @Get('arcade-competition-locations/:arcadeId')
+  async getArcadeCompetitionLocations(
+    @Param('arcadeId') arcadeId: string,
+    @Res() res: Response,
+  ) {
+    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
+    const data = parentCompetition ? await this.competitionGameService.getLeafCompetitionLcations(parentCompetition, []) : [];
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Arcade competition locations', data));
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('subscribe')
+  async subscribeToCompetition(
+    @Req() request: Request,
+    @Body() data: any,
+    @Res() res: Response,
+  ) {
+    const user = request.authUser
+    const authenticatedUser = await this.usersService.findOneByField({
+      email: user.email,
+    });
+    await this.competitionGameService.subscribeUser(data.location, authenticatedUser._id);
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Subscription procced successfully'));
+  }
 
   /**
    *

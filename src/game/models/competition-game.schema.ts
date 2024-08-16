@@ -33,7 +33,7 @@ export class CompetitionGame extends Document
 {
     
     @Prop({default:null})
-    arcadeId: String
+    arcadeId: string
     
     @Prop({default:[]})
     children: CompetitionGame[]
@@ -54,7 +54,7 @@ export class CompetitionGame extends Document
     canRegisterPlayer:Boolean;
 
     @Prop({default:""})
-    localisation:String
+    localisation:string
 
     @Prop({default:0})
     maxPlayerLife:Number;

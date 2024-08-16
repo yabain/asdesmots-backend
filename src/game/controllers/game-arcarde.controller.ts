@@ -84,12 +84,12 @@ export class GameArcardeController {
     @Res() res: Response
   ) {
     const user = request.authUser
-    const userConnected = await this.usersService.findOneByField({
+    const authenticatedUser = await this.usersService.findOneByField({
       email: user.email,
     });
     await this.gameArcardeService.executeWithTransaction(async (session) => {
       const gameArcarde = await this.gameArcardeService.create(
-        { ...createGameArcardeDTO, owner: userConnected },
+        { ...createGameArcardeDTO, owner: authenticatedUser },
         session
       );
 
@@ -165,14 +165,14 @@ export class GameArcardeController {
   @SecureRouteWithPerms()
   @Get()
   async getByAllArcardeByUser(@Req() request: Request) {
-    const userConnected = await this.usersService.findOneByField({
+    const authenticatedUser = await this.usersService.findOneByField({
       email: request.user["email"],
     });
     return {
       statusCode: HttpStatus.OK,
       message: "List of arcade games of the connected user",
       data: await this.gameArcardeService.findByField({
-        owner: userConnected._id,
+        owner: authenticatedUser._id,
       }),
     };
   }
