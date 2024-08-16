@@ -40,17 +40,37 @@ export class GameCompetitionController {
     private usersService: UsersService,
   ) {}
 
-  @SecureRouteWithPerms()
   @Get('/by-arcade/:arcadeId')
   async getCompetitionsByArcade(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const data = await this.competitionGameService.findByField({ 'arcadeId': arcadeId });
+    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
+    const data = parentCompetition ? await this.competitionGameService.buildCompetitionTree(parentCompetition) : null;
+
+    // console.log('competition with children', data)
+
     return res
       .status(HttpStatus.OK)
-      .json(this.jsonResponse.success('Arcade competition list', data));
+      .json(this.jsonResponse.success('Arcade competition', data));
   }
+
+  
+  @Get('/arcade-competition-and-sub-competitions/:arcadeId')
+  async getArcadeCompetitionsWithSubCompetitions(
+    @Param('arcadeId') arcadeId: string,
+    @Res() res: Response,
+  ) {
+    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
+    const data = parentCompetition ? await this.competitionGameService.associateCompetitionAndChildren(parentCompetition, []) : [];
+
+    // console.log('competition with children', data)
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Arcade competition', data));
+  }
+
 
   /**
    *
@@ -97,7 +117,6 @@ export class GameCompetitionController {
   async create(
     @Body() createCompetitionGameDTO: CreateCompetitionGameDTO,
     @Param('gameArcardeID') gameArcardeID: string,
-    string,
     @Res() res: Response,
   ) {
     await this.competitionGameService.createNewCompetition(

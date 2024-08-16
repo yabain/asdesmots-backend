@@ -31,9 +31,12 @@ export type CompetitionGameDocument = HydratedDocument<CompetitionGame>
 })
 export class CompetitionGame extends Document
 {
-
-    @Prop({required: true})
+    
+    @Prop({default:null})
     arcadeId: String
+    
+    @Prop({default:[]})
+    children: CompetitionGame[]
 
     @Prop({default:"", unique:true})
     name:string;

@@ -40,10 +40,15 @@ export abstract class DataBaseService<T extends Document>
             return this.entityModel.findOne<T>({_id: id}).session(session).select(select).exec().then((result)=>result?result.populate(this.toPopuloate):null);
         }
      
-        async findByField(entityObj:Record<string,any>):Promise<T[]>
-        {
-            return this.entityModel.find<T>({where:entityObj}).sort({createdAt:1}).populate(this.toPopuloate).exec();
+        // async findByField(entityObj:Record<string,any>):Promise<T[]>
+        // {
+        //     return this.entityModel.find<T>({where:entityObj}).sort({createdAt:1}).populate(this.toPopuloate).exec();
+        // }
+
+        async findByField(entityObj: Record<string, any>): Promise<T[]> {
+            return this.entityModel.find<T>(entityObj).sort({ createdAt: 1 }).populate(this.toPopuloate).exec();
         }
+        
     
         async findOneByField(entityObj:Record<string,any>,select:Record<string,any>={},session=null):Promise<T>
         {

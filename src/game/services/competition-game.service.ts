@@ -1,7 +1,7 @@
 import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
-import { CompetitionGame, CompetitionGameDocument } from "../models";
+import { CompetitionGame, CompetitionGameDocument, GameArcarde } from "../models";
 import { BadRequestException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
 import { ApplyGameWriteriaToGammeDTO, ChangeGameCompetitionStateDTO, CreateCompetitionGameDTO, UpdateGameCompetitionGameDTO } from "../dtos";
 import { UsersService } from "src/user/services";
@@ -89,6 +89,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
                 ...createCompetitionGameDTO,
                 gameJudge:judge,
                 parentCompetition,
+                gameArcarde,
                 gameWinnerCriterias: gamesCriteria,
                 // gameParts: (createCompetitionGameDTO.gameParts && createCompetitionGameDTO.gameParts.length>0) ? 
                 //     (await createCompetitionGameDTO.gameParts.map((parts)=>this.gamePartService.create(parts,transaction))) :
@@ -294,5 +295,28 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
 
         console.log('list Of Player :', listPlayer);
         return listPlayer;
+    }
+
+    async associateCompetitionAndChildren(competition: CompetitionGame, competitions: CompetitionGame[]): Promise<CompetitionGame[]> {
+        competitions.push(competition);
+        let children = await this.findByField({ 'parentCompetition': competition._id });
+        if (children && children.length > 0) {
+            for (const child of children) {
+                competitions.push(child);
+                await this.buildCompetitionTree(child);
+            }
+        }
+        return competitions;
+    }
+
+    async buildCompetitionTree(competition: CompetitionGame): Promise<CompetitionGame> {
+        let children = await this.findByField({ 'parentCompetition': competition._id });
+        if (children && children.length > 0) {
+            for (const child of children) {
+                await this.buildCompetitionTree(child);
+            }
+            competition.children = children;
+        }
+        return competition;
     }
 } 
