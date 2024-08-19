@@ -1,4 +1,4 @@
-import { IsMongoId, IsString, MaxLength, MinLength } from "class-validator";
+import { IsMongoId, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import { ObjectId } from "mongoose";
 
 /**
@@ -9,7 +9,12 @@ import { ObjectId } from "mongoose";
 export class PlayerUnSubscriptionDTO
 {
     @IsMongoId()
+    @IsOptional()
     gameID:ObjectId;
+
+    @IsMongoId()
+    @IsOptional()
+    arcadeID:ObjectId;
 
     @IsMongoId()
     playerID:ObjectId;

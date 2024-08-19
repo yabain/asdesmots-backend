@@ -290,8 +290,6 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     return gameCompetition.save();
   }
 
-  async addSubscription() {}
-
   async changeGameCompetiton(
     changeGameStateDTO: ChangeGameCompetitionStateDTO,
   ) {
@@ -356,43 +354,43 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     // return competition.update();
   }
 
-  async getListCompetitorSubscriptor(id: string) {
-    let data = await this.findOneByField({ _id: id });
-    if (!data)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'GameCompetitionNotFound/GameCompetition',
-        message: [`Game compétition not found`],
-      });
-    return data.playerGameRegistrations;
-  }
+  // async getListCompetitorSubscriptor(id: string) {
+  //   let data = await this.findOneByField({ _id: id });
+  //   if (!data)
+  //     throw new BadRequestException({
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //       error: 'GameCompetitionNotFound/GameCompetition',
+  //       message: [`Game compétition not found`],
+  //     });
+  //   return data.playerGameRegistrations;
+  // }
 
-  async getListCompetitionParticipants(id: string) {
-    const listPlayer = [];
-    let competition = await this.findOneByField({ _id: id });
-    if (!competition)
-      throw new BadRequestException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'GameCompetitionNotFound/GameCompetition',
-        message: [`Game compétition not found`],
-      });
+  // async getListCompetitionParticipants(id: string) {
+  //   const listPlayer = [];
+  //   let competition = await this.findOneByField({ _id: id });
+  //   if (!competition)
+  //     throw new BadRequestException({
+  //       statusCode: HttpStatus.NOT_FOUND,
+  //       error: 'GameCompetitionNotFound/GameCompetition',
+  //       message: [`Game compétition not found`],
+  //     });
 
-    for (let playerGameRegistration of competition.playerGameRegistrations) {
-      let user = await this.usersService.findOneByField({
-        _id: playerGameRegistration.player,
-      });
-      if (!user)
-        throw new BadRequestException({
-          statusCode: HttpStatus.NOT_FOUND,
-          error: 'PlayerNotFound/GameCompetition',
-          message: [`Player of that game competition not found`],
-        });
-      listPlayer.push(user);
-    }
+  //   for (let playerGameRegistration of competition.playerGameRegistrations) {
+  //     let user = await this.usersService.findOneByField({
+  //       _id: playerGameRegistration.player,
+  //     });
+  //     if (!user)
+  //       throw new BadRequestException({
+  //         statusCode: HttpStatus.NOT_FOUND,
+  //         error: 'PlayerNotFound/GameCompetition',
+  //         message: [`Player of that game competition not found`],
+  //       });
+  //     listPlayer.push(user);
+  //   }
 
-    console.log('list Of Player :', listPlayer);
-    return listPlayer;
-  }
+  //   console.log('list Of Player :', listPlayer);
+  //   return listPlayer;
+  // }
 
   async associateCompetitionAndChildren(
     competition: CompetitionGame,
@@ -458,95 +456,5 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         message: `Game arcarde not found`,
       });
     } else return competition.arcadeId;
-  }
-
-  async subscribeUser(location: string, subscriberId: string) {
-    let gameCompetition = await this.findOneByField({ location: location });
-    if (!gameCompetition)
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/GameCompetition-subscription',
-        message: `Game Competition not found`,
-      });
-    const arcadeId = await this.getCompatitionArcadeId(gameCompetition);
-    let arcade = await this.gameArcardeService.findOneByField({
-      _id: arcadeId,
-    });
-    if (!arcade)
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/GameArcarde-subscription',
-        message: `Game arcarde not found`,
-      });
-
-    console.log('canRegisterPlayer', arcade.canRegisterPlayer);
-    if (!arcade.canRegisterPlayer)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'UnableSubscription/GameArcarde-subscription',
-        message: `Unable to subscribe the player to the game`,
-      });
-
-    if (!arcade.isFreeRegistrationPlayer)
-      throw new ServiceUnavailableException({
-        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-        error: 'ServiceNotFound/GameArcarde-subscription',
-        message: `Paid games not yet supported.`,
-      });
-
-    if (arcade.maxPlayersNumber <= arcade.playerGameRegistrations.length)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'MaxPlayer/GameArcarde-subscription',
-        message: `Maximum number of players already reached`,
-      });
-
-    let player = await this.usersService.findOneByField({ _id: subscriberId });
-    if (!player)
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/PlayerGame-subscription',
-        message: `Player not found`,
-      });
-    let foundPlayer = arcade.playerGameRegistrations.findIndex(
-      (pl) => pl.player._id.toString() == subscriberId,
-    );
-    if (foundPlayer >= 0)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'AlreadyExists/GameArcarde-subscription',
-        message: `Player already subscribed to the game`,
-      });
-    const dateNow = new Date();
-    if (
-      arcade.startRegistrationDate > dateNow ||
-      arcade.endRegistrationDate < dateNow
-    )
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'DateRegistration/GameArcarde-subscription',
-        message: `Unable to register player for this game because player registration date is not allowed for this game`,
-      });
-
-    return this.executeWithTransaction(async (session) => {
-      let gameSubscription = await this.playerGameRegistrationService.create(
-        { player, localisation: location },
-        session,
-      );
-      //   let playerSubscription = await this.gameArcardeService.addSubscription(
-      //     gameSubscription,
-      //     arcade,
-      //     session,
-      //   );
-      let game = await this.findOneByField({ location: location });
-      game.playerGameRegistrations.push(gameSubscription);
-      let playerSubscription = game.save({ session });
-      arcade.playerGameRegistrations.push(gameSubscription);
-
-      gameSubscription.competition = gameCompetition;
-      await gameSubscription.save({ session });
-      await arcade.save({ session });
-      return playerSubscription;
-    });
   }
 }
