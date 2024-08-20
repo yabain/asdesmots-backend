@@ -115,7 +115,6 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         message: `Game arcarde not found`,
       });
 
-    console.log('canRegisterPlayer', arcade.canRegisterPlayer);
     if (!arcade.canRegisterPlayer)
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
@@ -172,6 +171,9 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
       let game = await this.competitionGameService.findOneByField({
         location: location,
       });
+      if (!game.playerGameRegistrations) {
+        game.playerGameRegistrations = []; // Crée le tableau s'il n'existe pas
+      }
       game.playerGameRegistrations.push(gameSubscription);
       let playerSubscription = game.save({ session });
       //   arcade.playerGameRegistrations.push(gameSubscription);

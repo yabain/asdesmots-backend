@@ -1,6 +1,6 @@
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { DataBaseService } from 'src/shared/services/database';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import {
   CompetitionGame,
   CompetitionGameDocument,
@@ -178,11 +178,9 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
           message: [`Parent competition not found`],
         });
 
-      if (
-        competition.parentCompetition &&
-        competition.parentCompetition.id != parentCompetition.id
-      )
-        competition.parentCompetition = parentCompetition;
+      // if (competition.parentCompetition?._id != parentCompetition?._id)
+        // competition.parentCompetition = parentCompetition._id;
+      // competition.parentCompetition = new Types.ObjectId(parentCompetition?._id);
     }
 
     if (updateCompetitionGameDTO.gameJudgeID) {
@@ -220,7 +218,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     return competition.update({
       ...updateCompetitionGameDTO,
       gameJudge: judge,
-      parentCompetition,
+      parentCompetition: new Types.ObjectId(parentCompetition?._id),
       gameWinnerCriterias: gamesCriteria,
     });
   }
@@ -448,6 +446,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       });
       // Retourner la valeur obtenue récursivement
       return this.getCompatitionArcadeId(parent);
+      // return this.getCompatitionArcadeId(competition.parentCompetition);
     } else if (!competition.arcadeId) {
       // Lancer une exception si arcadeId n'existe pas
       throw new NotFoundException({

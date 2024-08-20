@@ -46,8 +46,14 @@ export class GameCompetitionController {
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
-    const data = parentCompetition ? await this.competitionGameService.buildCompetitionTree(parentCompetition) : null;
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    const data = parentCompetition
+      ? await this.competitionGameService.buildCompetitionTree(
+          parentCompetition,
+        )
+      : null;
 
     // console.log('competition with children', data)
 
@@ -56,14 +62,47 @@ export class GameCompetitionController {
       .json(this.jsonResponse.success('Arcade competition', data));
   }
 
-  
   @Get('arcade-competition-and-sub-competitions/:arcadeId')
   async getArcadeCompetitionsWithSubCompetitions(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
-    const data = parentCompetition ? await this.competitionGameService.associateCompetitionAndChildren(parentCompetition, []) : [];
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    const data = parentCompetition
+      ? await this.competitionGameService.associateCompetitionAndChildren(
+          parentCompetition,
+          [],
+        )
+      : [];
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Arcade competition', data));
+  }
+
+  @Get('by-competition/:competitionId')
+  async getArcadeCompetitionsByChildCompetition(
+    @Param('competitionId') competitionId: string,
+    @Res() res: Response,
+  ) {
+    const competition = await this.competitionGameService.findOneByField({
+      _id: competitionId,
+    });
+    const arcadeId = await this.competitionGameService.getCompatitionArcadeId(
+      competition,
+    );
+    // console.log(arcadeId);
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    const data = competition
+      ? await this.competitionGameService.associateCompetitionAndChildren(
+          parentCompetition,
+          [],
+        )
+      : [];
 
     return res
       .status(HttpStatus.OK)
@@ -75,8 +114,15 @@ export class GameCompetitionController {
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
-    const data = parentCompetition ? await this.competitionGameService.getLeafCompetitionLcations(parentCompetition, []) : [];
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    const data = parentCompetition
+      ? await this.competitionGameService.getLeafCompetitionLcations(
+          parentCompetition,
+          [],
+        )
+      : [];
 
     return res
       .status(HttpStatus.OK)
@@ -202,9 +248,10 @@ export class GameCompetitionController {
   async deletecompetition(
     @Param('competitionId', ObjectIDValidationPipe) competitionId: string,
   ) {
-
-    await this.competitionGameService.delete({"parentCompetition":competitionId});
-    await this.competitionGameService.delete({"_id":competitionId});
+    await this.competitionGameService.delete({
+      parentCompetition: competitionId,
+    });
+    await this.competitionGameService.delete({ _id: competitionId });
 
     return {
       statusCode: HttpStatus.OK,
@@ -392,11 +439,18 @@ export class GameCompetitionController {
   @SecureRouteWithPerms()
   async getGameCompetitionById(
     @Param('id', ObjectIDValidationPipe) id: string,
+    @Res() res: Response,
   ) {
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Game competition details',
-      data: await this.competitionGameService.findOneByField({ _id: id }),
-    };
+    const competition = await this.competitionGameService.findOneByField({
+      _id: id,
+    });
+    try {
+      const arcadeId = await this.competitionGameService.getCompatitionArcadeId(competition);
+      competition.arcadeId = arcadeId;
+    } catch (err) {}
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Game competition details',competition));
   }
 }
