@@ -49,7 +49,7 @@ export class GameSubscriptionController {
   }
 
   @Get('/arcade/:arcadeId')
-  async getarcadeSubscribers(
+  async getArcadeSubscribers(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {

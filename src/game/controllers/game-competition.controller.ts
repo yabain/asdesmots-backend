@@ -209,7 +209,7 @@ export class GameCompetitionController {
   async applyGameWriteriaToGamme(
     @Body() applyGameWriteriaToGammeDTO: ApplyGameWriteriaToGammeDTO,
   ) {
-    await this.competitionGameService.appyCriteriaToGame(
+    await this.competitionGameService.applyCriteriaToGame(
       applyGameWriteriaToGammeDTO,
     );
     return {
@@ -289,7 +289,7 @@ export class GameCompetitionController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: 'Criterion winner of a competition withdraw successfully',
+      message: 'Criteria successfully removed',
     };
   }
 

@@ -143,7 +143,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         error: 'NotFound/PlayerGame-subscription',
         message: `Player not found`,
       });
-    let foundPlayer = arcade.playerGameRegistrations.findIndex(
+    let foundPlayer = gameCompetition.playerGameRegistrations.findIndex(
       (pl) => pl.player._id.toString() == subscriberId,
     );
     if (foundPlayer >= 0)
