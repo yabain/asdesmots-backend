@@ -15,6 +15,7 @@ import { GameGatewayWS } from "./ws-gateway";
 import { JsonResponse } from "src/shared/helpers/json-response";
 import { UniqueArcadeValidator } from "./validators/arcade-unique";
 import { UniqueCompetitionValidator } from "./validators/competition-unique";
+import { UniqueGamePartValidator } from "./validators/game-part-unique";
 
 @Module({
     controllers:[
@@ -54,7 +55,8 @@ import { UniqueCompetitionValidator } from "./validators/competition-unique";
         GameGatewayWS,
         JsonResponse,
         UniqueArcadeValidator,
-        UniqueCompetitionValidator
+        UniqueCompetitionValidator,
+        UniqueGamePartValidator
     ],
     exports:[
         CompetitionGameService,
