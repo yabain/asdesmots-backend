@@ -9,8 +9,8 @@ import { ObjectId } from "mongoose";
  */
 export class PlayerSubscriptionDTO
 {
-    // @IsMongoId()
-    // gameID:ObjectId;
+    @IsMongoId()
+    gameId:ObjectId;
 
     // @IsMongoId()
     // playerID:ObjectId;
@@ -18,5 +18,5 @@ export class PlayerSubscriptionDTO
     // @IsString()
     // @MinLength(4)
     // @MaxLength(65)
-    localisation:string
+    // localisation:string
 }

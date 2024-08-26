@@ -393,8 +393,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     });
     if (children && children.length > 0) {
       for (const child of children) {
-        competitions.push(child);
-        await this.buildCompetitionTree(child);
+        await this.associateCompetitionAndChildren(child, competitions);
       }
     }
     return competitions;
@@ -417,7 +416,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
 
   async getLeafCompetitionLcations(
     competition: CompetitionGame,
-    competitions: string[],
+    competitions: any[],
   ): Promise<string[]> {
     let children = await this.findByField({
       parentCompetition: competition._id,
@@ -426,7 +425,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       for (const child of children) {
         await this.getLeafCompetitionLcations(child, competitions);
       }
-    } else competitions.push(competition.localisation);
+    } else competitions.push({_id: competition._id, location: competition.localisation});
 
     return competitions;
   }
@@ -449,4 +448,40 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       });
     } else return competition.arcadeId;
   }
+
+  async formalDelete(competitionId: string) {
+    let competition = await this.findOneByField({
+      _id: competitionId,
+    });
+    if (!competition) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'GameCompetitionNotFound/GameCompetition',
+        message: [`Game competition not found`],
+      });
+    }
+  
+    // Récupérer toutes les compétitions associées
+    let competitions = await this.associateCompetitionAndChildren(competition, []);
+  
+    return this.executeWithTransaction(async (session) => {
+      // Supprimer les enregistrements de joueurs pour chaque compétition
+      for (let compet of competitions) {
+        let registersIds = compet.playerGameRegistrations.map((comp) => comp._id);
+  
+        let conditionFilter = { '_id': { $in: registersIds } };
+  
+        // Suppression avec la session
+        await this.playerGameRegistrationService.deleteMany(conditionFilter);
+      }
+  
+      let competIds = competitions.map((comp) => comp._id);
+  
+      let condition = { '_id': { $in: competIds } };
+  
+      // Suppression des compétitions avec la session
+      return await this.deleteMany(condition);
+    });
+  }
+  
 }

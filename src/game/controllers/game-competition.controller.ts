@@ -248,10 +248,10 @@ export class GameCompetitionController {
   async deletecompetition(
     @Param('competitionId', ObjectIDValidationPipe) competitionId: string,
   ) {
-    await this.competitionGameService.delete({
-      parentCompetition: competitionId,
-    });
-    await this.competitionGameService.delete({ _id: competitionId });
+    // await this.competitionGameService.delete({
+    //   parentCompetition: competitionId, 
+    // });
+    await this.competitionGameService.formalDelete(competitionId);
 
     return {
       statusCode: HttpStatus.OK,

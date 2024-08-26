@@ -52,6 +52,8 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         competition,
         [],
       );
+    
+    console.log('Arcade competition list', competitions)
 
     // Utiliser flatMap pour obtenir un tableau plat d'abonnés
     const subscribers = await Promise.all(
@@ -71,7 +73,6 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
     const game = await this.competitionGameService.findOneByField({
       _id: competitionId,
     });
-
     if (game) {
       const subscribers = await Promise.all(
         game.playerGameRegistrations.map(async (subscriber) => {
@@ -92,9 +93,9 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
     });
   }
 
-  async subscribeUser(location: string, subscriberId: string) {
+  async subscribePlayer(gameId: string, subscriberId: string) {
     let gameCompetition = await this.competitionGameService.findOneByField({
-      location: location,
+      _id: gameId,
     });
     if (!gameCompetition)
       throw new NotFoundException({
@@ -129,12 +130,12 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         message: `Paid games not yet supported.`,
       });
 
-    if (arcade.maxPlayersNumber <= arcade.playerGameRegistrations.length)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'MaxPlayer/GameArcarde-subscription',
-        message: `Maximum number of players already reached`,
-      });
+    // if (arcade.maxPlayersNumber <= arcade.playerGameRegistrations.length)
+    //   throw new BadRequestException({
+    //     statusCode: HttpStatus.BAD_REQUEST,
+    //     error: 'MaxPlayer/GameArcarde-subscription',
+    //     message: `Maximum number of players already reached`,
+    //   });
 
     let player = await this.userService.findOneByField({ _id: subscriberId });
     if (!player)
@@ -144,7 +145,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         message: `Player not found`,
       });
     let foundPlayer = gameCompetition.playerGameRegistrations.findIndex(
-      (pl) => pl.player._id.toString() == subscriberId,
+      (pl) => pl.player._id.toString() == subscriberId
     );
     if (foundPlayer >= 0)
       throw new BadRequestException({
@@ -165,22 +166,18 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
 
     return this.executeWithTransaction(async (session) => {
       let gameSubscription = await this.playerGameRegistrationService.create(
-        { player, localisation: location },
+        { player, localisation: gameCompetition.localisation },
         session,
       );
-      let game = await this.competitionGameService.findOneByField({
-        location: location,
-      });
-      if (!game.playerGameRegistrations) {
-        game.playerGameRegistrations = []; // Crée le tableau s'il n'existe pas
+      if (!gameCompetition.playerGameRegistrations) {
+        gameCompetition.playerGameRegistrations = []; // Crée le tableau s'il n'existe pas
       }
-      game.playerGameRegistrations.push(gameSubscription);
-      let playerSubscription = game.save({ session });
-      //   arcade.playerGameRegistrations.push(gameSubscription);
+      gameCompetition.playerGameRegistrations.push(gameSubscription);
+      let playerSubscription = gameCompetition.save({ session });
 
       gameSubscription.competition = gameCompetition;
       await gameSubscription.save({ session });
-      //   await arcade.save({ session });
+
       return playerSubscription;
     });
   }

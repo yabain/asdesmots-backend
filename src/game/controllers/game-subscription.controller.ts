@@ -38,8 +38,8 @@ export class GameSubscriptionController {
     const authenticatedUser = await this.usersService.findOneByField({
       email: user.email,
     });
-    await this.gameSubscriptionService.subscribeUser(
-      data.location,
+    await this.gameSubscriptionService.subscribePlayer(
+      data.gameId,
       authenticatedUser._id,
     );
 

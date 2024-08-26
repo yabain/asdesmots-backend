@@ -389,7 +389,8 @@ export class GameArcardeController {
   @Delete(":id")
   async DeleteArcarde(@Param("id") id: string) {
     
-    await this.competitionGameService.delete({"arcadeId":id});
+    let competition = await this.competitionGameService.findOneByField({"arcadeId":id});
+    await this.competitionGameService.formalDelete(competition._id);
     await this.gameArcardeService.delete({"_id":id});
     return {
       statusCode: HttpStatus.OK,
