@@ -19,8 +19,6 @@ import {
 import {
   ApplyGameWriteriaToGammeDTO,
   ChangeGameCompetitionStateDTO,
-  CreateCompetitionGameDTO,
-  PlayerSubscriptionDTO,
   UpdateGameCompetitionGameDTO,
 } from '../dtos';
 import { UsersService } from 'src/user/services';
@@ -28,7 +26,6 @@ import { GameWinnerCriteriaService } from './game-winner-criteria.service';
 import { GameArcardeService } from './game-arcarde.service';
 import { GameLevelService } from 'src/gamelevel/services';
 import { GameState } from '../enum';
-import { User } from 'src/user/models';
 import { PlayerGameRegistrationService } from './player-game-registration.service';
 
 @Injectable()

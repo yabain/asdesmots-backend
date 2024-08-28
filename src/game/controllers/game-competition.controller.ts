@@ -12,6 +12,7 @@ import {
   Req,
   Res,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { ObjectIDValidationPipe } from 'src/shared/pipes';
 import { SecureRouteWithPerms } from 'src/shared/security';
@@ -19,10 +20,8 @@ import {
   ApplyGameWriteriaToGammeDTO,
   ChangeGameCompetitionStateDTO,
   CreateCompetitionGameDTO,
-  PlayerSubscriptionDTO,
   UpdateGameCompetitionGameDTO,
 } from '../dtos';
-import { GameCompetitionPerms } from '../enum';
 import {
   CompetitionGameService,
   PlayerGameRegistrationService,
@@ -49,11 +48,15 @@ export class GameCompetitionController {
     const parentCompetition = await this.competitionGameService.findOneByField({
       arcadeId: arcadeId,
     });
-    const data = parentCompetition
-      ? await this.competitionGameService.buildCompetitionTree(
-          parentCompetition,
-        )
-      : null;
+
+    if (!parentCompetition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.buildCompetitionTree(parentCompetition);
 
     // console.log('competition with children', data)
 
@@ -70,12 +73,14 @@ export class GameCompetitionController {
     const parentCompetition = await this.competitionGameService.findOneByField({
       arcadeId: arcadeId,
     });
-    const data = parentCompetition
-      ? await this.competitionGameService.associateCompetitionAndChildren(
-          parentCompetition,
-          [],
-        )
-      : [];
+    if (!parentCompetition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.associateCompetitionAndChildren(parentCompetition,[]);
 
     return res
       .status(HttpStatus.OK)
@@ -90,19 +95,28 @@ export class GameCompetitionController {
     const competition = await this.competitionGameService.findOneByField({
       _id: competitionId,
     });
+
+    if (!competition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
     const arcadeId = await this.competitionGameService.getCompatitionArcadeId(
       competition,
     );
-    // console.log(arcadeId);
     const parentCompetition = await this.competitionGameService.findOneByField({
       arcadeId: arcadeId,
     });
-    const data = competition
-      ? await this.competitionGameService.associateCompetitionAndChildren(
-          parentCompetition,
-          [],
-        )
-      : [];
+    if (!parentCompetition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.associateCompetitionAndChildren(parentCompetition,[]);
 
     return res
       .status(HttpStatus.OK)

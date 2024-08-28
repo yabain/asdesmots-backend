@@ -1,16 +1,13 @@
 import {
-  Body,
   Controller,
   Get,
   HttpStatus,
   Param,
-  Put,
-  Delete,
   Res,
+  NotFoundException,
 } from '@nestjs/common';
 import { CompetitionGameService, GameWinnerCriteriaService } from '../services';
-import { ApplyGameWriteriaToGammeDTO } from '../dtos';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { JsonResponse } from 'src/shared/helpers/json-response';
 
 @Controller('winner-criteria')
@@ -72,11 +69,17 @@ export class GameWinnerCriteriaController {
     @Param('competitionID') gameCompetitionID: String,
     @Res() res: Response,
   ) {
-    const data = (
-      await this.competitionService.findOneByField({ _id: gameCompetitionID })
-    ).gameWinnerCriterias;
+    const competition = await this.competitionService.findOneByField({ _id: gameCompetitionID });
+    if (!competition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    
     return res
       .status(HttpStatus.OK)
-      .json(this.jsonResponse.success('Competition winning criterias list', data));
+      .json(this.jsonResponse.success('Competition winning criterias list', competition.gameWinnerCriterias));
   }
 }

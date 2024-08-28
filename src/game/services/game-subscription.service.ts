@@ -52,8 +52,6 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         competition,
         [],
       );
-    
-    console.log('Arcade competition list', competitions)
 
     // Utiliser flatMap pour obtenir un tableau plat d'abonnés
     const subscribers = await Promise.all(
@@ -130,12 +128,13 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         message: `Paid games not yet supported.`,
       });
 
-    // if (arcade.maxPlayersNumber <= arcade.playerGameRegistrations.length)
-    //   throw new BadRequestException({
-    //     statusCode: HttpStatus.BAD_REQUEST,
-    //     error: 'MaxPlayer/GameArcarde-subscription',
-    //     message: `Maximum number of players already reached`,
-    //   });
+    const arcadeSubscribers = await this.getArcadeSubscribers(arcade.id);
+    if (arcade.maxPlayersNumber <= arcadeSubscribers.length)
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        error: 'MaxPlayer/GameArcarde-subscription',
+        message: `Maximum number of players already reached`,
+      });
 
     let player = await this.userService.findOneByField({ _id: subscriberId });
     if (!player)
@@ -145,7 +144,7 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         message: `Player not found`,
       });
     let foundPlayer = gameCompetition.playerGameRegistrations.findIndex(
-      (pl) => pl.player._id.toString() == subscriberId
+      (pl) => pl.player._id.toString() == subscriberId,
     );
     if (foundPlayer >= 0)
       throw new BadRequestException({

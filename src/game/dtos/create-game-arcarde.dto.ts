@@ -20,7 +20,6 @@ import { IsUnique } from "../validators/arcade-unique";
 export class CreateGameArcardeDTO
 {
     @IsString()
-    @MinLength(4)
     @MaxLength(65)
     @IsUnique({ message: 'Arcade already exists'})
     name:string;
