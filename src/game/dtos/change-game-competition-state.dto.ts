@@ -10,8 +10,8 @@ import { GameState } from "../enum";
  */
 export class ChangeGameCompetitionStateDTO
 {
-    @IsMongoId()
-    gameArcardeID:ObjectId;
+    // @IsMongoId()
+    // gameArcardeID:ObjectId;
 
     @IsMongoId()
     gameCompetitionID:ObjectId;

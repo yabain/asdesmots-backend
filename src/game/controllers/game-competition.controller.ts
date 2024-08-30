@@ -7,9 +7,6 @@ import {
   Post,
   Put,
   Delete,
-  Query,
-  ParseArrayPipe,
-  Req,
   Res,
   UseGuards,
   NotFoundException,
@@ -26,7 +23,7 @@ import {
   CompetitionGameService,
   PlayerGameRegistrationService,
 } from '../services';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { JsonResponse } from 'src/shared/helpers/json-response';
 import { AuthGuard } from 'src/authorization/guards/auth.guard';
 import { UsersService } from 'src/user/services';
@@ -37,7 +34,6 @@ export class GameCompetitionController {
     private competitionGameService: CompetitionGameService,
     private playerGameSubscription: PlayerGameRegistrationService,
     private jsonResponse: JsonResponse,
-    private usersService: UsersService,
   ) {}
 
   @Get('by-arcade/:arcadeId')

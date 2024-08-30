@@ -22,18 +22,19 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
         if(!gameArcarde) throw new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
             error:'NotFound/GameArcarde-changestate',
-            message:[`Game arcarde not found`]   
+            message:`Game arcarde not found`   
         })
         let dateNow = new Date();
-        if( changeGameStateDTO.state==GameState.RUNNING && (dateNow < gameArcarde.startDate ||  dateNow> gameArcarde.endDate)) throw new ForbiddenException({
+        console.log(dateNow)
+        if( changeGameStateDTO.state==GameState.RUNNING && ((dateNow < gameArcarde.startDate) ||  (dateNow> gameArcarde.endDate))) throw new ForbiddenException({
             statusCode:HttpStatus.FORBIDDEN,
             error:'Forbidden/GameArcarde-changestate-start',
-            message:[`The current date does not correspond to the start and end date of the game`]  
+            message:`The current date does not correspond to the start and end date of the game`  
         })
         else if(changeGameStateDTO.state==GameState.END && dateNow< gameArcarde.endDate) throw new ForbiddenException({
             statusCode:HttpStatus.FORBIDDEN,
             error:'Forbidden/GameArcarde-changestate-end',
-            message:[`The current date does not correspond to the start and end date of the game`]  
+            message:`The current date does not correspond to the start and end date of the game`  
         })
 
         // gameArcarde.competitionGames

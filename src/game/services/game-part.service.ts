@@ -1,84 +1,107 @@
-import { InjectModel, InjectConnection } from "@nestjs/mongoose";
-import mongoose, { Model } from "mongoose";
-import { DataBaseService } from "src/shared/services/database";
-import { GamePart, GamePartDocument } from "../models";
-import { CreateGamePartDTO } from "../dtos";
-import { HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
-import { CompetitionGameService } from "./competition-game.service";
-import { GameLevelService } from "src/gamelevel/services";
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import mongoose, { Model } from 'mongoose';
+import { DataBaseService } from 'src/shared/services/database';
+import { GamePart, GamePartDocument } from '../models';
+import { CreateGamePartDTO } from '../dtos';
+import {
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  forwardRef,
+} from '@nestjs/common';
+import { CompetitionGameService } from './competition-game.service';
+import { GameLevelService } from 'src/gamelevel/services';
+import { JsonResponse } from 'src/shared/helpers/json-response';
 @Injectable()
-export class GamePartService extends DataBaseService<GamePartDocument>
-{
-    constructor(
-        @InjectModel(GamePart.name) gamePartModel: Model<GamePartDocument>,
-        @InjectConnection() connection: mongoose.Connection,
-        private gameCompetitionService:CompetitionGameService,
-        private gameLevelService:GameLevelService
-        ){
-            super(gamePartModel,connection,["gameLevel"]);
-    } 
-    
-    async createNewGamePart(createGamePartDTO:CreateGamePartDTO)
-    {
-        let gameCompetition = await this.gameCompetitionService.findOneByField({"_id":createGamePartDTO.gameCompetitionID});
-        if(!gameCompetition) throw new NotFoundException({
-            statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/GamePart-GameCompetition',
-            message:[`Competition not found`]
-        })
-        return this.executeWithTransaction(async (session)=>{
-            let newGamePart = this.createInstance(createGamePartDTO);
-            newGamePart.gameLevel=gameCompetition.gameLevel;
-            gameCompetition.gameParts.push(newGamePart);
-            if(gameCompetition.gameParts.length>1) gameCompetition.isSinglePart=false;
-            newGamePart = await newGamePart.save({session});
-            await gameCompetition.save({session});
-            return newGamePart;
-        })
-    }
+export class GamePartService extends DataBaseService<GamePartDocument> {
+  constructor(
+    @InjectModel(GamePart.name) gamePartModel: Model<GamePartDocument>,
+    @InjectConnection() connection: mongoose.Connection,
+    private gameCompetitionService: CompetitionGameService,
+    private gameLevelService: GameLevelService,
+  ) {
+    super(gamePartModel, connection, ['gameLevel']);
+  }
 
-    async deletGamePart(gameCompetitionID,gamePartID)
-    {
-        let gamePart = await this.findOneByField({"_id":gamePartID});
-        if(!gamePart) throw new NotFoundException({
-            statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/GamePart',
-            message:[`Game part not found`]
-        })
+  async createNewGamePart(createGamePartDTO: CreateGamePartDTO) {
+    let gameCompetition = await this.gameCompetitionService.findOneByField({
+      _id: createGamePartDTO.gameCompetitionID,
+    });
+    if (!gameCompetition)
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GamePart-GameCompetition',
+        message: [`Competition not found`],
+      });
+    const exist = gameCompetition?.gameParts.findIndex(
+      (part) => part.name === createGamePartDTO.name,
+    );
+    console.log(exist);
+    if (exist >= 0)
+      throw new ConflictException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GamePart-DuplicatedEntry',
+        message: `The given name is already used`,
+      });
+    return this.executeWithTransaction(async (session) => {
+      let newGamePart = this.createInstance(createGamePartDTO);
+      newGamePart.gameLevel = gameCompetition.gameLevel;
+      gameCompetition.gameParts.push(newGamePart);
+      if (gameCompetition.gameParts.length > 1)
+        gameCompetition.isSinglePart = false;
+      newGamePart = await newGamePart.save({ session });
+      await gameCompetition.save({ session });
+      return newGamePart;
+    });
+  }
 
-        let gameCompetition = await this.gameCompetitionService.findOneByField({"_id":gameCompetitionID});
-        if(!gameCompetition) throw new NotFoundException({
-            statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/GamePart-GameCompetition',
-            message:[`Competition not found`]
-        })
+  async deletGamePart(gameCompetitionID, gamePartID) {
+    let gamePart = await this.findOneByField({ _id: gamePartID });
+    if (!gamePart)
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GamePart',
+        message: [`Game part not found`],
+      });
 
-        return this.executeWithTransaction(async (session)=>{
-            let gamePartIndex = gameCompetition.gameParts.findIndex((part)=>part.id==gamePartID);
-            if(gamePartIndex>-1) 
-            {
-                gameCompetition.gameParts.splice(gamePartIndex,1);
-                if(gameCompetition.gameParts.length<2) gameCompetition.isSinglePart=true;
-                await gameCompetition.save({session});
-            }
-            return gamePart.delete({session});
-        })
-    }
+    let gameCompetition = await this.gameCompetitionService.findOneByField({
+      _id: gameCompetitionID,
+    });
+    if (!gameCompetition)
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GamePart-GameCompetition',
+        message: [`Competition not found`],
+      });
 
-    async getListOfPartOfCompetition(gameCompetitionID)
-    {
-        let gameCompetition = await this.gameCompetitionService.findOneByField({"_id":gameCompetitionID});
-        if(!gameCompetition) throw new NotFoundException({
-            statusCode:HttpStatus.NOT_FOUND,
-            error:'NotFound/GamePart-GameCompetition',
-            message:[`Competition not found`]
-        }) 
-        
-        return gameCompetition.gameParts;
-    }
+    return this.executeWithTransaction(async (session) => {
+      let gamePartIndex = gameCompetition.gameParts.findIndex(
+        (part) => part.id == gamePartID,
+      );
+      if (gamePartIndex > -1) {
+        gameCompetition.gameParts.splice(gamePartIndex, 1);
+        if (gameCompetition.gameParts.length < 2)
+          gameCompetition.isSinglePart = true;
+        await gameCompetition.save({ session });
+      }
+      return gamePart.delete({ session });
+    });
+  }
 
-    async changeGamePartState(gamePartState) {
+  async getListOfPartOfCompetition(gameCompetitionID) {
+    let gameCompetition = await this.gameCompetitionService.findOneByField({
+      _id: gameCompetitionID,
+    });
+    if (!gameCompetition)
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GamePart-GameCompetition',
+        message: [`Competition not found`],
+      });
 
-    }
-    
-} 
+    return gameCompetition.gameParts;
+  }
+
+  async changeGamePartState(gamePartState) {}
+}

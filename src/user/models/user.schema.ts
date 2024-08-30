@@ -40,7 +40,7 @@ export class User extends Document
     @Prop({
         required:true,
         unique:true,
-        match:/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[_!?&$*,.';+\-@#\$%\^&\*])(?=.{8,})/,
+        // match:/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[_!?&$*,.';+\-@#\$%\^&\*])(?=.{8,})/,
     })
     email:string;
 

@@ -21,7 +21,7 @@ export class CreateGamePartDTO
     @IsString()
     @MinLength(4)
     @MaxLength(65)
-    @IsUnique({ message: 'Part already exists'})
+    // @IsUnique({ message: 'Part already exists'})
     name:string;
 
     @IsOptional()
