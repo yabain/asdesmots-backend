@@ -1,6 +1,6 @@
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { DataBaseService } from 'src/shared/services/database';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import {
   CompetitionGame,
   CompetitionGameDocument,
@@ -19,8 +19,6 @@ import {
 import {
   ApplyGameWriteriaToGammeDTO,
   ChangeGameCompetitionStateDTO,
-  CreateCompetitionGameDTO,
-  PlayerSubscriptionDTO,
   UpdateGameCompetitionGameDTO,
 } from '../dtos';
 import { UsersService } from 'src/user/services';
@@ -28,7 +26,6 @@ import { GameWinnerCriteriaService } from './game-winner-criteria.service';
 import { GameArcardeService } from './game-arcarde.service';
 import { GameLevelService } from 'src/gamelevel/services';
 import { GameState } from '../enum';
-import { User } from 'src/user/models';
 import { PlayerGameRegistrationService } from './player-game-registration.service';
 
 @Injectable()
@@ -178,11 +175,9 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
           message: [`Parent competition not found`],
         });
 
-      if (
-        competition.parentCompetition &&
-        competition.parentCompetition.id != parentCompetition.id
-      )
-        competition.parentCompetition = parentCompetition;
+      // if (competition.parentCompetition?._id != parentCompetition?._id)
+      // competition.parentCompetition = parentCompetition._id;
+      // competition.parentCompetition = new Types.ObjectId(parentCompetition?._id);
     }
 
     if (updateCompetitionGameDTO.gameJudgeID) {
@@ -220,77 +215,68 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     return competition.update({
       ...updateCompetitionGameDTO,
       gameJudge: judge,
-      parentCompetition,
+      parentCompetition: new Types.ObjectId(parentCompetition?._id),
       gameWinnerCriterias: gamesCriteria,
     });
   }
 
-  async appyCriteriaToGame(
+  async applyCriteriaToGame(
     applyGameWriteriaToGammeDTO: ApplyGameWriteriaToGammeDTO,
   ) {
     let gameCompetition = await this.findOneByField({
       _id: applyGameWriteriaToGammeDTO.gameID,
     });
-    if (!gameCompetition)
+    if (!gameCompetition) {
       throw new BadRequestException({
         statusCode: HttpStatus.NOT_FOUND,
         error: 'GameCompetitionNotFound/GameCompetition',
         message: [`Game competition not found`],
       });
-    console.log(gameCompetition);
-
-    let criteriaExist = await gameCompetition.gameWinnerCriterias.find(
-      (id) => id._id.toString() == applyGameWriteriaToGammeDTO.gammeWinnersID,
-    );
-    console.log(criteriaExist);
-    if (criteriaExist) {
-      throw new BadRequestException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'GameCriteria/AlreadyExiste',
-        message: [`Game criteria already exist`],
-      });
-    } else {
-      let winnerCriteria = await this.gameWinnerCriteriaService.findOneByField({
-        _id: applyGameWriteriaToGammeDTO.gammeWinnersID,
-      });
-      console.log(winnerCriteria);
-      if (!winnerCriteria) {
-        throw new BadRequestException({
-          statusCode: HttpStatus.NOT_FOUND,
-          error: 'GameCriteriaNotFound/GameCompetition',
-          message: [`Game criteria not found`],
-        });
-      } else {
-        await gameCompetition.gameWinnerCriterias.push(winnerCriteria);
-        return gameCompetition.save();
-      }
     }
+
+    return this.executeWithTransaction(async (session) => {
+      gameCompetition.gameWinnerCriterias = [];
+
+      for (const criteria of applyGameWriteriaToGammeDTO.gammeWinnersID) {
+        let winnerCriteria =
+          await this.gameWinnerCriteriaService.findOneByField({
+            _id: criteria,
+          });
+
+        if (winnerCriteria) {
+          gameCompetition.gameWinnerCriterias.push(winnerCriteria);
+        }
+      }
+      return await gameCompetition.save();
+    });
   }
 
   async removeCriteriaToGame(objectReceiveFromFrontend) {
     let gameCompetition = await this.findOneByField({
       _id: objectReceiveFromFrontend.gameID,
     });
-    if (!gameCompetition)
+  
+    if (!gameCompetition) {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         error: 'GameCompetitionNotFound/GameCompetition',
         message: [`Game competition not found`],
       });
-
-    let gameCriteriaIndex = await gameCompetition.gameWinnerCriterias.findIndex(
-      (id) => id._id.toString() == objectReceiveFromFrontend.gammeWinnersID,
-    );
-    if (gameCriteriaIndex > -1) {
-      await gameCompetition.gameWinnerCriterias.splice(gameCriteriaIndex, 1);
-    } else {
-      console.log('Critere introuvable');
     }
-
-    return gameCompetition.save();
+  
+    let gameCriteriaIndex = gameCompetition.gameWinnerCriterias.findIndex(
+      (criteria) => criteria._id.toString() === objectReceiveFromFrontend.gammeWinnersID
+    );
+  
+    if (gameCriteriaIndex > -1) {
+      // Supprimer le critère si trouvé
+      gameCompetition.gameWinnerCriterias.splice(gameCriteriaIndex, 1);
+    }
+  
+    // Sauvegarder les modifications
+    return await gameCompetition.save();
   }
-
-  async addSubscription() {}
+  
 
   async changeGameCompetiton(
     changeGameStateDTO: ChangeGameCompetitionStateDTO,
@@ -356,43 +342,43 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     // return competition.update();
   }
 
-  async getListCompetitorSubscriptor(id: string) {
-    let data = await this.findOneByField({ _id: id });
-    if (!data)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'GameCompetitionNotFound/GameCompetition',
-        message: [`Game compétition not found`],
-      });
-    return data.playerGameRegistrations;
-  }
+  // async getListCompetitorSubscriptor(id: string) {
+  //   let data = await this.findOneByField({ _id: id });
+  //   if (!data)
+  //     throw new BadRequestException({
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //       error: 'GameCompetitionNotFound/GameCompetition',
+  //       message: [`Game compétition not found`],
+  //     });
+  //   return data.playerGameRegistrations;
+  // }
 
-  async getListCompetitionParticipants(id: string) {
-    const listPlayer = [];
-    let competition = await this.findOneByField({ _id: id });
-    if (!competition)
-      throw new BadRequestException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'GameCompetitionNotFound/GameCompetition',
-        message: [`Game compétition not found`],
-      });
+  // async getListCompetitionParticipants(id: string) {
+  //   const listPlayer = [];
+  //   let competition = await this.findOneByField({ _id: id });
+  //   if (!competition)
+  //     throw new BadRequestException({
+  //       statusCode: HttpStatus.NOT_FOUND,
+  //       error: 'GameCompetitionNotFound/GameCompetition',
+  //       message: [`Game compétition not found`],
+  //     });
 
-    for (let playerGameRegistration of competition.playerGameRegistrations) {
-      let user = await this.usersService.findOneByField({
-        _id: playerGameRegistration.player,
-      });
-      if (!user)
-        throw new BadRequestException({
-          statusCode: HttpStatus.NOT_FOUND,
-          error: 'PlayerNotFound/GameCompetition',
-          message: [`Player of that game competition not found`],
-        });
-      listPlayer.push(user);
-    }
+  //   for (let playerGameRegistration of competition.playerGameRegistrations) {
+  //     let user = await this.usersService.findOneByField({
+  //       _id: playerGameRegistration.player,
+  //     });
+  //     if (!user)
+  //       throw new BadRequestException({
+  //         statusCode: HttpStatus.NOT_FOUND,
+  //         error: 'PlayerNotFound/GameCompetition',
+  //         message: [`Player of that game competition not found`],
+  //       });
+  //     listPlayer.push(user);
+  //   }
 
-    console.log('list Of Player :', listPlayer);
-    return listPlayer;
-  }
+  //   console.log('list Of Player :', listPlayer);
+  //   return listPlayer;
+  // }
 
   async associateCompetitionAndChildren(
     competition: CompetitionGame,
@@ -404,8 +390,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     });
     if (children && children.length > 0) {
       for (const child of children) {
-        competitions.push(child);
-        await this.buildCompetitionTree(child);
+        await this.associateCompetitionAndChildren(child, competitions);
       }
     }
     return competitions;
@@ -428,7 +413,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
 
   async getLeafCompetitionLcations(
     competition: CompetitionGame,
-    competitions: string[],
+    competitions: any[],
   ): Promise<string[]> {
     let children = await this.findByField({
       parentCompetition: competition._id,
@@ -437,7 +422,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       for (const child of children) {
         await this.getLeafCompetitionLcations(child, competitions);
       }
-    } else competitions.push(competition.localisation);
+    } else competitions.push({_id: competition._id, location: competition.localisation});
 
     return competitions;
   }
@@ -450,6 +435,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       });
       // Retourner la valeur obtenue récursivement
       return this.getCompatitionArcadeId(parent);
+      // return this.getCompatitionArcadeId(competition.parentCompetition);
     } else if (!competition.arcadeId) {
       // Lancer une exception si arcadeId n'existe pas
       throw new NotFoundException({
@@ -460,93 +446,39 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     } else return competition.arcadeId;
   }
 
-  async subscribeUser(location: string, subscriberId: string) {
-    let gameCompetition = await this.findOneByField({ location: location });
-    if (!gameCompetition)
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/GameCompetition-subscription',
-        message: `Game Competition not found`,
-      });
-    const arcadeId = await this.getCompatitionArcadeId(gameCompetition);
-    let arcade = await this.gameArcardeService.findOneByField({
-      _id: arcadeId,
+  async formalDelete(competitionId: string) {
+    let competition = await this.findOneByField({
+      _id: competitionId,
     });
-    if (!arcade)
-      throw new NotFoundException({
+    if (!competition) {
+      throw new BadRequestException({
         statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/GameArcarde-subscription',
-        message: `Game arcarde not found`,
+        error: 'GameCompetitionNotFound/GameCompetition',
+        message: [`Game competition not found`],
       });
-
-    console.log('canRegisterPlayer', arcade.canRegisterPlayer);
-    if (!arcade.canRegisterPlayer)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'UnableSubscription/GameArcarde-subscription',
-        message: `Unable to subscribe the player to the game`,
-      });
-
-    if (!arcade.isFreeRegistrationPlayer)
-      throw new ServiceUnavailableException({
-        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-        error: 'ServiceNotFound/GameArcarde-subscription',
-        message: `Paid games not yet supported.`,
-      });
-
-    if (arcade.maxPlayersNumber <= arcade.playerGameRegistrations.length)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'MaxPlayer/GameArcarde-subscription',
-        message: `Maximum number of players already reached`,
-      });
-
-    let player = await this.usersService.findOneByField({ _id: subscriberId });
-    if (!player)
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/PlayerGame-subscription',
-        message: `Player not found`,
-      });
-    let foundPlayer = arcade.playerGameRegistrations.findIndex(
-      (pl) => pl.player._id.toString() == subscriberId,
-    );
-    if (foundPlayer >= 0)
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'AlreadyExists/GameArcarde-subscription',
-        message: `Player already subscribed to the game`,
-      });
-    const dateNow = new Date();
-    if (
-      arcade.startRegistrationDate > dateNow ||
-      arcade.endRegistrationDate < dateNow
-    )
-      throw new BadRequestException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'DateRegistration/GameArcarde-subscription',
-        message: `Unable to register player for this game because player registration date is not allowed for this game`,
-      });
-
+    }
+  
+    // Récupérer toutes les compétitions associées
+    let competitions = await this.associateCompetitionAndChildren(competition, []);
+  
     return this.executeWithTransaction(async (session) => {
-      let gameSubscription = await this.playerGameRegistrationService.create(
-        { player, localisation: location },
-        session,
-      );
-      //   let playerSubscription = await this.gameArcardeService.addSubscription(
-      //     gameSubscription,
-      //     arcade,
-      //     session,
-      //   );
-      let game = await this.findOneByField({ location: location });
-      game.playerGameRegistrations.push(gameSubscription);
-      let playerSubscription = game.save({ session });
-      arcade.playerGameRegistrations.push(gameSubscription);
-
-      gameSubscription.competition = gameCompetition;
-      await gameSubscription.save({ session });
-      await arcade.save({ session });
-      return playerSubscription;
+      // Supprimer les enregistrements de joueurs pour chaque compétition
+      for (let compet of competitions) {
+        let registersIds = compet.playerGameRegistrations.map((comp) => comp._id);
+  
+        let conditionFilter = { '_id': { $in: registersIds } };
+  
+        // Suppression avec la session
+        await this.playerGameRegistrationService.deleteMany(conditionFilter);
+      }
+  
+      let competIds = competitions.map((comp) => comp._id);
+  
+      let condition = { '_id': { $in: competIds } };
+  
+      // Suppression des compétitions avec la session
+      return await this.deleteMany(condition);
     });
   }
+  
 }

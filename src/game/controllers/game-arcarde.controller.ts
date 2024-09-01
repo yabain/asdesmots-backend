@@ -374,63 +374,6 @@ export class GameArcardeController {
   }
 
   /**
-   * @api {post} /game-arcarde/subscription Souscription d'un joueur a un jeu
-   * @apidescription Souscription d'un joueur a un jeu
-   * @apiName Souscription a un jeu
-   * @apiGroup Game Arcarde
-   * @apiUse PlayerSubscriptionDTO
-   * @apiUse apiSecurity
-   * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
-   * @apiSuccess (200 Ok) {String} Response Description
-   * @apiSuccess (200 Ok) {Object} data response data
-   * @apiSuccess (200 Ok) {String} data._id identifiant
-   * @apiSuccess (200 Ok) {Number} data.lifeGame nombre de vie du joueur
-   * @apiSuccess (200 Ok) {Boolean} data.hasLostGame Est définis sur vrai si le joueur a déjà perdu la parti
-   * @apiSuccess (200 Ok) {User} data.player Information sur l'utilisateur
-   * @apiSuccess (200 Ok) {String} data.localisation zone de localisation  du jeu
-   *
-   * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token
-   * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
-   * @apiUse apiError
-   */
-  @Post("subscription")
-  async addSubscription(@Body() addSubscriptionDTO: PlayerSubscriptionDTO) {
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: "Successful registered user subscription",
-      data: await this.gameSubscriptionService.addGameArcardeSubscription(
-        addSubscriptionDTO
-      ),
-    };
-  }
-
-  /**
-   * @api {Post} /game-arcarde/unSubscription desenregistrement d'un joueur a un jeu
-   * @apidescription Desenregistrement d'un joueur a un jeu
-   * @apiName Desenregistrement a un jeu
-   * @apiGroup Game Arcarde
-   * @apiUse PlayerUnSubscriptionDTO
-   * @apiUse apiSecurity
-   * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
-   * @apiSuccess (200 Ok) {String} Response Description     *
-   * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token
-   * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
-   * @apiUse apiError
-   */
-  @Post("unSubscription")
-  async removeSubscription(
-    @Body() addUnSubscriptionDTO: PlayerUnSubscriptionDTO
-  ) {
-    await this.gameSubscriptionService.removeGameArcardeSubscription(
-      addUnSubscriptionDTO
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      message: "user unregistration with success",
-    };
-  }
-
-  /**
    * @api {delete} /game-arcarde/:id delete arcarde
    * @apidescription delete arcarde by id
    * @apiParam {String} id Game Arcarde unique ID
@@ -446,7 +389,8 @@ export class GameArcardeController {
   @Delete(":id")
   async DeleteArcarde(@Param("id") id: string) {
     
-    await this.competitionGameService.delete({"arcadeId":id});
+    let competition = await this.competitionGameService.findOneByField({"arcadeId":id});
+    await this.competitionGameService.formalDelete(competition._id);
     await this.gameArcardeService.delete({"_id":id});
     return {
       statusCode: HttpStatus.OK,

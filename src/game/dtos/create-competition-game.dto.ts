@@ -36,7 +36,6 @@ export class CreateCompetitionGameDTO
     @IsOptional()
     @IsString()
     @MinLength(4)
-    @MaxLength(65)
     description:string;
 
     @IsMongoId()
@@ -50,7 +49,6 @@ export class CreateCompetitionGameDTO
     canRegisterPlayer:Boolean;
 
     @IsString()
-    @MinLength(4)
     @MaxLength(65)
     localisation:String
 

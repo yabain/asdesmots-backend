@@ -1,6 +1,7 @@
 import { Transform } from "class-transformer";
 import { IsDate, IsMongoId, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from "class-validator";
 import { ObjectId } from "mongoose";
+import { IsUnique } from "../validators/game-part-unique";
 
 
 /**
@@ -20,6 +21,7 @@ export class CreateGamePartDTO
     @IsString()
     @MinLength(4)
     @MaxLength(65)
+    @IsUnique({ message: 'Part already exists'})
     name:string;
 
     @IsOptional()

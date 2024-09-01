@@ -67,6 +67,11 @@ export abstract class DataBaseService<T extends Document>
         {
             await this.entityModel.findOneAndDelete(filter,{session});
         }
+
+        async deleteMany(filter,session=null):Promise<any>
+        {
+            return this.entityModel.deleteMany(filter,{session});
+        }
     
         bulkOperator(ops:any[],session:ClientSession=null):Promise<any>
         {

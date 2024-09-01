@@ -12,6 +12,7 @@ import {
   Req,
   Res,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { ObjectIDValidationPipe } from 'src/shared/pipes';
 import { SecureRouteWithPerms } from 'src/shared/security';
@@ -19,10 +20,8 @@ import {
   ApplyGameWriteriaToGammeDTO,
   ChangeGameCompetitionStateDTO,
   CreateCompetitionGameDTO,
-  PlayerSubscriptionDTO,
   UpdateGameCompetitionGameDTO,
 } from '../dtos';
-import { GameCompetitionPerms } from '../enum';
 import {
   CompetitionGameService,
   PlayerGameRegistrationService,
@@ -46,8 +45,18 @@ export class GameCompetitionController {
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
-    const data = parentCompetition ? await this.competitionGameService.buildCompetitionTree(parentCompetition) : null;
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+
+    if (!parentCompetition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.buildCompetitionTree(parentCompetition);
 
     // console.log('competition with children', data)
 
@@ -56,14 +65,58 @@ export class GameCompetitionController {
       .json(this.jsonResponse.success('Arcade competition', data));
   }
 
-  
   @Get('arcade-competition-and-sub-competitions/:arcadeId')
   async getArcadeCompetitionsWithSubCompetitions(
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
-    const data = parentCompetition ? await this.competitionGameService.associateCompetitionAndChildren(parentCompetition, []) : [];
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    if (!parentCompetition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.associateCompetitionAndChildren(parentCompetition,[]);
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Arcade competition', data));
+  }
+
+  @Get('by-competition/:competitionId')
+  async getArcadeCompetitionsByChildCompetition(
+    @Param('competitionId') competitionId: string,
+    @Res() res: Response,
+  ) {
+    const competition = await this.competitionGameService.findOneByField({
+      _id: competitionId,
+    });
+
+    if (!competition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const arcadeId = await this.competitionGameService.getCompatitionArcadeId(
+      competition,
+    );
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    if (!parentCompetition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.associateCompetitionAndChildren(parentCompetition,[]);
 
     return res
       .status(HttpStatus.OK)
@@ -75,30 +128,19 @@ export class GameCompetitionController {
     @Param('arcadeId') arcadeId: string,
     @Res() res: Response,
   ) {
-    const parentCompetition = await this.competitionGameService.findOneByField({ 'arcadeId': arcadeId });
-    const data = parentCompetition ? await this.competitionGameService.getLeafCompetitionLcations(parentCompetition, []) : [];
+    const parentCompetition = await this.competitionGameService.findOneByField({
+      arcadeId: arcadeId,
+    });
+    const data = parentCompetition
+      ? await this.competitionGameService.getLeafCompetitionLcations(
+          parentCompetition,
+          [],
+        )
+      : [];
 
     return res
       .status(HttpStatus.OK)
       .json(this.jsonResponse.success('Arcade competition locations', data));
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('subscribe')
-  async subscribeToCompetition(
-    @Req() request: Request,
-    @Body() data: any,
-    @Res() res: Response,
-  ) {
-    const user = request.authUser
-    const authenticatedUser = await this.usersService.findOneByField({
-      email: user.email,
-    });
-    await this.competitionGameService.subscribeUser(data.location, authenticatedUser._id);
-
-    return res
-      .status(HttpStatus.OK)
-      .json(this.jsonResponse.success('Subscription procced successfully'));
   }
 
   /**
@@ -181,7 +223,7 @@ export class GameCompetitionController {
   async applyGameWriteriaToGamme(
     @Body() applyGameWriteriaToGammeDTO: ApplyGameWriteriaToGammeDTO,
   ) {
-    await this.competitionGameService.appyCriteriaToGame(
+    await this.competitionGameService.applyCriteriaToGame(
       applyGameWriteriaToGammeDTO,
     );
     return {
@@ -220,9 +262,10 @@ export class GameCompetitionController {
   async deletecompetition(
     @Param('competitionId', ObjectIDValidationPipe) competitionId: string,
   ) {
-
-    await this.competitionGameService.delete({"parentCompetition":competitionId});
-    await this.competitionGameService.delete({"_id":competitionId});
+    // await this.competitionGameService.delete({
+    //   parentCompetition: competitionId, 
+    // });
+    await this.competitionGameService.formalDelete(competitionId);
 
     return {
       statusCode: HttpStatus.OK,
@@ -260,7 +303,7 @@ export class GameCompetitionController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: 'Criterion winner of a competition withdraw successfully',
+      message: 'Criteria successfully removed',
     };
   }
 
@@ -370,36 +413,6 @@ export class GameCompetitionController {
   }
 
   /**
-   * @api {get} /game-competition/:id/subscription Obtention de la liste des souscripteur a une compétition
-   * @apidescription  Obtention de la liste des souscripteur a une compétition
-   * @apiName  Obtention de la liste des souscripteur a une compétition
-   * @apiParam {String} id Identifiant de compétition
-   * @apiGroup Game Competition
-   * @apiUse apiSecurity
-   * @apiSuccess (200 Ok) {Number} statusCode HTTP status code
-   * @apiSuccess (200 Ok) {String} Response Description
-   * @apiSuccess (200 Ok) {Object} data response data
-   * @apiSuccess (200 Ok) {String} data._id identifiant
-   * @apiSuccess (200 Ok) {Number} data.lifeGame nombre de vie du joueur
-   * @apiSuccess (200 Ok) {Boolean} data.hasLostGame Est définis sur vrai si le joueur a déjà perdu la parti
-   * @apiSuccess (200 Ok) {String} data.player Identifiant du joueur.
-   * @apiSuccess (200 Ok) {String} data.localisation zone de localisation  du jeu
-   * @apiSuccess (200 Ok) {Date} data.createdAt date e souscription du joueur a un jeu
-   *
-   * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token
-   * @apiError (Error 4xx) 404-NotFound Game Arcarde not found
-   * @apiUse apiError
-   */
-  @Get(':id/subscription')
-  async getSubscription(@Param('id', ObjectIDValidationPipe) id: string) {
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Get list of competition subscriptor',
-      data: await this.competitionGameService.getListCompetitorSubscriptor(id),
-    };
-  }
-
-  /**
    *
    * @api {get} /game-competition/:id get game competition
    * @apiDescription get game competition by id
@@ -440,44 +453,18 @@ export class GameCompetitionController {
   @SecureRouteWithPerms()
   async getGameCompetitionById(
     @Param('id', ObjectIDValidationPipe) id: string,
+    @Res() res: Response,
   ) {
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Game competition details',
-      data: await this.competitionGameService.findOneByField({ _id: id }),
-    };
-  }
+    const competition = await this.competitionGameService.findOneByField({
+      _id: id,
+    });
+    try {
+      const arcadeId = await this.competitionGameService.getCompatitionArcadeId(competition);
+      competition.arcadeId = arcadeId;
+    } catch (err) {}
 
-  /**
-   *
-   * @api {get} /game-competition/participants/:id get list participants of a game competition
-   * @apiDescription get all the participants of a game competition by id
-   * @apiParam {String} id Game competition unique ID
-   * @apiName Get list participants of a game competition
-   * @apiGroup Game Competition
-   * @apiUse apiSecurity
-   * @apiUse apiDefaultResponse
-   * @apiPermission GameCompetitionPerms.OWNER
-   *
-   * @apiSuccess (200 Ok) {Number} statusCode status code
-   * @apiSuccess (200 Ok) {String} Response Description
-   * @apiSuccess (200 Ok) {User[]} data response data
-   *
-   * @apiError (Error 4xx) 401-Unauthorized Token not supplied/invalid token
-   * @apiError (Error 4xx) 404-NotFound Game Competition not found/User not found
-   * @apiUse apiError
-   *
-   */
-
-  @Get('/participants/:id')
-  @SecureRouteWithPerms()
-  async getListParticipants(@Param('id', ObjectIDValidationPipe) id: string) {
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'List of participants of a competition game',
-      data: await this.competitionGameService.getListCompetitionParticipants(
-        id,
-      ),
-    };
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Game competition details',competition));
   }
 }
