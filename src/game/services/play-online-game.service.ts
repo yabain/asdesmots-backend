@@ -116,7 +116,7 @@ export class PlayOnlineGameService
         if(!gamePart) throw new NotFoundException({
             statusCode:HttpStatus.NOT_FOUND,
             error:'NotFound/GamePart',
-            message:[`Game part not found`]
+            message:`Game part not found`
         })
 
         let game=await this.gameCompetitionService.findOneByField({_id:competitionID});
@@ -124,7 +124,7 @@ export class PlayOnlineGameService
         if(game.gameState!=GameState.RUNNING) throw new ForbiddenException({
             statusCode:HttpStatus.FORBIDDEN,
             error:'Forbidden/GameCompetition-joingame',
-            message:[`The state of the competition must be in "In Progress" state for the competition to start`]  
+            message:`The state of the competition must be in "In Progress" state for the competition to start` 
         })
 
         if(gamePart.gameState===GameState.WAITING_PLAYER) return { gameState:GameState.WAITING_PLAYER };
@@ -146,7 +146,7 @@ export class PlayOnlineGameService
         }
         this.games.set(game.id,gameObject)
 
-        return { gameState:GameState.WAITING_PLAYER }
+        return { gameState:GameState.WAITING_PLAYER, gameId:gamePart._id }
     }
 
     async endPart(gamePartID:ObjectId,competitionID:ObjectId)

@@ -281,33 +281,32 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
   async changeGameCompetiton(
     changeGameStateDTO: ChangeGameCompetitionStateDTO,
   ) {
+    let competition = await this.findOneByField(
+      {_id: changeGameStateDTO.gameCompetitionID}
+    );
+    if (!competition)
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition-changestate-start',
+        message: `The competition was not found`,
+      });
+
+    const gameArcardeId = await this.getCompatitionArcadeId(competition);
     let gameArcarde = await this.gameArcardeService.findOneByField({
-      _id: changeGameStateDTO.gameArcardeID,
+      _id: gameArcardeId,
     });
     if (!gameArcarde)
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/GameCompetition-changestate',
-        message: [`Game arcarde not found`],
+        error: 'NotFound/GameCompetition-changestate-arcade',
+        message: `Game arcarde not found`,
       });
     let dateNow = new Date();
     if (gameArcarde.gameState != GameState.RUNNING)
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
         error: 'Forbidden/GameCompetition-changestate-start',
-        message: [
-          `The state of the arcade must be in "In Progress" state for the competition to start`,
-        ],
-      });
-
-    let competition = gameArcarde.competitionGames.find(
-      (compet) => compet.id == changeGameStateDTO.gameCompetitionID,
-    );
-    if (!competition)
-      throw new NotFoundException({
-        statusCode: HttpStatus.NOT_FOUND,
-        error: 'NotFound/GameCompetition-changestate-start',
-        message: [`The competition was not found`],
+        message: `The state of the arcade must be in "In Progress" state for the competition to start`,
       });
 
     if (
@@ -317,9 +316,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
         error: 'Forbidden/GameCompetition-changestate-start',
-        message: [
-          `The current date does not correspond to the start and end date of the game`,
-        ],
+        message: `The current date does not correspond to the start and end date of the game`,
       });
     else if (
       changeGameStateDTO.state == GameState.END &&
@@ -328,9 +325,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
         error: 'Forbidden/GameCompetition-changestate-end',
-        message: [
-          `The competition is over! it is no longer possible to start it`,
-        ],
+        message: `The competition is over! it is no longer possible to start it`,
       });
 
     // gameArcarde.competitionGames

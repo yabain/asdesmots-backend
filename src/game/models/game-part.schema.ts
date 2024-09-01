@@ -26,7 +26,7 @@ export type GamePartDocument = HydratedDocument<GamePart>
 export class GamePart extends Document //Manche de jeux
 {
     
-    @Prop({default:"", unique:true})
+    @Prop({default:""})
     name:string;
 
     @Prop({default:""})
