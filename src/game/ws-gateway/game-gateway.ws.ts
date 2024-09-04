@@ -39,8 +39,8 @@ export class GameGatewayWS
     {
         try {
             client.emit("join-game",await this.playGameService.joinGame(joinGameDTO,client))
-            console.log(await this.playGameService.joinGame(joinGameDTO,client))
         } catch (error) {
+            console.log("join-game-error",error)
             client.emit("join-game-error",error)
         }
     }

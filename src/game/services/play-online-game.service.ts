@@ -21,8 +21,8 @@ export class PlayOnlineGameService
         {
             competition:CompetitionGame,
             players:{
-                player?:PlayerGameRegistration,
-                client?:Socket
+                player:PlayerGameRegistration,
+                client:Socket
             }[],
             gameParts:Map<ObjectId,GamePart>,
             currentGamePartID:ObjectId,
@@ -42,17 +42,11 @@ export class PlayOnlineGameService
 
     async joinGame(joinGame:JoinGameDTO,client:Socket)
     {
-        let gameObject = null,game=null;
+        let gameObject = null;
+        const game = await this.gameCompetitionService.findOneByField({_id:joinGame.competitionID});
         if(!this.games.has(joinGame.competitionID)) 
         {
-            // throw new ForbiddenException({
-            //     statusCode:HttpStatus.FORBIDDEN,
-            //     error:'NotFound/GameCompetition-joingame',
-            //     message:[`Competition not found`]  
-            // })
-
-            game = await this.gameCompetitionService.findOneByField({_id:joinGame.competitionID});
-            let gameParts:Map<string,GamePart> = new Map<string,GamePart>();
+            const gameParts:Map<string,GamePart> = new Map<string,GamePart>();
             (await this.gamePartService.getListOfPartOfCompetition(joinGame.competitionID)).forEach((gamePart)=>gameParts.set(gamePart.id,gamePart))
             gameObject = {
                 competition:game,
@@ -66,21 +60,21 @@ export class PlayOnlineGameService
             }
             this.games.set(game.id,gameObject)
         }
-        else  gameObject = this.games.get(joinGame.competitionID);
-        let player = gameObject.players.find(player => player.player.id==joinGame.playerID);
+        else { gameObject = this.games.get(joinGame.competitionID); }
+        // gameObject.players.map(gamePlayer => console.log(joinGame.playerID, gamePlayer.player._id))
+        const player: PlayerGameRegistration = gameObject.players.find(gamePlayer => joinGame.playerID == gamePlayer.player._id.toString());
         if(!player) {
-            player=await this.playerGameRegistration.getPlayerSubscriber(joinGame.playerID,joinGame.competitionID);
-            if(!player) throw new BadRequestException({
+            const subscriber=(await this.playerGameRegistration.getPlayerSubscriber(joinGame.playerID,joinGame.competitionID));
+            if(!subscriber) throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 error:'GameLocationNotFound/GameCompetition-joingame',
-                message:[`Unable to subscribe in this location`]
+                message:`Unable to subscribe in this location`
             })
             
             //notification de tous les précédents joueur du nouveau arrivant
             UtilsFunc.emitMessage("new-player",{data: await this.userService.findByField({_id: joinGame.playerID})},this.getListOfClients());
-            
             //Sauvegarde du nouveau joueur dans la liste des joueurs
-            gameObject.players.push({player,client});
+            gameObject.players.push({...subscriber.toObject(), client});
         }
        
      //Si on a atteint le nombre minimum de joueur
@@ -96,18 +90,24 @@ export class PlayOnlineGameService
        }
 
        //notification du nouveau joueur de l'état du jeu
-        return {
-            ...this.getListOfPlayerRegistration()
-        };
+        return this.getListOfPlayerRegistration();
+        // return player;
     }
     getListOfClients():Socket[]
     {
         return Array.from(this.games.values()).map((game)=>game.players.map((player)=>player.client)).reduce((prev,curr)=>[...prev,...curr],[]);
     }
 
-    getListOfPlayerRegistration():PlayerGameRegistration[]
+    getListOfPlayerRegistration()
     {
-        return Array.from(this.games.values()).map((g)=>g.players.map((client)=>client.player)).reduce((prev,curr)=>[...prev,...curr],[]);
+        return Array.from(this.games.values()).flatMap((g) => {
+            return g.players.map((client: any) => {
+                return { 
+                    player: {...client.player,lifeGame: client.lifeGame}, 
+                    competition: g.competition 
+                };
+            });
+        });
     }
 
     async startPart(competitionID:ObjectId,gamePartID:ObjectId)

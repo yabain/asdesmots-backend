@@ -48,6 +48,25 @@ export class GameSubscriptionController {
       .json(this.jsonResponse.success('Subscription procced successfully'));
   }
 
+  @UseGuards(AuthGuard)
+  @Get('/subscriber-games/:state')
+  async playersCompetitions(
+    @Req() request: Request,
+    @Param('state') state: string[],
+    @Res() res: Response,
+  ) {
+    const user = request.authUser;
+    const authenticatedUser = await this.usersService.findOneByField({
+      email: user.email,
+    });
+    
+    const data = await this.gameSubscriptionService.playerSubscribedCompetitions(authenticatedUser._id, state);
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Geme competitions list', data));
+  }
+
   @Get('/arcade/:arcadeId')
   async getArcadeSubscribers(
     @Param('arcadeId') arcadeId: string,

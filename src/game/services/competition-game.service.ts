@@ -302,12 +302,12 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         message: `Game arcarde not found`,
       });
     let dateNow = new Date();
-    if (gameArcarde.gameState != GameState.RUNNING)
-      throw new ForbiddenException({
-        statusCode: HttpStatus.FORBIDDEN,
-        error: 'Forbidden/GameCompetition-changestate-start',
-        message: `The state of the arcade must be in "In Progress" state for the competition to start`,
-      });
+    // if (gameArcarde.gameState != GameState.RUNNING)
+    //   throw new ForbiddenException({
+    //     statusCode: HttpStatus.FORBIDDEN,
+    //     error: 'Forbidden/GameCompetition-changestate-start',
+    //     message: `The state of the arcade must be in "In Progress" state for the competition to start`,
+    //   });
 
     if (
       changeGameStateDTO.state == GameState.RUNNING &&
@@ -319,13 +319,23 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         message: `The current date does not correspond to the start and end date of the game`,
       });
     else if (
+      changeGameStateDTO.state == GameState.RUNNING &&
+      dateNow > gameArcarde.endDate
+    )
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        error: 'Forbidden/GameCompetition-changestate-end',
+        message: `The competition is over! it is no longer possible to start it`,
+      });
+
+    else if (
       changeGameStateDTO.state == GameState.END &&
       dateNow < gameArcarde.endDate
     )
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
         error: 'Forbidden/GameCompetition-changestate-end',
-        message: `The competition is over! it is no longer possible to start it`,
+        message: `The competition is not over! it is no longer possible to stop it`,
       });
 
     // gameArcarde.competitionGames
