@@ -78,15 +78,24 @@ export class PlayOnlineGameService
         }
        
      //Si on a atteint le nombre minimum de joueur
-       if(gameObject.players.length>=game.minOfPlayers) {
+       if(gameObject.players.length >= (game.minOfPlayers && game.playerGameRegistrations.length)) {
             //on notifie tous les joueurs que la partie a débuté
+            let part = game.gameParts.find(p => p.gameState === GameState.WAITING_PLAYER);
+            if(!part) throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                error:'NoPartFound/GameCompetition-joingame',
+                message:`No game part found in the competition`
+            })
+            this.gamePartService.update(
+                { _id: part._id },
+                { gameState: GameState.RUNNING },
+              );
             UtilsFunc.emitMessage("game-statechange",
-                {gameState:GameState.RUNNING},this.getListOfClients()
+                {gameState:GameState.RUNNING, competitionID: game._id.toString(), gamePart:part},this.getListOfClients()
             )
             this.games.get(joinGame.competitionID).gameGlobalState=GameState.RUNNING
-
             //On lance le jeu au premier joueur
-            UtilsFunc.emitMessage("game-play",this.getNexPlayerWithWordAndLevel(joinGame.competitionID),this.getListOfClients())
+            // UtilsFunc.emitMessage("game-play",this.getNexPlayerWithWordAndLevel(part._id),this.getListOfClients())
        }
 
        //notification du nouveau joueur de l'état du jeu
@@ -127,12 +136,17 @@ export class PlayOnlineGameService
             message:`The state of the competition must be in "In Progress" state for the competition to start` 
         })
 
+        // Vérifier l'état du jeu uniquement si la compétition est RUNNING
+        if (game.gameParts.some(part => part.gameState === GameState.WAITING_PLAYER)) throw new ForbiddenException({
+            statusCode:HttpStatus.FORBIDDEN,
+            error:'Forbidden/GameCompetition-running',
+            message:`You cannot start multiple games of the same competition simultaneously` 
+        })
+
         if(gamePart.gameState===GameState.WAITING_PLAYER) return { gameState:GameState.WAITING_PLAYER };
         gamePart.gameState=GameState.WAITING_PLAYER;
         gamePart.startDate=new Date()
         await this.gamePartService.update({_id:gamePart._id},{gameState:GameState.WAITING_PLAYER,startDate:gamePart.startDate})
-
-        
 
         let gameObject = {
             competition:game,
@@ -179,8 +193,16 @@ export class PlayOnlineGameService
         //et du niveau du mot
         
         //Selection du prochain joueur
-        let competition = this.games.get(competitionID);
-        let gamePart = competition.gameParts.get(competition.currentGamePartID);
+        const competition = this.games.get(competitionID);
+        if(!competition.currentGamePartID) {
+            competition.currentGamePartID = competition.gameParts[0]?._id
+        }
+        const gamePart = competition.gameParts.get(competition.currentGamePartID);
+        if(!competition.gameRound)
+        competition.gameRound = this.gameRoundService.createInstance({
+            step:1,
+            gameLevel: competition.competition.gameLevel                 
+        })
         let gameRound=competition.gameRound;
         competition.currentPlayerIndex=(competition.currentPlayerIndex+1)%competition.players.length;
 
@@ -190,21 +212,22 @@ export class PlayOnlineGameService
             //on a terminer ce round
 
             //si c'est le dernier round On termine la partie
-            if(gamePart.gameRound.length-1==gameRound.step) 
+            if((gamePart?.gameRound.length - 1) == gameRound.step) 
                 return -1; 
             else{
                 //si c'est pas le dernier Round alors on démarre un nouveau
-                let newGameRound = this.gameRoundService.createInstance({
-                    step:gameRound.step+1                    
+                const newGameRound = this.gameRoundService.createInstance({
+                    step:gameRound.step+1,
+                    gameLevel:gameRound.gameLevel                   
                 })
-                newGameRound.gameLevel = await this.processNewGameLevel(competitionID,gamePart.id,newGameRound)
+                newGameRound.gameLevel = await this.processNewGameLevel(competitionID,newGameRound.id,newGameRound)
                 await newGameRound.save()
                 gameRound = newGameRound;
             }
         }
 
         //on obtien un nouveau mot
-        let wordGameLevel = this.processNewWord(gameRound.gameLevel);
+        const wordGameLevel = this.processNewWord(gameRound.gameLevel);
         competition.currentWordGameLevel = wordGameLevel;
         return {
             gameRound,

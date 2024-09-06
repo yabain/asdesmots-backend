@@ -10,6 +10,7 @@ import {
   Res,
   UseGuards,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { ObjectIDValidationPipe } from 'src/shared/pipes';
 import { SecureRouteWithPerms } from 'src/shared/security';
@@ -26,7 +27,6 @@ import {
 import { Response } from 'express';
 import { JsonResponse } from 'src/shared/helpers/json-response';
 import { AuthGuard } from 'src/authorization/guards/auth.guard';
-import { UsersService } from 'src/user/services';
 
 @Controller('game-competition')
 export class GameCompetitionController {
@@ -186,6 +186,10 @@ export class GameCompetitionController {
     @Param('gameArcardeID') gameArcardeID: string,
     @Res() res: Response,
   ) {
+    const existsGame = await this.competitionGameService.findOneByField({name: createCompetitionGameDTO.name})
+    if(existsGame)  {
+        throw new ConflictException(this.jsonResponse.error(`Competition already exists`,{alreadyUsed: true}));
+    }
     await this.competitionGameService.createNewCompetition(
       { ...createCompetitionGameDTO, arcadeId: gameArcardeID },
       gameArcardeID,
@@ -345,7 +349,7 @@ export class GameCompetitionController {
   @SecureRouteWithPerms()
   async updateGameCompetition(
     @Body() updateGameCompetitionDTO: UpdateGameCompetitionGameDTO,
-    @Param('id') gameCompetitionID: String,
+    @Param('id') gameCompetitionID: string,
   ) {
     return {
       statusCode: HttpStatus.OK,

@@ -1,7 +1,5 @@
 import { Transform } from "class-transformer";
 import { IsBoolean, IsDate, IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength } from "class-validator";
-import { IsUnique } from "../validators/arcade-unique";
-
 
 /**
  * @apiDefine CreateGameArcardeDTO Create new game arcarde
@@ -21,7 +19,6 @@ export class CreateGameArcardeDTO
 {
     @IsString()
     @MaxLength(65)
-    @IsUnique({ message: 'Arcade already exists'})
     name:string;
 
     @IsOptional()
@@ -30,7 +27,7 @@ export class CreateGameArcardeDTO
 
     @IsOptional()
     @IsBoolean()
-    isOnlineGame:Boolean;
+    isOnlineGame:boolean;
 
     @IsOptional()
     @IsBoolean()

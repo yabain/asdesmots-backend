@@ -279,8 +279,24 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
     const dateNow = new Date();
     // Filtrer les compétitions où le joueur est inscrit
     const playerCompetitions = allCompetitions.filter(competition =>
-      (competition.endDate > dateNow) && (gameStates.includes(competition.gameState)) && competition.playerGameRegistrations.some(subscriber => {
-        return subscriber.player.toString() === playerId.toString();
+      (competition.endDate > dateNow) &&
+      (gameStates.includes(competition.gameState)) &&
+      competition.playerGameRegistrations.some(subscriber => {
+        // Initialiser la condition à true
+        let isEligible = true;
+    
+        // Vérifier l'état du jeu uniquement si la compétition est RUNNING
+        if (competition.gameState === GameState.RUNNING) {
+          const hasWaitingPlayers = competition.gameParts.some(part => part.gameState === GameState.WAITING_PLAYER);
+    
+          // Si aucune partie n'attend de joueurs, la compétition n'est pas éligible
+          if (!hasWaitingPlayers) {
+            isEligible = false;
+          }
+        }
+    
+        // Retourner true si éligible et si le joueur correspond
+        return isEligible && (subscriber.player.toString() === playerId.toString());
       })
     );
     
