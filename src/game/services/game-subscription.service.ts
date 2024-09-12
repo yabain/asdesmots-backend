@@ -287,16 +287,19 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
     
         // Vérifier l'état du jeu uniquement si la compétition est RUNNING
         if (competition.gameState === GameState.RUNNING) {
-          const hasWaitingPlayers = competition.gameParts.some(part => part.gameState === GameState.WAITING_PLAYER);
+          const hasWaitingPlayersOrRunning = competition.gameParts.some(part => 
+            part.gameState === GameState.WAITING_PLAYER || part.gameState === GameState.RUNNING
+          );
     
           // Si aucune partie n'attend de joueurs, la compétition n'est pas éligible
-          if (!hasWaitingPlayers) {
+          if (!hasWaitingPlayersOrRunning) {
             isEligible = false;
           }
         }
     
         // Retourner true si éligible et si le joueur correspond
-        return isEligible && (subscriber.player.toString() === playerId.toString());
+        const hasLost = (subscriber.hasLostGame || (subscriber.lifeGame <= 0));
+        return isEligible && (subscriber.player.toString() === playerId.toString()) && !hasLost;
       })
     );
     

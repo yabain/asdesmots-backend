@@ -3,6 +3,7 @@ import { Socket } from 'socket.io'
 import { GameStartDTO, JoinGameDTO, PlayGameDTO } from "../dtos";
 import { PlayOnlineGameService } from "../services/";
 import { ForbiddenException } from "@nestjs/common";
+import { Server } from "http";
 
 @WebSocketGateway({
     cors: {
@@ -48,7 +49,10 @@ export class GameGatewayWS
     @SubscribeMessage('game-play')
     async playGame(@MessageBody() playGameDTO:PlayGameDTO, @ConnectedSocket() client:Socket)
     {
-        this.playGameService.gamePlay(playGameDTO)
+        try {
+            this.playGameService.gamePlay(playGameDTO)
+        } catch (error) {
+            client.emit("game-play-error")
+        }
     }
-
 }

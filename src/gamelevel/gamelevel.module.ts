@@ -27,6 +27,6 @@ import { UniqueWordValidator } from "./validators/word-unique";
         UniqueWordValidator,
         UniqueLevelValidator
     ],
-    exports:[GameLevelService]
+    exports:[GameLevelService,WordGameLevelService]
 })
 export class GameLevelModule{}
