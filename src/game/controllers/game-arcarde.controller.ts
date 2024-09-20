@@ -190,9 +190,10 @@ export class GameArcardeController {
     return {
       statusCode: HttpStatus.OK,
       message: "List of arcade games of the connected user",
-      data: await this.gameArcardeService.findByField({
-        owner: authenticatedUser._id,
-      }),
+      // data: await this.gameArcardeService.findByField({
+      //   owner: authenticatedUser._id,
+      // }),
+      data: await this.gameArcardeService.findAll()
     };
   }
 

@@ -298,8 +298,9 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
         }
     
         // Retourner true si éligible et si le joueur correspond
-        const hasLost = (subscriber.hasLostGame || (subscriber.lifeGame <= 0));
-        return isEligible && (subscriber.player.toString() === playerId.toString()) && !hasLost;
+        // const hasLost = (subscriber.hasLostGame || (subscriber.lifeGame <= 0));
+        // return isEligible && (subscriber.player.toString() === playerId.toString()) && !hasLost;
+        return isEligible && (subscriber.player.toString() === playerId.toString());
       })
     );
     

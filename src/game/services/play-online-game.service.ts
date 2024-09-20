@@ -84,6 +84,7 @@ export class PlayOnlineGameService {
     } else {
       gameObject = this.games.get(joinGame.competitionID);
     }
+    // console.log('Game round playing and step', gameObject.competition, runningPart)
     const player: PlayerGameRegistration = gameObject.players.find(
       (gamePlayer) => joinGame.playerID == gamePlayer.player._id.toString()
     );
@@ -92,24 +93,23 @@ export class PlayOnlineGameService {
         joinGame.playerID,
         joinGame.competitionID
       );
+
+      const runningPart = game.gameParts.find((p) => p.gameState === GameState.RUNNING);
+      const late: boolean = runningPart && gameObject.competition.gameRound?.step > 1;
       if (!subscriber)
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           error: "GameLocationNotFound/GameCompetition-joingame",
           message: `Unable to subscribe in this location`,
         });
-
       //Sauvegarde du nouveau joueur dans la liste des joueurs
-      gameObject.players.push({ ...subscriber.toObject(), client });
-      //notification de tous les précédents joueur du nouveau arrivant
-      UtilsFunc.emitMessage(
-        "new-player",
-        {
+      else if (!subscriber.hasLostGame && subscriber.lifeGame > 0 && !late) {
+        gameObject.players.push({ ...subscriber.toObject(), client });
+        this.gameBroadcastGatewayService.broadcastMessage("new-player", {
           user: await this.userService.findByField({ _id: joinGame.playerID }),
           timeLeft: gameObject.countdownValue ?? 0,
-        },
-        this.getListOfClients()
-      );
+        });
+      }
     }
 
     //Si on a atteint le nombre minimum de joueur
@@ -148,6 +148,24 @@ export class PlayOnlineGameService {
     //notification du nouveau joueur de l'état du jeu
     return this.getListOfPlayerRegistration();
   }
+
+  async leaveGame(joinGame: JoinGameDTO) {
+    const gameObject = this.games.get(joinGame.competitionID);
+    gameObject.players = gameObject?.players.filter(
+      (player) => player.player._id.toString() !== joinGame.playerID
+    );
+    // UtilsFunc.emitMessage(
+    //   "join-game",
+    //   this.getListOfPlayerRegistration(),
+    //   this.getListOfClients()
+    // );
+    this.gameBroadcastGatewayService.broadcastMessage(
+      "join-game",
+      this.getListOfPlayerRegistration()
+    );
+    return { playerID: joinGame.playerID };
+  }
+
   getListOfClients(): Socket[] {
     return Array.from(this.games.values())
       .map((game) => game.players.map((player) => player.client))
@@ -165,8 +183,12 @@ export class PlayOnlineGameService {
     });
   }
 
-  async startPart(competitionID: ObjectId, gamePartID: ObjectId) {
-    let gamePart = await this.gamePartService.findOneByField({
+  async changeState(
+    competitionID: ObjectId,
+    gamePartID: ObjectId,
+    gameState: string
+  ) {
+    const gamePart = await this.gamePartService.findOneByField({
       _id: gamePartID,
     });
     if (!gamePart)
@@ -176,7 +198,7 @@ export class PlayOnlineGameService {
         message: `Game part not found`,
       });
 
-    let game = await this.gameCompetitionService.findOneByField({
+    const game = await this.gameCompetitionService.findOneByField({
       _id: competitionID,
     });
 
@@ -189,7 +211,14 @@ export class PlayOnlineGameService {
 
     // Vérifier l'état du jeu uniquement si la compétition est RUNNING
     if (
-      game.gameParts.some((part) => part.gameState === GameState.WAITING_PLAYER)
+      game.gameParts.some(
+        (part) =>
+          (gameState === GameState.WAITING_PLAYER &&
+            (part.gameState === GameState.WAITING_PLAYER ||
+              part.gameState === GameState.RUNNING)) ||
+          (gameState === GameState.RUNNING &&
+            part.gameState === GameState.RUNNING)
+      )
     )
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
@@ -197,36 +226,55 @@ export class PlayOnlineGameService {
         message: `You cannot start multiple games of the same competition simultaneously`,
       });
 
-    if (gamePart.gameState === GameState.WAITING_PLAYER)
-      return { gameState: GameState.WAITING_PLAYER };
-
-    gamePart.gameState = GameState.WAITING_PLAYER;
-    gamePart.startDate = new Date();
+    // gamePart.gameState = gameState;
+    // gamePart.startDate = new Date();
     await this.gamePartService.update(
       { _id: gamePart._id },
-      { gameState: GameState.WAITING_PLAYER, startDate: gamePart.startDate }
+      { gameState: gameState, startDate: gamePart.startDate }
     );
 
-    let gameObject = {
+    if (gameState === GameState.WAITING_PLAYER)
+      await this.initGame(competitionID, gamePartID);
+
+    this.gameBroadcastGatewayService.broadcastMessage("game-statechange", {
+      gameState: gameState,
+      competitionID: game._id.toString(),
+      partID: gamePartID,
+    });
+
+    const gameObject = this.games.get(competitionID);
+    if (gameState === GameState.RUNNING && gameObject) {
+      console.log(`Initializing on ${gameObject.competition.maxTimeToPlay}s`);
+      setTimeout(async () => {
+        await this.startCountdown(gameObject, gamePartID);
+      }, gameObject.competition.maxTimeToPlay * 1000);
+    }
+    // await this.startCountdown(gameObject, gamePartID)
+    if (gameState === GameState.END) await this.stopCountdown(gameObject);
+
+    return { gameState: gameState, gameId: gamePart._id };
+  }
+
+  async initGame(competitionID: ObjectId, currentPartId: ObjectId) {
+    const game = await this.gameCompetitionService.findOneByField({
+      _id: competitionID,
+    });
+    const gameParts: Map<string, GamePart> = new Map<string, GamePart>();
+    (
+      await this.gamePartService.getListOfPartOfCompetition(competitionID)
+    ).forEach((gamePart) => gameParts.set(gamePart.id, gamePart));
+    const gameObject = {
       competition: game,
       players: [],
-      gameParts: new Map<ObjectId, GamePart>(),
-      currentGamePartID: null,
+      gameParts,
+      currentGamePartID: currentPartId,
       currentPlayerIndex: -1,
       gameRound: null,
       currentWordGameLevel: null,
       gameGlobalState: GameState.WAITING_PLAYER,
     };
-    this.games.set(game.id, gameObject);
-
-    this.gameBroadcastGatewayService.broadcastMessage("game-statechange", {
-      gameState: GameState.RUNNING,
-      competitionID: game._id.toString(),
-      partID: gamePartID,
-    });
-    return { gameState: GameState.WAITING_PLAYER, gameId: gamePart._id };
+    this.games.set(competitionID, gameObject);
   }
-
   async endPart(gamePartID: any, competitionID: ObjectId) {
     //On termine la partie
     let gamePart = await this.gamePartService.findOneByField({
@@ -243,6 +291,7 @@ export class PlayOnlineGameService {
     gamePart.endDate = new Date();
     await gamePart.save();
     const game = this.games.get(competitionID);
+    await this.stopCountdown(game);
     // const foundGamePart = game.competition.gameParts.get(gamePartID);
     // foundGamePart.gameState=GameState.END;
     // foundGamePart.startDate=gamePart.startDate;
@@ -260,10 +309,6 @@ export class PlayOnlineGameService {
     PartID = null,
     timeOver = false
   ) {
-    //ici on doit selectionner le prochain joeur, a jouer, le prochain mot en fonction du type de compétition
-    //et du niveau du mot
-    //Selection du prochain joueur
-    // le prochain joueur prend le relais
     const competition = this.games.get(competitionID);
     if (competition.players.length > 0) {
       if (!competition.currentGamePartID) {
@@ -271,47 +316,56 @@ export class PlayOnlineGameService {
       }
       if (!competition.gameRound)
         competition.gameRound = this.gameRoundService.createInstance({
-          step: 1,
+          step: 0,
           gameLevel: competition.competition.gameLevel,
         });
       if (timeOver && competition.players.length > 0) {
         this.setPlayerLives(competition);
       }
-      if (competition.players.length > 0) {
-        let gameRound = competition.gameRound;
+      const realCompetition = await this.gameCompetitionService.findOneByField({
+        _id: competitionID,
+      });
+      const partGame = realCompetition.gameParts.find(
+        (p) => p.gameState === GameState.RUNNING
+      );
+      if (
+        competition.players.length > 0 &&
+        competition.gameRound.step <= partGame.numberOfWord
+      ) {
+        const gameRound = competition.gameRound;
         competition.currentPlayerIndex =
           (competition.currentPlayerIndex + 1) % competition.players.length;
 
         //Si c'est le dernier joueur du round
+        console.log("Current player index", competition.currentPlayerIndex);
         if (competition.currentPlayerIndex == competition.players.length - 1) {
           //on a terminer ce round
-
           //si c'est le dernier round On termine la partie
-
-          const gamePart = PartID
-            ? await this.gamePartService.findOneByField({
-                _id: PartID.toString(),
-              })
-            : null;
-          if (gamePart?.gameRound.length - 1 == gameRound.step) return -1;
-          else {
-            //si c'est pas le dernier Round alors on démarre un nouveau
-            const newGameRound = this.gameRoundService.createInstance({
-              step: gameRound.step + 1,
-              gameLevel: gameRound.gameLevel,
-            });
-            newGameRound.gameLevel = await this.processNewGameLevel(
-              competitionID,
-              newGameRound.id,
-              newGameRound
-            );
-            await newGameRound.save();
-            competition.gameRound = newGameRound;
-          }
+          // const gamePart = PartID
+          //   ? await this.gamePartService.findOneByField({
+          //       _id: PartID.toString(),
+          //     })
+          //   : null;
+          // if (gamePart?.gameRound.length - 1 == gameRound.step) return -1;
+          // else {
+          //si c'est pas le dernier Round alors on démarre un nouveau
+          const newGameRound = this.gameRoundService.createInstance({
+            step: gameRound.step + 1,
+            gameLevel: gameRound.gameLevel,
+          });
+          newGameRound.gameLevel = await this.processNewGameLevel(
+            competitionID,
+            newGameRound.id,
+            newGameRound
+          );
+          await newGameRound.save();
+          competition.gameRound = newGameRound;
+          // }
         }
-
         //on obtien un nouveau mot
-        const wordGameLevelID = this.processNewWord(competition.gameRound.gameLevel);
+        const wordGameLevelID = this.processNewWord(
+          competition.gameRound.gameLevel
+        );
         competition.currentWordGameLevel = wordGameLevelID;
         const wordGameLevel = await this.wordGameLevelService.findOneByField({
           _id: wordGameLevelID,
@@ -319,13 +373,16 @@ export class PlayOnlineGameService {
         console.log(
           `Round ${competition.gameRound.step} curent player index ${competition.currentPlayerIndex}`
         );
-        return competition.players[competition.currentPlayerIndex] ? {
-          gameRound,
-          gameWord: wordGameLevel,
-          player:
-            competition.players[competition.currentPlayerIndex].player._id,
-        } : -1;
-      }
+        return competition.players[competition.currentPlayerIndex]
+          ? {
+              gameRound,
+              gameWord: wordGameLevel,
+              player:
+                competition.players[competition.currentPlayerIndex].player._id,
+              gameRoundStep: competition.gameRound.step,
+            }
+          : -1;
+      } else return -1;
     } else {
       return -1;
     }
@@ -365,45 +422,33 @@ export class PlayOnlineGameService {
     const expectedWord = await this.wordGameLevelService.findOneByField({
       _id: competition.currentWordGameLevel.toString(),
     });
-    const newPlayerInfos = await this.getNexPlayerWithWordAndLevel(
-      playGameDTO.competitionID.toString()
-    );
-    const subscriber =
+    const currentPlayerID =
       competition.players[competition.currentPlayerIndex].player._id;
-    const player = await this.playerGameRegistration.getPlayerSubscriber(
-      subscriber.toString(),
-      playGameDTO.competitionID
-    );
-    console.log(`expected word',${expectedWord.name} vs ${playGameDTO.word}`);
+    //Verifier si la reponse est acceptable en verifiant si cle delais de reponse n'est pas depasse
     if (
-      UtilsFunc.purgeString(expectedWord.name) !=
-      UtilsFunc.purgeString(playGameDTO.word)
+      currentPlayerID.toString() == playGameDTO.playerID &&
+      competition.gameRound.step == playGameDTO.gameRoundStep &&
+      competition.currentGamePartID.toString() == playGameDTO.gamePartID
     ) {
-      //le mot n'est pas correctement écrit
-      //on doit: diminuer le nombre de vie du joueur et informer tout le monde, s'il n'a plus de vie on le rétire
-      //On diminue le nombre de vie du joeur
-      await this.setPlayerLives(competition);
+      if (
+        UtilsFunc.purgeString(expectedWord.name) !=
+        UtilsFunc.purgeString(playGameDTO.word)
+      ) {
+        await this.setPlayerLives(competition);
+      }
+      // else save as won word
     }
     // le prochain joueur prend le relais
-    if (newPlayerInfos != -1) {
-      UtilsFunc.emitMessage(
-        "game-play",
-        newPlayerInfos,
-        this.getListOfClients()
-      );
-    }
-    // Arreter la partie si le jouer a perdu et qu'il n'y en a pas de prochain dans la liste
-    else if (newPlayerInfos == -1 && player.hasLostGame)
-      await this.endPart(
-        competition.currentGamePartID.toString(),
-        competition.competition._id.toString()
-      );
+    const newPlayerInfos = await this.sendNextItem(competition);
 
     //on passe au joueur suivant
     return newPlayerInfos;
   }
 
   async setPlayerLives(competition: any) {
+    //le mot n'est pas correctement écrit
+    //on doit: diminuer le nombre de vie du joueur et informer tout le monde, s'il n'a plus de vie on le rétire
+    //On diminue le nombre de vie du joeur
     const subscriber =
       competition.players[competition.currentPlayerIndex].player._id;
     const player = await this.playerGameRegistration.getPlayerSubscriber(
@@ -417,22 +462,23 @@ export class PlayOnlineGameService {
       player.hasLostGame = true;
       //on supprime le joueur en cours
       competition.players.splice(competition.currentPlayerIndex, 1);
-      competition.currentPlayerIndex --;
+      if (competition.currentPlayerIndex > 0) competition.currentPlayerIndex--;
     }
+    await player.save();
     this.gameBroadcastGatewayService.broadcastMessage("game-player-lifegame", {
       competitionID: competition.competition._id.toString(),
       player: subscriber.toString(),
       lifeGame: player.lifeGame,
     });
-    await player.save();
   }
 
   // Démarre le compte à rebours
   async startCountdown(competition: any, PartID = null, init = true) {
-    competition.countdownValue = competition.competition.maxTimeToPlay;
+    await this.stopCountdown(competition);
     if (init) await this.sendNextItem(competition, PartID);
     competition.countdownInterval = setInterval(async () => {
       competition.countdownValue--;
+      console.log("counter ", competition.countdownValue);
       if (competition.countdownValue <= 0) {
         await this.stopCountdown(competition);
         this.resetCountdown(competition);
@@ -444,12 +490,19 @@ export class PlayOnlineGameService {
 
   // Envoie l'élément suivant de la liste
   async sendNextItem(competition: any, PartID = null, timeOver = false) {
+    this.resetCountdown(competition);
     const playingData = await this.getNexPlayerWithWordAndLevel(
       competition.competition._id.toString(),
       PartID,
       timeOver
     );
-    UtilsFunc.emitMessage("game-play", playingData, this.getListOfClients());
+    this.gameBroadcastGatewayService.broadcastMessage("game-play", playingData);
+    // Arreter la partie si le jouer a perdu et qu'il n'y en a pas de prochain dans la liste
+    if (playingData == -1)
+      await this.endPart(
+        competition.currentGamePartID.toString(),
+        competition.competition._id.toString()
+      );
     return playingData;
   }
 

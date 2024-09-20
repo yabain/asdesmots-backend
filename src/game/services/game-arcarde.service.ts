@@ -31,7 +31,8 @@ export class GameArcardeService extends DataBaseService<GameArcardeDocument>
           });
     
         const existsArcade = await this.findOneByField({name: updateArcadeDTO.name})
-        if(existsArcade?._id.toString() !== arcadeID)  {
+        if(existsArcade && (existsArcade?._id.toString() !== arcadeID))  {
+            console.log(existsArcade?._id.toString(), arcadeID)
             throw new ConflictException(this.jsonResponse.error(`Arcade already exists`,{alreadyUsed: true}));
         }
         return arcade.update({

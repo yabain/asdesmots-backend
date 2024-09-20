@@ -168,7 +168,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       });
     
     const existsGame = await this.findOneByField({name: updateCompetitionGameDTO.name})
-    if(existsGame?._id.toString() !== competitionGameID)  {
+    if(existsGame && (existsGame?._id.toString() !== competitionGameID))  {
         throw new ConflictException(this.jsonResponse.error(`Competition already exists`,{alreadyUsed: true}));
     }
 
@@ -465,9 +465,11 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         _id: competition.parentCompetition.toString(),
       });
       // Retourner la valeur obtenue récursivement
-      return this.getCompatitionArcadeId(parent);
+      if(parent)
+        return this.getCompatitionArcadeId(parent);
       // return this.getCompatitionArcadeId(competition.parentCompetition);
     } else if (!competition.arcadeId) {
+      console.log(competition);
       // Lancer une exception si arcadeId n'existe pas
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
