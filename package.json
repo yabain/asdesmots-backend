@@ -18,6 +18,7 @@
     "build": "nest build && cp -r ./env ./dist/env && cp -r ./src/shared/services/emails/templates/ ./dist/shared/services/emails/templates",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "env-cmd -f env/.env.dev nest start",
+    "start-prod": "env-cmd -f env/.env.prod nest start",
     "start:dev": "env-cmd -f env/.env.dev nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
