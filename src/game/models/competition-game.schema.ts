@@ -57,10 +57,10 @@ export class CompetitionGame extends Document
     localisation:string
 
     @Prop({default:0})
-    maxPlayerLife:Number;
+    maxPlayerLife:number;
 
     @Prop({default:0})
-    maxTimeToPlay:Number;
+    maxTimeToPlay:number;
 
     @Prop({type:Date,default:Date.now()})
     startDate:Date;
@@ -72,10 +72,10 @@ export class CompetitionGame extends Document
     isStarted:Boolean;
 
     @Prop({default:2})
-    minOfPlayers:Number;
+    minOfPlayers:number;
 
     @Prop({default:1})
-    maxOfWinners:Number;
+    maxOfWinners:number;
 
     @Prop({type:[{type:mongoose.Types.ObjectId,ref:GameWinnerCriteria.name}],default:[]})
     gameWinnerCriterias:GameWinnerCriteria[];

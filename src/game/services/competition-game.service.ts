@@ -8,6 +8,7 @@ import {
 } from '../models';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpStatus,
   Inject,
@@ -27,6 +28,7 @@ import { GameArcardeService } from './game-arcarde.service';
 import { GameLevelService } from 'src/gamelevel/services';
 import { GameState } from '../enum';
 import { PlayerGameRegistrationService } from './player-game-registration.service';
+import { JsonResponse } from 'src/shared/helpers/json-response';
 
 @Injectable()
 export class CompetitionGameService extends DataBaseService<CompetitionGameDocument> {
@@ -39,6 +41,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
     private playerGameRegistrationService: PlayerGameRegistrationService,
     private gameArcardeService: GameArcardeService,
     private gameLevelService: GameLevelService,
+    private jsonResponse: JsonResponse,
   ) {
     super(competitionGameModel, connection, [
       'gameLevel',
@@ -151,7 +154,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
 
   async updateCompetition(
     updateCompetitionGameDTO: UpdateGameCompetitionGameDTO,
-    competitionGameID: String,
+    competitionGameID: string,
   ) {
     let competition = await this.findOneByField({ _id: competitionGameID }),
       parentCompetition = null,
@@ -161,8 +164,13 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,
         error: 'NotFound/GameCompetition-competition',
-        message: [`Game competition not found`],
+        message: `Game competition not found`,
       });
+    
+    const existsGame = await this.findOneByField({name: updateCompetitionGameDTO.name})
+    if(existsGame && (existsGame?._id.toString() !== competitionGameID))  {
+        throw new ConflictException(this.jsonResponse.error(`Competition already exists`,{alreadyUsed: true}));
+    }
 
     if (updateCompetitionGameDTO.parentCompetition) {
       parentCompetition = await this.findOneByField({
@@ -301,7 +309,6 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         error: 'NotFound/GameCompetition-changestate-arcade',
         message: `Game arcarde not found`,
       });
-    let dateNow = new Date();
     if (gameArcarde.gameState != GameState.RUNNING)
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
@@ -309,6 +316,7 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         message: `The state of the arcade must be in "In Progress" state for the competition to start`,
       });
 
+    const dateNow = new Date();
     if (
       changeGameStateDTO.state == GameState.RUNNING &&
       (dateNow < competition.startDate || dateNow > competition.endDate)
@@ -319,14 +327,42 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         message: `The current date does not correspond to the start and end date of the game`,
       });
     else if (
-      changeGameStateDTO.state == GameState.END &&
-      dateNow < gameArcarde.endDate
+      changeGameStateDTO.state == GameState.RUNNING &&
+      dateNow > gameArcarde.endDate
     )
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
         error: 'Forbidden/GameCompetition-changestate-end',
         message: `The competition is over! it is no longer possible to start it`,
       });
+    else if (
+      (changeGameStateDTO.state == GameState.RUNNING) &&
+      (competition.gameParts.length <= 0)
+    )
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        error: 'Forbidden/GameCompetition-no-parts',
+        message: `The competition does not include any rounds`,
+      });
+    else if (
+      changeGameStateDTO.state == GameState.END &&
+      dateNow < gameArcarde.endDate
+    )
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        error: 'Forbidden/GameCompetition-changestate-end',
+        message: `The competition is not over! it is no longer possible to stop it`,
+      });
+    else if (
+      (changeGameStateDTO.state == GameState.WAITING_PLAYER) &&
+      (competition.playerGameRegistrations.length < competition.minOfPlayers)
+    )
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        error: 'Forbidden/GameCompetition-changestate-minOfPlayers',
+        message: `The minimum number of players is not reached`,
+      });
+  
 
     // gameArcarde.competitionGames
     // competition.gameState=changeGameStateDTO.state;
@@ -429,9 +465,11 @@ export class CompetitionGameService extends DataBaseService<CompetitionGameDocum
         _id: competition.parentCompetition.toString(),
       });
       // Retourner la valeur obtenue récursivement
-      return this.getCompatitionArcadeId(parent);
+      if(parent)
+        return this.getCompatitionArcadeId(parent);
       // return this.getCompatitionArcadeId(competition.parentCompetition);
     } else if (!competition.arcadeId) {
+      console.log(competition);
       // Lancer une exception si arcadeId n'existe pas
       throw new NotFoundException({
         statusCode: HttpStatus.NOT_FOUND,

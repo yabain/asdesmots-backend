@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io'
+
 export class UtilsFunc
 {
-
     static getWinnerCriteriaDifference(array1, array2) {
         return array1.filter(object1 => {
           return !array2.some(object2 => {

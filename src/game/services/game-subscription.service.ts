@@ -19,6 +19,7 @@ import { GameArcardeService } from './game-arcarde.service';
 import { PlayerGameRegistrationService } from './player-game-registration.service';
 import { CompetitionGameService } from './competition-game.service';
 import { User } from 'src/user/models';
+import { GameState } from '../enum';
 
 @Injectable()
 export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrationDocument> {
@@ -270,4 +271,47 @@ export class GameSubscriptionService extends DataBaseService<PlayerGameRegistrat
       }
     });
   }
+
+  async playerSubscribedCompetitions(playerId: string, gameStates: string[]) {
+    // Récupérer toutes les compétitions
+    const allCompetitions = await this.competitionGameService.findAll();
+    
+    const dateNow = new Date();
+    // Filtrer les compétitions où le joueur est inscrit
+    const playerCompetitions = allCompetitions.filter(competition =>
+      (competition.endDate > dateNow) &&
+      (gameStates.includes(competition.gameState)) &&
+      competition.playerGameRegistrations.some(subscriber => {
+        // Initialiser la condition à true
+        let isEligible = true;
+    
+        // Vérifier l'état du jeu uniquement si la compétition est RUNNING
+        if (competition.gameState === GameState.RUNNING) {
+          const hasWaitingPlayersOrRunning = competition.gameParts.some(part => 
+            part.gameState === GameState.WAITING_PLAYER || part.gameState === GameState.RUNNING
+          );
+    
+          // Si aucune partie n'attend de joueurs, la compétition n'est pas éligible
+          if (!hasWaitingPlayersOrRunning) {
+            isEligible = false;
+          }
+        }
+    
+        // Retourner true si éligible et si le joueur correspond
+        // const hasLost = (subscriber.hasLostGame || (subscriber.lifeGame <= 0));
+        // return isEligible && (subscriber.player.toString() === playerId.toString()) && !hasLost;
+        return isEligible && (subscriber.player.toString() === playerId.toString());
+      })
+    );
+    
+    // Populer les compétitions trouvées avec les relations nécessaires
+    const populatedCompetitions = await Promise.all(
+      playerCompetitions.map(competition => 
+        competition.populate(["gameParts", "gameLevel"])
+      )
+    );
+  
+    return populatedCompetitions;
+  }
+
 }

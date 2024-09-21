@@ -4,4 +4,5 @@ export class GameStartDTO
 {
     gamePartID:ObjectId
     competitionID:ObjectId
+    gameState:string;
 }

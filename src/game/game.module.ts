@@ -16,6 +16,7 @@ import { JsonResponse } from "src/shared/helpers/json-response";
 import { UniqueArcadeValidator } from "./validators/arcade-unique";
 import { UniqueCompetitionValidator } from "./validators/competition-unique";
 import { UniqueGamePartValidator } from "./validators/game-part-unique";
+import { GameBroadcastGatewayService } from "./services/game-broadcast-gateway.service";
 
 @Module({
     controllers:[
@@ -40,6 +41,7 @@ import { UniqueGamePartValidator } from "./validators/game-part-unique";
         AuthorizationModule,
         GameLevelModule,
         CommandModule,
+        GameBroadcastGatewayService
     ],
     providers:[
         CompetitionGameService,
@@ -56,7 +58,8 @@ import { UniqueGamePartValidator } from "./validators/game-part-unique";
         JsonResponse,
         UniqueArcadeValidator,
         UniqueCompetitionValidator,
-        UniqueGamePartValidator
+        UniqueGamePartValidator,
+        GameBroadcastGatewayService
     ],
     exports:[
         CompetitionGameService,

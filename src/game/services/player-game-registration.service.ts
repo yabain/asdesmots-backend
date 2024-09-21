@@ -19,8 +19,10 @@ export class PlayerGameRegistrationService extends DataBaseService<PlayerGameReg
         return await Promise.all((await this.findAll()).filter((registration)=>registration.player._id == playerId).map((registration)=>registration.competition.populate(["gameParts","gameLevel"])));
     }
 
-    async getPlayerSubscriber(playerID,conpititionID) {
-        return await Promise.all((await this.findAll()).filter((sub)=>sub.player._id == playerID && sub.competition._id == conpititionID));
+    async getPlayerSubscriber(playerID, competitionID): Promise<PlayerGameRegistration> {
+        const allSubscriptions = await this.findAll();
+        // Trouver les abonnés correspondant au playerID et competitionID
+        return allSubscriptions.find(sub => sub.player._id == playerID && sub.competition._id == competitionID);
     }
 
     

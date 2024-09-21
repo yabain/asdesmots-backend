@@ -1,10 +1,7 @@
-import { Transform, Type } from "class-transformer";
-import { ArrayMinSize, IsArray, IsBoolean, IsDate, IsEnum, IsMongoId, IsNumber, IsOptional, IsString, MaxLength, MinLength, ValidateNested } from "class-validator";
+import { Transform } from "class-transformer";
+import { ArrayMinSize, IsBoolean, IsDate, IsEnum, IsMongoId, IsNumber, IsOptional, IsString, MaxLength, MinLength, ValidateNested } from "class-validator";
 import { ObjectId } from "mongoose";
 import { WordGameLevelLangType } from "src/gamelevel/enums";
-import { CreateGamePartDTO } from "./create-game-part.dto";
-import { IsUnique } from "../validators/competition-unique";
-
 
 /**
  * @apiDefine CreateCompetitionGameDTO Create new game competition
@@ -30,7 +27,6 @@ export class CreateCompetitionGameDTO
     @IsString()
     @MinLength(4)
     @MaxLength(65)
-    @IsUnique({ message: 'Competition already exists'})
     name:string;
 
     @IsOptional()

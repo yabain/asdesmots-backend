@@ -1,6 +1,6 @@
-/* eslint-disable prettier/prettier */
 import {
   Body,
+  ConflictException,
   Controller,
   DefaultValuePipe,
   Get,
@@ -24,6 +24,7 @@ import {
   CreateGameArcardeDTO,
   PlayerUnSubscriptionDTO,
   ChangeGameArcardeStateDTO,
+  UpdateGameArcadeDTO,
 } from "../dtos";
 import { GameArcardePerms } from "../enum";
 import { CompetitionGameService, GameArcardeService } from "../services";
@@ -87,6 +88,10 @@ export class GameArcardeController {
     const authenticatedUser = await this.usersService.findOneByField({
       email: user.email,
     });
+    const existsArcade = await this.gameArcardeService.findOneByField({name: createGameArcardeDTO.name});
+    if(existsArcade)  {
+        throw new ConflictException(this.jsonResponse.error(`Arcade already exists`,{alreadyUsed: true}));
+    }
     await this.gameArcardeService.executeWithTransaction(async (session) => {
       const gameArcarde = await this.gameArcardeService.create(
         { ...createGameArcardeDTO, owner: authenticatedUser },
@@ -117,6 +122,20 @@ export class GameArcardeController {
       .status(HttpStatus.CREATED)
       .json(
         this.jsonResponse.success("Arcade successfully created")
+      );
+  }
+
+  @Post('/:arcadeID')
+  async update(
+    @Body() updateGameArcadeDTO: UpdateGameArcadeDTO,
+    @Param("arcadeID", ObjectIDValidationPipe) arcadeID: string,
+    @Res() res: Response
+  ) {
+    await this.gameArcardeService.updateArcade(updateGameArcadeDTO, arcadeID);
+    return res
+      .status(HttpStatus.OK)
+      .json(
+        this.jsonResponse.success("Arcade successfully updated")
       );
   }
 
@@ -171,9 +190,10 @@ export class GameArcardeController {
     return {
       statusCode: HttpStatus.OK,
       message: "List of arcade games of the connected user",
-      data: await this.gameArcardeService.findByField({
-        owner: authenticatedUser._id,
-      }),
+      // data: await this.gameArcardeService.findByField({
+      //   owner: authenticatedUser._id,
+      // }),
+      data: await this.gameArcardeService.findAll()
     };
   }
 

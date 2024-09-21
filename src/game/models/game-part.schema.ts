@@ -39,7 +39,7 @@ export class GamePart extends Document //Manche de jeux
     gameLevel:GameLevel;
 
     @Prop({type:Number,default:1})
-    numberOfWord:Number
+    numberOfWord:number
 
     @Prop({enum:GameState,default:GameState.NO_START})
     gameState:GameState;

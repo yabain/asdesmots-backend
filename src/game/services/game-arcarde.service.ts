@@ -2,19 +2,43 @@ import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { DataBaseService } from "src/shared/services/database";
 import mongoose, { Model } from "mongoose";
 import { GameArcarde, GameArcardeDocument, PlayerGameRegistration } from "../models";
-import { BadRequestException, ForbiddenException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { GameState } from "../enum";
-import { ChangeGameArcardeStateDTO } from "../dtos";
+import { ChangeGameArcardeStateDTO, UpdateGameArcadeDTO } from "../dtos";
+import { JsonResponse } from "src/shared/helpers/json-response";
 
 @Injectable()
 export class GameArcardeService extends DataBaseService<GameArcardeDocument>
 {
     constructor(
         @InjectModel(GameArcarde.name) gameArcardeModel: Model<GameArcardeDocument>,
-        @InjectConnection() connection: mongoose.Connection
+        @InjectConnection() connection: mongoose.Connection,
+        private jsonResponse: JsonResponse
         ){
             super(gameArcardeModel,connection,['competitionGames','competitionGames.gameWinnerCriterias','playerGameRegistrations','playerGameRegistrations.player']);
     }  
+
+    async updateArcade(
+        updateArcadeDTO: UpdateGameArcadeDTO,
+        arcadeID: string,
+      ) {
+        let arcade = await this.findOneByField({ _id: arcadeID });
+        if (!arcade)
+          throw new NotFoundException({
+            statusCode: HttpStatus.NOT_FOUND,
+            error: 'NotFound/GameArcade-arcade',
+            message: `Game arcade not found`,
+          });
+    
+        const existsArcade = await this.findOneByField({name: updateArcadeDTO.name})
+        if(existsArcade && (existsArcade?._id.toString() !== arcadeID))  {
+            console.log(existsArcade?._id.toString(), arcadeID)
+            throw new ConflictException(this.jsonResponse.error(`Arcade already exists`,{alreadyUsed: true}));
+        }
+        return arcade.update({
+          ...updateArcadeDTO
+        });
+      }
 
     async changeGameArcarde( changeGameStateDTO:ChangeGameArcardeStateDTO)
     {
