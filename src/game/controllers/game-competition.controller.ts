@@ -61,6 +61,32 @@ export class GameCompetitionController {
       .json(this.jsonResponse.success('Arcade competition', data));
   }
 
+
+  @Get('tree/:competitionId')
+  async getCompetitionTree(
+    @Param('competitionId') competitionId: string,
+    @Res() res: Response,
+  ) {
+    const competition = await this.competitionGameService.findOneByField({
+      _id: competitionId,
+    });
+
+    if (!competition) {
+      throw new NotFoundException({
+        statusCode: HttpStatus.NOT_FOUND,
+        error: 'NotFound/GameCompetition',
+        message: `Game competition not found`,
+      });
+    }
+    const data = await this.competitionGameService.buildCompetitionTree(competition);
+
+    console.log('competition with children', data)
+
+    return res
+      .status(HttpStatus.OK)
+      .json(this.jsonResponse.success('Competition tree', data));
+  }
+
   @Get('arcade-competition-and-sub-competitions/:arcadeId')
   async getArcadeCompetitionsWithSubCompetitions(
     @Param('arcadeId') arcadeId: string,

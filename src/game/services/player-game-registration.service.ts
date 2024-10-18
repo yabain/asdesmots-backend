@@ -22,7 +22,7 @@ export class PlayerGameRegistrationService extends DataBaseService<PlayerGameReg
     async getPlayerSubscriber(playerID, competitionID): Promise<PlayerGameRegistration> {
         const allSubscriptions = await this.findAll();
         // Trouver les abonnés correspondant au playerID et competitionID
-        return allSubscriptions.find(sub => sub.player._id == playerID && sub.competition._id == competitionID);
+        return allSubscriptions.find(sub => sub.player?._id == playerID && sub.competition._id == competitionID);
     }
 
     

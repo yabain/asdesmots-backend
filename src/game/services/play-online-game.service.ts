@@ -242,15 +242,16 @@ export class PlayOnlineGameService {
       partID: gamePartID,
     });
 
-    const gameObject = this.games.get(competitionID);
+    const gameObject = await this.games.get(competitionID);
     if (gameState === GameState.RUNNING && gameObject) {
-      console.log(`Initializing on ${gameObject.competition.maxTimeToPlay}s`);
       setTimeout(async () => {
         await this.startCountdown(gameObject, gamePartID);
       }, gameObject.competition.maxTimeToPlay * 1000);
     }
     // await this.startCountdown(gameObject, gamePartID)
-    if (gameState === GameState.END) await this.stopCountdown(gameObject);
+    if (gameState === GameState.END) { 
+      await this.stopCountdown(gameObject);
+    }
 
     return { gameState: gameState, gameId: gamePart._id };
   }
